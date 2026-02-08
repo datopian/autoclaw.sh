@@ -1,0 +1,58 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "openclaw-worker-api",
+	"account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-02-08",
+	"vars": {
+		"APP_ENV": "dev",
+		"CF_ACCOUNT_ID": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+		"AI_GATEWAY_ID": "openclaw-gateway-prod",
+		"DEFAULT_MODEL_PROVIDER": "openai",
+		"DEFAULT_MODEL_ID": "gpt-4o-mini"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "openclaw_aaas",
+			"database_id": "YOUR_D1_DATABASE_ID",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "ARTIFACTS",
+			"bucket_name": "openclaw-artifacts",
+			"remote": true
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "RUN_QUEUE",
+				"queue": "openclaw-runs"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "openclaw-runs"
+			}
+		]
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "AGENT_SESSION",
+				"class_name": "AgentSession"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": [
+				"AgentSession"
+			]
+		}
+	]
+}
