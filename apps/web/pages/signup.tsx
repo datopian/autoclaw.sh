@@ -1,9 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { FormEvent, useMemo, useState } from "react";
 import { createTenant } from "../lib/api/control";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [tenantId, setTenantId] = useState("");
@@ -35,10 +37,10 @@ export default function SignupPage() {
 
     try {
       const tenant = await createTenant({ name, email });
-      setTenantId(tenant.id);
+      // Redirect to dashboard immediately
+      router.push(`/dashboard?tenantId=${tenant.id}`);
     } catch {
       setError("Unable to create tenant. Please retry.");
-    } finally {
       setIsSubmitting(false);
     }
   }
@@ -93,38 +95,18 @@ export default function SignupPage() {
                 onChange={(event) => setEmail(event.target.value)}
               />
               <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating Tenant..." : "Create Tenant"}
+                {isSubmitting ? "Creating Tenant..." : "Create Tenant & Continue"}
               </button>
             </form>
             {error && <p className="error">{error}</p>}
           </article>
 
           <aside className="panel">
-            <h3 className="panelTitle">Step 2: Billing Activation</h3>
-            {!tenantId && (
-              <p className="helper">Create tenant first to unlock Stripe checkout.</p>
-            )}
-            {tenantId && (
-              <div className="notice">
-                <p>
-                  Tenant ready: <code>{tenantId}</code>
-                </p>
-                {paymentUrl ? (
-                  <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
-                    Open Stripe Checkout
-                  </a>
-                ) : (
-                  <p className="helper">
-                    Set <code>NEXT_PUBLIC_STRIPE_STARTER_URL</code> in `apps/web/.env.local`.
-                  </p>
-                )}
-                <div className="actions">
-                  <Link href={`/dashboard?tenantId=${tenantId}`} className="button ghostButton">
-                    Continue to Dashboard
-                  </Link>
-                </div>
-              </div>
-            )}
+            <h3 className="panelTitle">What happens next?</h3>
+            <p className="panelText">
+              You will be redirected to the dashboard where you can activate your subscription and
+              start running agents.
+            </p>
           </aside>
         </section>
       </main>

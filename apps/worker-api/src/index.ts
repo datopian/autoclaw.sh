@@ -6,6 +6,7 @@ import { handleRuns } from "./routes/runs";
 import { handleTemplates } from "./routes/templates";
 import { handleTenants } from "./routes/tenants";
 import { handleStripeWebhook } from "./routes/webhooks/stripe";
+import { handleSubscriptions } from "./routes/subscriptions";
 import { AgentSession } from "./durable/agent-session";
 import { createRunOrchestrator } from "./services/run-orchestrator";
 import type { RunQueueMessage } from "./services/run-orchestrator";
@@ -33,6 +34,10 @@ const worker: ExportedHandler<Env> = {
 
     if (url.pathname === "/api/webhooks/stripe") {
       return handleStripeWebhook(request, env);
+    }
+
+    if (url.pathname === "/api/subscriptions") {
+      return handleSubscriptions(request, env);
     }
 
     return json({ error: "Not found" }, 404);

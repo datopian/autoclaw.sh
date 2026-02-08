@@ -2,7 +2,8 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
-import { createRun, getTemplates, Template } from "../lib/api/control";
+import { createRun, getSubscription, getTemplates, Template } from "../lib/api/control";
+import { useSubscriptionUrl } from "../lib/hooks/use-payment";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function DashboardPage() {
   const [byokApiKey, setByokApiKey] = useState("");
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
+  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | null>(null);
+
+  const paymentUrl = useSubscriptionUrl(undefined, tenantId);
 
   useEffect(() => {
     const incomingTenant = router.query.tenantId;
@@ -22,6 +26,14 @@ export default function DashboardPage() {
       setTenantId(incomingTenant);
     }
   }, [router.query.tenantId]);
+
+  useEffect(() => {
+    if (!tenantId) return;
+
+    getSubscription(tenantId)
+      .then((sub) => setHasActiveSubscription(sub.active))
+      .catch(() => setHasActiveSubscription(false));
+  }, [tenantId]);
 
   useEffect(() => {
     getTemplates()
@@ -130,7 +142,18 @@ export default function DashboardPage() {
                 onChange={(event) => setPrompt(event.target.value)}
               />
 
-              <button type="submit">Queue Run</button>
+              {hasActiveSubscription === false ? (
+                <div className="cta-box">
+                  <p>Active subscription required to run agents.</p>
+                  <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
+                    Subscribe via Stripe
+                  </a>
+                </div>
+              ) : (
+                <button type="submit" disabled={!hasActiveSubscription}>
+                  {hasActiveSubscription === null ? "Checking subscription..." : "Queue Run"}
+                </button>
+              )}
             </form>
           </article>
 

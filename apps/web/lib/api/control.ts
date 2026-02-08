@@ -11,6 +11,12 @@ export type Tenant = {
   createdAt: string;
 };
 
+export type SubscriptionStatus = {
+  active: boolean;
+  status: string;
+  plan: string;
+};
+
 export type Template = {
   id: string;
   name: string;
@@ -48,6 +54,16 @@ export async function getTemplates(): Promise<Template[]> {
 
   const payload = (await response.json()) as { templates: Template[] };
   return payload.templates;
+}
+
+export async function getSubscription(
+  tenantId: string
+): Promise<{ active: boolean; status: string; plan: string }> {
+  const response = await fetch(`/api/control/subscriptions?tenantId=${tenantId}`);
+  if (!response.ok) {
+    throw new Error("Failed to check subscription");
+  }
+  return response.json() as Promise<{ active: boolean; status: string; plan: string }>;
 }
 
 export async function createRun(input: RunInput): Promise<{ runId: string; status: string }> {
