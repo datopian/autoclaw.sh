@@ -1,0 +1,13 @@
+# SQLite runtime files
+beads.db
+beads.db-shm
+beads.db-wal
+
+# Daemon runtime files
+bd.sock
+daemon.lock
+daemon.log
+daemon.pid
+
+# Local version tracking
+.local_version
