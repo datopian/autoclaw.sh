@@ -449,6 +449,65 @@ textarea {
   justify-content: center;
 }
 
+/* ── Hero visual wrapper ── */
+
+.heroVisualWrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ── Floating service icons ── */
+
+.floatingIcon {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  animation: floatBob 3s ease-in-out infinite;
+}
+
+.floatingIconEmail {
+  top: 8%;
+  left: -4%;
+  animation-delay: 0s;
+}
+
+.floatingIconDrive {
+  bottom: 12%;
+  left: -6%;
+  animation-delay: 0.8s;
+}
+
+.floatingIconCalendar {
+  top: 4%;
+  right: -2%;
+  animation-delay: 1.6s;
+}
+
+.floatingIconTelegram {
+  bottom: 8%;
+  right: -4%;
+  animation-delay: 2.4s;
+}
+
+@keyframes floatBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 /* ── Chat mockup ── */
 
 .chatMockup {
@@ -463,11 +522,16 @@ textarea {
     0 40px 80px -20px rgba(79, 70, 229, 0.1);
   overflow: hidden;
   transform: rotate(1deg);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.4s ease;
 }
 
 .chatMockup:hover {
   transform: rotate(0deg) translateY(-4px);
+}
+
+.chatMockup.chatFading {
+  opacity: 0;
+  transform: rotate(1deg) scale(0.97);
 }
 
 .chatHeader {
@@ -952,6 +1016,10 @@ textarea {
 
   .landingHeroRail {
     justify-items: start;
+  }
+
+  .floatingIcon {
+    display: none;
   }
 }
 

@@ -1,33 +1,82 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
-const chatMessages = [
-  { type: "user" as const, text: "Hey, anything urgent in my email today?" },
-  {
-    type: "bot" as const,
-    html: `Good morning! I checked your inbox:<br/><br/>📩 <strong>Invoice from Acme Co</strong> — due tomorrow<br/>📅 <strong>Team meeting moved</strong> — now at 3pm<br/>✈️ <strong>Flight confirmed</strong> — Friday is all set<br/><br/>Want me to handle any of these?`,
-  },
-  { type: "user" as const, text: "Pay the invoice and update my calendar" },
-  {
-    type: "bot" as const,
-    html: `Done! Invoice payment initiated and calendar updated ✓`,
-  },
+type ChatMessage = {
+  type: "user" | "bot";
+  text?: string;
+  html?: string;
+};
+
+const scenarios: ChatMessage[][] = [
+  [
+    { type: "user", text: "Hey, anything urgent in my email today?" },
+    {
+      type: "bot",
+      html: `I checked your inbox:<br/><br/>📩 <strong>Invoice from Acme Co</strong> — due tomorrow<br/>📅 <strong>Team meeting moved</strong> — now at 3pm<br/>✈️ <strong>Flight confirmed</strong> — Friday is all set<br/><br/>Want me to handle any of these?`,
+    },
+    { type: "user", text: "Pay the invoice and update my calendar" },
+    { type: "bot", html: `Done! Invoice paid and calendar updated ✓` },
+  ],
+  [
+    { type: "user", text: "Find the proposal I sent to Sarah last week" },
+    {
+      type: "bot",
+      html: `Found it in your Drive:<br/><br/>📄 <strong>Q1 Partnership Proposal</strong><br/>Shared with Sarah on Feb 10<br/>Last edited by you, 3 pages<br/><br/>Want me to send her a follow-up?`,
+    },
+    { type: "user", text: "Yes, ask if she had a chance to review it" },
+    { type: "bot", html: `Follow-up sent to Sarah ✓<br/>I'll let you know when she replies.` },
+  ],
+  [
+    { type: "user", text: "Move my 2pm meeting to Thursday" },
+    {
+      type: "bot",
+      html: `📅 <strong>Design Review with Alex</strong><br/>Currently: Wednesday 2pm<br/><br/>Alex is free Thursday at 2pm and 4pm. Which works better?`,
+    },
+    { type: "user", text: "4pm works" },
+    { type: "bot", html: `Moved to Thursday 4pm ✓<br/>Alex has been notified.` },
+  ],
+  [
+    { type: "user", text: "Draft a reply to Tom's email about the budget" },
+    {
+      type: "bot",
+      html: `Here's a draft based on your conversation:<br/><br/><em>"Hi Tom, thanks for the breakdown. The Q2 numbers look good — let's go ahead with Option B. Can you send the updated timeline by Friday?"</em><br/><br/>Send it, or want me to adjust?`,
+    },
+    { type: "user", text: "Make it a bit more formal and send it" },
+    { type: "bot", html: `Toned up and sent to Tom ✓` },
+  ],
 ];
 
 function AnimatedChat() {
+  const [scenarioIndex, setScenarioIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(0);
   const [showTyping, setShowTyping] = useState(false);
+  const [fading, setFading] = useState(false);
+
+  const currentScenario = scenarios[scenarioIndex];
+
+  const nextScenario = useCallback(() => {
+    setFading(true);
+    setTimeout(() => {
+      setScenarioIndex((i) => (i + 1) % scenarios.length);
+      setVisibleCount(0);
+      setShowTyping(false);
+      setFading(false);
+    }, 400);
+  }, []);
 
   useEffect(() => {
-    if (visibleCount >= chatMessages.length) return;
+    if (visibleCount >= currentScenario.length) {
+      // Pause on completed conversation, then rotate
+      const rotateTimer = setTimeout(nextScenario, 4000);
+      return () => clearTimeout(rotateTimer);
+    }
 
-    // Show typing indicator before each message
-    const typingDelay = visibleCount === 0 ? 800 : 1200;
+    const typingDelay = visibleCount === 0 ? 800 : 1000;
     const typingTimer = setTimeout(() => setShowTyping(true), typingDelay);
 
-    // Then show the message
-    const messageDelay = typingDelay + (chatMessages[visibleCount].type === "bot" ? 1500 : 600);
+    const messageDelay =
+      typingDelay + (currentScenario[visibleCount].type === "bot" ? 1400 : 500);
     const messageTimer = setTimeout(() => {
       setShowTyping(false);
       setVisibleCount((c) => c + 1);
@@ -37,38 +86,45 @@ function AnimatedChat() {
       clearTimeout(typingTimer);
       clearTimeout(messageTimer);
     };
-  }, [visibleCount]);
+  }, [visibleCount, scenarioIndex, currentScenario, nextScenario]);
 
   return (
-    <div className="chatMockup">
-      <div className="chatHeader">
-        <span className="chatAvatar">🤖</span>
-        <span className="chatName">Your Assistant</span>
-        <span className="chatStatus">
-          <span className="chatOnline" /> Online
-        </span>
+    <div className="heroVisualWrap">
+      <div className={`chatMockup ${fading ? "chatFading" : ""}`}>
+        <div className="chatHeader">
+          <span className="chatAvatar">🤖</span>
+          <span className="chatName">Your Assistant</span>
+          <span className="chatStatus">
+            <span className="chatOnline" /> Online
+          </span>
+        </div>
+        <div className="chatMessages">
+          {currentScenario.slice(0, visibleCount).map((msg, i) => (
+            <div
+              key={`${scenarioIndex}-${i}`}
+              className={`chatBubble ${msg.type === "user" ? "chatBubbleUser" : "chatBubbleBot"} chatBubbleAnimate`}
+            >
+              {msg.html ? (
+                <span dangerouslySetInnerHTML={{ __html: msg.html }} />
+              ) : (
+                msg.text
+              )}
+            </div>
+          ))}
+          {showTyping && (
+            <div className="chatBubble chatBubbleBot chatTyping">
+              <span className="typingDot" />
+              <span className="typingDot" />
+              <span className="typingDot" />
+            </div>
+          )}
+        </div>
       </div>
-      <div className="chatMessages">
-        {chatMessages.slice(0, visibleCount).map((msg, i) => (
-          <div
-            key={i}
-            className={`chatBubble ${msg.type === "user" ? "chatBubbleUser" : "chatBubbleBot"} chatBubbleAnimate`}
-          >
-            {msg.html ? (
-              <span dangerouslySetInnerHTML={{ __html: msg.html }} />
-            ) : (
-              msg.text
-            )}
-          </div>
-        ))}
-        {showTyping && (
-          <div className="chatBubble chatBubbleBot chatTyping">
-            <span className="typingDot" />
-            <span className="typingDot" />
-            <span className="typingDot" />
-          </div>
-        )}
-      </div>
+      {/* Floating service icons */}
+      <div className="floatingIcon floatingIconEmail" aria-hidden="true">📧</div>
+      <div className="floatingIcon floatingIconDrive" aria-hidden="true">📁</div>
+      <div className="floatingIcon floatingIconCalendar" aria-hidden="true">📅</div>
+      <div className="floatingIcon floatingIconTelegram" aria-hidden="true">✈️</div>
     </div>
   );
 }
@@ -108,8 +164,8 @@ export default function HomePage() {
               <span className="landingHighlight">It&nbsp;Does.</span>
             </h1>
             <p className="landingLead">
-              Talk to your assistant on Telegram. It reads your email,
-              manages your calendar, and finds your files.
+              Chat with your assistant on Telegram, WhatsApp, or the web.
+              It reads your email, manages your calendar, and finds your files.
               No tech skills needed — we handle everything.
             </p>
             <div className="actions landingActions">
@@ -131,7 +187,7 @@ export default function HomePage() {
             <div className="valuePropIcon">⚡</div>
             <div>
               <h3>Works where you already are</h3>
-              <p>Chat on Telegram. No new apps to learn, no dashboards to figure out.</p>
+              <p>Telegram, WhatsApp, or web — chat wherever you're comfortable. No new apps to learn.</p>
             </div>
           </div>
           <div className="valueProp">
@@ -161,8 +217,8 @@ export default function HomePage() {
             <div className="stepConnector" aria-hidden="true">→</div>
             <div className="stepCard">
               <span className="stepNumber">2</span>
-              <h3>Connect Telegram</h3>
-              <p>We walk you through it. Takes about two minutes.</p>
+              <h3>Pick your channel</h3>
+              <p>Telegram, WhatsApp, or web chat — connect in two minutes.</p>
             </div>
             <div className="stepConnector" aria-hidden="true">→</div>
             <div className="stepCard">
