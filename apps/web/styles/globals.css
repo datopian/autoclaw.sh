@@ -658,7 +658,8 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 280px;
+  height: 340px;
+  overflow-y: auto;
 }
 
 /* ── Value props ── */
