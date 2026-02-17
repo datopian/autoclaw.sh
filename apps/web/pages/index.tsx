@@ -15,7 +15,6 @@ export default function HomePage() {
       <main className="landingMain">
         <header className="topbar landingTopbar">
           <Link href="/" className="brand landingBrand">
-            <span className="brandMark" />
             AI Assistant
           </Link>
           <nav className="navLinks landingNavLinks">
@@ -34,12 +33,13 @@ export default function HomePage() {
             <h1 className="landingTitle">
               Your Own AI Assistant.
               <br />
-              It Doesn't Just Talk&nbsp;— It&nbsp;Does.
+              It Doesn't Just Talk&nbsp;—{" "}
+              <span className="landingHighlight">It&nbsp;Does.</span>
             </h1>
             <p className="landingLead">
-              Talk to your assistant on Telegram. Let it handle your email,
-              calendar, and files. No tech skills needed — we take care of
-              everything.
+              Talk to your assistant on Telegram. It reads your email,
+              manages your calendar, and finds your files.
+              No tech skills needed — we handle everything.
             </p>
             <div className="actions landingActions">
               <Link href="/waitlist" className="button landingButton">
@@ -55,7 +55,7 @@ export default function HomePage() {
               <div className="chatHeader">
                 <span className="chatAvatar">🤖</span>
                 <span className="chatName">Your Assistant</span>
-                <span className="chatStatus">Online</span>
+                <span className="chatStatus"><span className="chatOnline" /> Online</span>
               </div>
               <div className="chatMessages">
                 <div className="chatBubble chatBubbleUser">
@@ -84,11 +84,11 @@ export default function HomePage() {
         </section>
 
         <section className="landingProblem">
-          <h2>Getting your own AI assistant used to be complicated.</h2>
+          <h2>AI is powerful. But getting your own assistant? That was hard.</h2>
           <p>
-            Most AI tools expect you to be technical. We think that's wrong.
-            You shouldn't need to know about servers, APIs, or code to have
-            an AI that works for you. So we made it simple.
+            Until now, you needed technical skills just to get started.
+            We believe everyone deserves an AI that works for them —
+            not just developers. So we made it ridiculously simple.
           </p>
         </section>
 
@@ -190,15 +190,15 @@ export default function HomePage() {
         </section>
 
         <section className="landingFooterCta">
-          <h2>Be the first to get your own AI assistant.</h2>
+          <h2>Ready to meet your AI assistant?</h2>
           <p>
-            Join the waitlist. We'll reach out when it's your turn.
+            Join the waitlist. We're onboarding new users every week.
           </p>
           <Link href="/waitlist" className="button landingButton">
             Join the Waitlist
           </Link>
           <div className="landingFooterMeta">
-            Powered by OpenClaw
+            Built by <a href="https://datopian.com" target="_blank" rel="noopener noreferrer" className="footerLink">Datopian</a> · Powered by OpenClaw
           </div>
         </section>
       </main>

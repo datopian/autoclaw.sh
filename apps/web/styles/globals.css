@@ -11,11 +11,15 @@
   --accent: #111827;
   --accent-soft: #e8eef8;
   --success: #0f766e;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-soft: #eef2ff;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --shadow-sm: 0 1px 2px rgba(12, 16, 24, 0.05);
   --shadow-md: 0 12px 30px rgba(15, 24, 36, 0.08);
+  --shadow-lg: 0 20px 50px rgba(15, 24, 36, 0.12);
 }
 
 * {
@@ -334,7 +338,7 @@ textarea {
 }
 
 .landingTopbar {
-  margin-bottom: 42px;
+  margin-bottom: 48px;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
@@ -342,7 +346,7 @@ textarea {
 .landingBrand {
   font-family: "Space Grotesk", sans-serif;
   letter-spacing: -0.01em;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .landingNavLinks {
@@ -355,11 +359,12 @@ textarea {
   color: var(--text-muted);
   border-bottom: 1px solid transparent;
   padding-bottom: 2px;
+  transition: color 0.15s ease;
 }
 
 .landingNavLink:hover {
-  color: var(--text);
-  border-color: var(--text);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .landingPill {
@@ -367,21 +372,22 @@ textarea {
   align-items: center;
   gap: 6px;
   border-radius: 999px;
-  padding: 5px 12px;
-  border: 1px solid var(--line);
-  background: var(--surface-muted);
-  color: var(--text-muted);
+  padding: 5px 14px;
+  border: 1px solid #c7d2fe;
+  background: var(--primary-soft);
+  color: var(--primary);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .landingHero {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 48px;
   align-items: center;
+  min-height: 520px;
 }
 
 .landingHeroCopy {
@@ -389,42 +395,61 @@ textarea {
 }
 
 .landingTitle {
-  margin: 0 0 16px;
-  font-size: clamp(2rem, 4.5vw, 3.6rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+  margin: 0 0 20px;
+  font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
   font-family: "Space Grotesk", sans-serif;
+}
+
+.landingTitle br + span,
+.landingHighlight {
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .landingLead {
   margin: 0;
   color: var(--text-muted);
-  font-size: 1.08rem;
-  line-height: 1.65;
+  font-size: 1.12rem;
+  line-height: 1.7;
 }
 
 .landingActions {
   justify-content: flex-start;
-  margin-top: 24px;
+  margin-top: 28px;
+  gap: 14px;
 }
 
 .landingButton {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--primary);
+  border-color: var(--primary);
+  padding: 14px 24px;
+  font-size: 1.02rem;
+  border-radius: 12px;
 }
 
 .landingButton:hover {
-  box-shadow: 0 10px 18px rgba(17, 24, 39, 0.22);
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.3);
 }
 
 .landingGhostButton {
   border-color: var(--line-strong);
   color: var(--text);
   background: var(--surface);
+  padding: 14px 24px;
+  font-size: 1.02rem;
+  border-radius: 12px;
 }
 
 .landingGhostButton:hover {
   box-shadow: 0 8px 16px rgba(17, 24, 39, 0.08);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .landingHeroRail {
@@ -436,12 +461,21 @@ textarea {
 
 .chatMockup {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 1px rgba(79, 70, 229, 0.05),
+    0 40px 80px -20px rgba(79, 70, 229, 0.1);
   overflow: hidden;
+  transform: rotate(1deg);
+  transition: transform 0.3s ease;
+}
+
+.chatMockup:hover {
+  transform: rotate(0deg) translateY(-4px);
 }
 
 .chatHeader {
@@ -450,11 +484,18 @@ textarea {
   gap: 10px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
-  background: var(--surface-muted);
+  background: linear-gradient(135deg, var(--surface-muted) 0%, #eef2ff 100%);
 }
 
 .chatAvatar {
-  font-size: 1.4rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
 }
 
 .chatName {
@@ -462,10 +503,21 @@ textarea {
   font-size: 0.92rem;
 }
 
+.chatOnline {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+}
+
 .chatStatus {
   font-size: 0.75rem;
   color: var(--success);
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .chatMessages {
@@ -478,13 +530,13 @@ textarea {
 .chatBubble {
   padding: 12px 16px;
   border-radius: 16px;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.88rem;
+  line-height: 1.55;
   max-width: 88%;
 }
 
 .chatBubbleUser {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--primary) 0%, #6d28d9 100%);
   color: #ffffff;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
@@ -495,43 +547,47 @@ textarea {
   color: var(--text);
   align-self: flex-start;
   border-bottom-left-radius: 4px;
+  border: 1px solid var(--line);
 }
 
 /* ── Problem section ── */
 
 .landingProblem {
-  margin-top: 80px;
+  margin-top: 100px;
   text-align: center;
-  max-width: 600px;
+  max-width: 640px;
   margin-left: auto;
   margin-right: auto;
+  padding: 48px 32px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #eef2ff 100%);
+  border-radius: var(--radius-lg);
 }
 
 .landingProblem h2 {
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
   letter-spacing: -0.02em;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
 }
 
 .landingProblem p {
   color: var(--text-muted);
-  font-size: 1.05rem;
-  line-height: 1.65;
+  font-size: 1.08rem;
+  line-height: 1.7;
   margin: 0;
 }
 
 /* ── How it works ── */
 
 .landingSteps {
-  margin-top: 80px;
+  margin-top: 100px;
 }
 
 .landingSteps > h2 {
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
   letter-spacing: -0.02em;
-  margin: 0 0 32px;
+  margin: 0 0 40px;
   text-align: center;
 }
 
@@ -545,22 +601,28 @@ textarea {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  padding: 24px;
+  padding: 28px;
   text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stepCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .stepNumber {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
   color: #ffffff;
   font-weight: 700;
-  font-size: 0.9rem;
-  margin-bottom: 12px;
+  font-size: 1rem;
+  margin-bottom: 14px;
 }
 
 .stepCard h3 {
@@ -578,12 +640,12 @@ textarea {
 /* ── Capabilities ── */
 
 .landingCapabilities {
-  margin-top: 80px;
+  margin-top: 100px;
 }
 
 .landingCapabilities > h2 {
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
   letter-spacing: -0.02em;
   margin: 0 0 12px;
   text-align: center;
@@ -592,8 +654,8 @@ textarea {
 .landingCapabilities > p {
   text-align: center;
   color: var(--text-muted);
-  margin: 0 0 32px;
-  font-size: 1.02rem;
+  margin: 0 0 40px;
+  font-size: 1.05rem;
 }
 
 .capGrid {
@@ -606,12 +668,25 @@ textarea {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  padding: 24px;
+  padding: 28px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.capCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .capIcon {
-  font-size: 1.6rem;
-  margin-bottom: 10px;
+  font-size: 2rem;
+  margin-bottom: 12px;
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  text-align: center;
+  background: var(--primary-soft);
+  border-radius: 12px;
 }
 
 .capCard h3 {
@@ -629,19 +704,19 @@ textarea {
 /* ── Security section ── */
 
 .landingSecurity {
-  margin-top: 80px;
-  background: var(--surface);
+  margin-top: 100px;
+  background: linear-gradient(135deg, var(--surface) 0%, #f5f3ff 100%);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: 40px;
+  padding: 48px 40px;
   text-align: center;
 }
 
 .landingSecurity h2 {
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
   letter-spacing: -0.02em;
-  margin: 0 0 28px;
+  margin: 0 0 32px;
 }
 
 .trustPoints {
@@ -659,7 +734,14 @@ textarea {
 }
 
 .trustIcon {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
+  width: 52px;
+  height: 52px;
+  line-height: 52px;
+  text-align: center;
+  background: var(--surface);
+  border-radius: 50%;
+  border: 1px solid var(--line);
 }
 
 .trustPoint h3 {
@@ -677,30 +759,42 @@ textarea {
 /* ── Footer CTA ── */
 
 .landingFooterCta {
-  margin-top: 80px;
+  margin-top: 100px;
   text-align: center;
-  padding-bottom: 40px;
+  padding: 60px 32px;
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fce7f3 100%);
+  border-radius: var(--radius-lg);
 }
 
 .landingFooterCta h2 {
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
   letter-spacing: -0.02em;
   margin: 0 0 12px;
 }
 
 .landingFooterCta p {
   color: var(--text-muted);
-  margin: 0 0 24px;
-  font-size: 1.02rem;
+  margin: 0 0 28px;
+  font-size: 1.05rem;
 }
 
 .landingFooterMeta {
-  margin-top: 40px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   color: var(--text-muted);
   font-size: 0.82rem;
+}
+
+.footerLink {
+  color: var(--primary);
+  font-weight: 600;
+  transition: opacity 0.15s ease;
+}
+
+.footerLink:hover {
+  opacity: 0.8;
 }
 
 /* ── Responsive ── */
