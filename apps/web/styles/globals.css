@@ -511,11 +511,11 @@ textarea {
 /* ── Chat mockup ── */
 
 .chatMockup {
-  width: 420px;
-  min-width: 420px;
+  width: 360px;
+  min-width: 360px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: 28px;
   box-shadow:
     var(--shadow-lg),
     0 0 0 1px rgba(79, 70, 229, 0.05),
@@ -658,7 +658,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 340px;
+  height: 520px;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
