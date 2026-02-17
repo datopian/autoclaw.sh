@@ -511,8 +511,8 @@ textarea {
 /* ── Chat mockup ── */
 
 .chatMockup {
-  width: 100%;
-  max-width: 420px;
+  width: 420px;
+  min-width: 420px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -660,6 +660,12 @@ textarea {
   gap: 12px;
   height: 340px;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatMessages::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Value props ── */
@@ -1043,6 +1049,11 @@ textarea {
 
   .landingTitle {
     font-size: clamp(1.7rem, 6vw, 2.4rem);
+  }
+
+  .chatMockup {
+    width: 100%;
+    min-width: unset;
   }
 
   .landingSecurity {
