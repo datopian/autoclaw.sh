@@ -82,6 +82,125 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <section className="landingProblem">
+          <h2>Getting your own AI assistant used to be complicated.</h2>
+          <p>
+            Most AI tools expect you to be technical. We think that's wrong.
+            You shouldn't need to know about servers, APIs, or code to have
+            an AI that works for you. So we made it simple.
+          </p>
+        </section>
+
+        <section className="landingSteps" id="how-it-works">
+          <h2>Up and running in three steps</h2>
+          <div className="stepsGrid">
+            <div className="stepCard">
+              <span className="stepNumber">1</span>
+              <h3>Sign up</h3>
+              <p>Create your account. No credit card needed to get started.</p>
+            </div>
+            <div className="stepCard">
+              <span className="stepNumber">2</span>
+              <h3>Pick where to chat</h3>
+              <p>
+                Connect Telegram — that's it. WhatsApp and more coming soon.
+              </p>
+            </div>
+            <div className="stepCard">
+              <span className="stepNumber">3</span>
+              <h3>Start talking</h3>
+              <p>
+                Your assistant is ready. Ask it anything or give it a task.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="landingCapabilities">
+          <h2>Start simple. Add more when you're ready.</h2>
+          <p>
+            You control what your assistant can access. Begin with chat, then
+            unlock more as you get comfortable.
+          </p>
+          <div className="capGrid">
+            <div className="capCard">
+              <div className="capIcon">💬</div>
+              <h3>Chat with your assistant</h3>
+              <p>
+                Ask questions, brainstorm ideas, get help thinking through
+                problems. No setup needed.
+              </p>
+            </div>
+            <div className="capCard">
+              <div className="capIcon">📧</div>
+              <h3>Connect your email</h3>
+              <p>
+                "What's urgent today?" Get morning briefings and let your
+                assistant draft replies.
+              </p>
+            </div>
+            <div className="capCard">
+              <div className="capIcon">📁</div>
+              <h3>Connect your drive</h3>
+              <p>
+                "Find that proposal from last week." Your assistant searches
+                and retrieves files for you.
+              </p>
+            </div>
+            <div className="capCard">
+              <div className="capIcon">📅</div>
+              <h3>Connect your calendar</h3>
+              <p>
+                "Reschedule Thursday's meeting to Friday." Your assistant
+                manages your schedule.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="landingSecurity">
+          <h2>Your data. Your rules.</h2>
+          <div className="trustPoints">
+            <div className="trustPoint">
+              <span className="trustIcon">🔒</span>
+              <h3>Secure sandbox</h3>
+              <p>
+                Your assistant runs in its own secure space — not on your
+                laptop where it could access everything.
+              </p>
+            </div>
+            <div className="trustPoint">
+              <span className="trustIcon">🎛️</span>
+              <h3>You're in control</h3>
+              <p>
+                You decide exactly what it can access. Email, drive,
+                calendar — only what you choose. Nothing more.
+              </p>
+            </div>
+            <div className="trustPoint">
+              <span className="trustIcon">🛡️</span>
+              <h3>Your data stays yours</h3>
+              <p>
+                We don't sell or share your information. Your assistant
+                works for you and only you.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="landingFooterCta">
+          <h2>Be the first to get your own AI assistant.</h2>
+          <p>
+            Join the waitlist. We'll reach out when it's your turn.
+          </p>
+          <Link href="/waitlist" className="button landingButton">
+            Join the Waitlist
+          </Link>
+          <div className="landingFooterMeta">
+            Powered by OpenClaw
+          </div>
+        </section>
       </main>
     </>
   );
