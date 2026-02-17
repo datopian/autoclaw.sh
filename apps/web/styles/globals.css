@@ -326,6 +326,8 @@ textarea {
   font-size: 0.92rem;
 }
 
+/* ── Landing page ── */
+
 .landingMain {
   max-width: 1230px;
   padding-top: 24px;
@@ -334,14 +336,13 @@ textarea {
 .landingTopbar {
   margin-bottom: 42px;
   padding-bottom: 14px;
-  border-bottom: 1px solid #18181b;
+  border-bottom: 1px solid var(--line);
 }
 
 .landingBrand {
   font-family: "Space Grotesk", sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.92rem;
+  letter-spacing: -0.01em;
+  font-size: 1rem;
 }
 
 .landingNavLinks {
@@ -349,165 +350,360 @@ textarea {
 }
 
 .landingNavLink {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #27272a;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
   border-bottom: 1px solid transparent;
   padding-bottom: 2px;
 }
 
 .landingNavLink:hover {
-  color: #dc2626;
-  border-color: #dc2626;
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.landingPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
 }
 
 .landingHero {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 40px;
   align-items: center;
 }
 
 .landingHeroCopy {
-  max-width: 60ch;
-}
-
-.landingHeroRail {
-  display: grid;
-  gap: 14px;
-  justify-items: center;
-}
-
-.landingHeroVisual {
-  margin: 0;
-  width: 100%;
-  max-width: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.landingHeroVisual img {
-  width: 100%;
-  height: auto;
-  display: block;
-  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
-}
-
-.landingKicker {
-  margin: 0;
-  font-family: "IBM Plex Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #b91c1c;
-  font-size: 0.79rem;
+  max-width: 56ch;
 }
 
 .landingTitle {
-  margin: 10px 0 12px;
-  font-size: clamp(2.1rem, 5vw, 4.6rem);
-  line-height: 0.96;
-  letter-spacing: -0.04em;
-  max-width: 13ch;
+  margin: 0 0 16px;
+  font-size: clamp(2rem, 4.5vw, 3.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
   font-family: "Space Grotesk", sans-serif;
 }
 
 .landingLead {
   margin: 0;
-  color: #27272a;
-  font-size: 1.03rem;
+  color: var(--text-muted);
+  font-size: 1.08rem;
   line-height: 1.65;
 }
 
 .landingActions {
   justify-content: flex-start;
-  align-self: flex-start;
   margin-top: 24px;
 }
 
 .landingButton {
-  background: #111111;
-  border-color: #111111;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .landingButton:hover {
-  box-shadow: 0 10px 18px rgba(17, 17, 17, 0.22);
+  box-shadow: 0 10px 18px rgba(17, 24, 39, 0.22);
 }
 
 .landingGhostButton {
-  border-color: #dc2626;
-  color: #dc2626;
-  background: #fff;
+  border-color: var(--line-strong);
+  color: var(--text);
+  background: var(--surface);
 }
 
 .landingGhostButton:hover {
-  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 8px 16px rgba(17, 24, 39, 0.08);
 }
 
-.landingSignals {
-  margin-top: 54px;
-  border-top: 1px solid #18181b;
+.landingHeroRail {
+  display: flex;
+  justify-content: center;
 }
 
-.landingSignalRow {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
-  padding: 20px 0;
-  border-bottom: 1px solid #d4d4d8;
+/* ── Chat mockup ── */
+
+.chatMockup {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
 }
 
-.landingSignalRow h2 {
-  margin: 0;
-  font-size: 1rem;
-  font-family: "IBM Plex Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.landingSignalRow p {
-  margin: 0;
-  color: #3f3f46;
-  line-height: 1.6;
-}
-
-.landingFlow {
-  margin-top: 40px;
-  display: grid;
-  grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.landingFlow h2 {
-  margin: 0;
-  font-size: 1rem;
-  font-family: "IBM Plex Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.landingFlow ol {
-  margin: 0;
-  padding-left: 20px;
-  display: grid;
+.chatHeader {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  color: #27272a;
-  line-height: 1.6;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-muted);
 }
 
-.landingFooter {
-  margin-top: 34px;
-  padding-top: 14px;
-  border-top: 1px solid #e4e4e7;
-  color: #a11d1d;
-  font-family: "IBM Plex Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-size: 0.74rem;
+.chatAvatar {
+  font-size: 1.4rem;
 }
+
+.chatName {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.chatStatus {
+  font-size: 0.75rem;
+  color: var(--success);
+  margin-left: auto;
+}
+
+.chatMessages {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chatBubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-width: 88%;
+}
+
+.chatBubbleUser {
+  background: var(--accent);
+  color: #ffffff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.chatBubbleBot {
+  background: var(--surface-muted);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+/* ── Problem section ── */
+
+.landingProblem {
+  margin-top: 80px;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landingProblem h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+
+.landingProblem p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── How it works ── */
+
+.landingSteps {
+  margin-top: 80px;
+}
+
+.landingSteps > h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 32px;
+  text-align: center;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.stepCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.stepCard h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.stepCard p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+/* ── Capabilities ── */
+
+.landingCapabilities {
+  margin-top: 80px;
+}
+
+.landingCapabilities > h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.landingCapabilities > p {
+  text-align: center;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  font-size: 1.02rem;
+}
+
+.capGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.capCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.capIcon {
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.capCard h3 {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+}
+
+.capCard p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+/* ── Security section ── */
+
+.landingSecurity {
+  margin-top: 80px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  text-align: center;
+}
+
+.landingSecurity h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 28px;
+}
+
+.trustPoints {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  text-align: center;
+}
+
+.trustPoint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.trustIcon {
+  font-size: 1.8rem;
+}
+
+.trustPoint h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.trustPoint p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ── Footer CTA ── */
+
+.landingFooterCta {
+  margin-top: 80px;
+  text-align: center;
+  padding-bottom: 40px;
+}
+
+.landingFooterCta h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+
+.landingFooterCta p {
+  color: var(--text-muted);
+  margin: 0 0 24px;
+  font-size: 1.02rem;
+}
+
+.landingFooterMeta {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* ── Responsive ── */
 
 @media (max-width: 940px) {
   .sectionGrid {
@@ -518,9 +714,19 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .landingHero,
-  .landingFlow,
-  .landingSignalRow {
+  .landingHero {
+    grid-template-columns: 1fr;
+  }
+
+  .stepsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .capGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .trustPoints {
     grid-template-columns: 1fr;
   }
 
@@ -552,6 +758,10 @@ textarea {
   }
 
   .landingTitle {
-    max-width: 12ch;
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+  }
+
+  .landingSecurity {
+    padding: 24px;
   }
 }
