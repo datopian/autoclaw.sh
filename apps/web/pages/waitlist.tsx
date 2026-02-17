@@ -32,13 +32,13 @@ export default function WaitlistPage() {
   return (
     <>
       <Head>
-        <title>Waitlist | OpenClaw AaaS</title>
+        <title>Join the Waitlist | Your AI Assistant</title>
       </Head>
       <main>
         <header className="topbar">
           <Link href="/" className="brand">
             <span className="brandMark" />
-            OpenClaw AaaS
+            AI Assistant
           </Link>
           <nav className="navLinks">
             <Link href="/pricing" className="navLink">
@@ -51,18 +51,19 @@ export default function WaitlistPage() {
         </header>
 
         <section className="heroPanel">
-          <span className="pill">Pilot Waitlist</span>
-          <h1 className="heroTitle">Request Early Access.</h1>
+          <span className="pill">Early Access</span>
+          <h1 className="heroTitle">Join the Waitlist</h1>
           <p className="heroSub">
-            Join the pilot list if you want direct onboarding support and early
-            influence over templates and runtime capabilities.
+            We're onboarding new users gradually to make sure everyone gets a
+            great experience. Leave your email and we'll reach out when it's
+            your turn.
           </p>
 
           <form className="waitlist" onSubmit={handleSubmit}>
             <input
               required
               type="email"
-              placeholder="you@company.com"
+              placeholder="you@email.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
@@ -72,7 +73,7 @@ export default function WaitlistPage() {
           </form>
 
           {status === "ok" && (
-            <p className="success">Request received. We will follow up soon.</p>
+            <p className="success">You're on the list! We'll be in touch soon.</p>
           )}
           {status === "error" && (
             <p className="error">Submission failed. Please retry.</p>
