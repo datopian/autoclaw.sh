@@ -90,6 +90,9 @@ function AnimatedChat() {
 
   return (
     <div className="heroVisualWrap">
+      <div className="heroBgBlob heroBgBlob1" aria-hidden="true" />
+      <div className="heroBgBlob heroBgBlob2" aria-hidden="true" />
+      <div className="heroBgBlob heroBgBlob3" aria-hidden="true" />
       <div className={`chatMockup ${fading ? "chatFading" : ""}`}>
         <div className="chatHeader">
           <span className="chatAvatar">🤖</span>
@@ -120,11 +123,6 @@ function AnimatedChat() {
           )}
         </div>
       </div>
-      {/* Floating service icons */}
-      <div className="floatingIcon floatingIconEmail" aria-hidden="true">📧</div>
-      <div className="floatingIcon floatingIconDrive" aria-hidden="true">📁</div>
-      <div className="floatingIcon floatingIconCalendar" aria-hidden="true">📅</div>
-      <div className="floatingIcon floatingIconTelegram" aria-hidden="true">✈️</div>
     </div>
   );
 }

@@ -458,53 +458,53 @@ textarea {
   padding: 24px;
 }
 
-/* ── Floating service icons ── */
+/* ── Hero background blobs ── */
 
-.floatingIcon {
+.heroBgBlob {
   position: absolute;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow-md);
-  animation: floatBob 3s ease-in-out infinite;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: blobFloat 8s ease-in-out infinite;
 }
 
-.floatingIconEmail {
-  top: 8%;
-  left: -4%;
+.heroBgBlob1 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+  top: -10%;
+  right: -5%;
   animation-delay: 0s;
 }
 
-.floatingIconDrive {
-  bottom: 12%;
-  left: -6%;
-  animation-delay: 0.8s;
+.heroBgBlob2 {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, #6ee7b7 0%, #67e8f9 100%);
+  bottom: -5%;
+  left: -8%;
+  animation-delay: 2.5s;
 }
 
-.floatingIconCalendar {
-  top: 4%;
-  right: -2%;
-  animation-delay: 1.6s;
+.heroBgBlob3 {
+  width: 160px;
+  height: 160px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f472b6 100%);
+  top: 50%;
+  right: -12%;
+  animation-delay: 5s;
 }
 
-.floatingIconTelegram {
-  bottom: 8%;
-  right: -4%;
-  animation-delay: 2.4s;
-}
-
-@keyframes floatBob {
+@keyframes blobFloat {
   0%, 100% {
-    transform: translateY(0);
+    transform: translate(0, 0) scale(1);
   }
-  50% {
-    transform: translateY(-8px);
+  33% {
+    transform: translate(10px, -15px) scale(1.05);
+  }
+  66% {
+    transform: translate(-8px, 10px) scale(0.95);
   }
 }
 
@@ -1025,7 +1025,7 @@ textarea {
     justify-items: start;
   }
 
-  .floatingIcon {
+  .heroBgBlob {
     display: none;
   }
 }
