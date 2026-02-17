@@ -463,16 +463,16 @@ textarea {
 .heroBgBlob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.5;
+  filter: blur(80px);
+  opacity: 0.2;
   pointer-events: none;
-  animation: blobFloat 8s ease-in-out infinite;
+  animation: blobFloat 12s ease-in-out infinite;
 }
 
 .heroBgBlob1 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+  width: 280px;
+  height: 280px;
+  background: #818cf8;
   top: -10%;
   right: -5%;
   animation-delay: 0s;
@@ -481,19 +481,19 @@ textarea {
 .heroBgBlob2 {
   width: 200px;
   height: 200px;
-  background: linear-gradient(135deg, #6ee7b7 0%, #67e8f9 100%);
+  background: #6ee7b7;
   bottom: -5%;
   left: -8%;
-  animation-delay: 2.5s;
+  animation-delay: 3s;
 }
 
 .heroBgBlob3 {
-  width: 160px;
-  height: 160px;
-  background: linear-gradient(135deg, #fbbf24 0%, #f472b6 100%);
+  width: 150px;
+  height: 150px;
+  background: #f0abfc;
   top: 50%;
   right: -12%;
-  animation-delay: 5s;
+  animation-delay: 6s;
 }
 
 @keyframes blobFloat {
