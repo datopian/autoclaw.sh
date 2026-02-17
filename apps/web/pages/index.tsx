@@ -1,5 +1,77 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+const chatMessages = [
+  { type: "user" as const, text: "Hey, anything urgent in my email today?" },
+  {
+    type: "bot" as const,
+    html: `Good morning! I checked your inbox:<br/><br/>📩 <strong>Invoice from Acme Co</strong> — due tomorrow<br/>📅 <strong>Team meeting moved</strong> — now at 3pm<br/>✈️ <strong>Flight confirmed</strong> — Friday is all set<br/><br/>Want me to handle any of these?`,
+  },
+  { type: "user" as const, text: "Pay the invoice and update my calendar" },
+  {
+    type: "bot" as const,
+    html: `Done! Invoice payment initiated and calendar updated ✓`,
+  },
+];
+
+function AnimatedChat() {
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [showTyping, setShowTyping] = useState(false);
+
+  useEffect(() => {
+    if (visibleCount >= chatMessages.length) return;
+
+    // Show typing indicator before each message
+    const typingDelay = visibleCount === 0 ? 800 : 1200;
+    const typingTimer = setTimeout(() => setShowTyping(true), typingDelay);
+
+    // Then show the message
+    const messageDelay = typingDelay + (chatMessages[visibleCount].type === "bot" ? 1500 : 600);
+    const messageTimer = setTimeout(() => {
+      setShowTyping(false);
+      setVisibleCount((c) => c + 1);
+    }, messageDelay);
+
+    return () => {
+      clearTimeout(typingTimer);
+      clearTimeout(messageTimer);
+    };
+  }, [visibleCount]);
+
+  return (
+    <div className="chatMockup">
+      <div className="chatHeader">
+        <span className="chatAvatar">🤖</span>
+        <span className="chatName">Your Assistant</span>
+        <span className="chatStatus">
+          <span className="chatOnline" /> Online
+        </span>
+      </div>
+      <div className="chatMessages">
+        {chatMessages.slice(0, visibleCount).map((msg, i) => (
+          <div
+            key={i}
+            className={`chatBubble ${msg.type === "user" ? "chatBubbleUser" : "chatBubbleBot"} chatBubbleAnimate`}
+          >
+            {msg.html ? (
+              <span dangerouslySetInnerHTML={{ __html: msg.html }} />
+            ) : (
+              msg.text
+            )}
+          </div>
+        ))}
+        {showTyping && (
+          <div className="chatBubble chatBubbleBot chatTyping">
+            <span className="typingDot" />
+            <span className="typingDot" />
+            <span className="typingDot" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -29,7 +101,6 @@ export default function HomePage() {
 
         <section className="landingHero">
           <div className="landingHeroCopy">
-            <span className="landingPill">Powered by OpenClaw</span>
             <h1 className="landingTitle">
               Your Own AI Assistant.
               <br />
@@ -51,68 +122,53 @@ export default function HomePage() {
             </div>
           </div>
           <div className="landingHeroRail">
-            <div className="chatMockup">
-              <div className="chatHeader">
-                <span className="chatAvatar">🤖</span>
-                <span className="chatName">Your Assistant</span>
-                <span className="chatStatus"><span className="chatOnline" /> Online</span>
-              </div>
-              <div className="chatMessages">
-                <div className="chatBubble chatBubbleUser">
-                  Hey, anything urgent in my email today?
-                </div>
-                <div className="chatBubble chatBubbleBot">
-                  Good morning! I checked your inbox. Here's what needs attention:
-                  <br /><br />
-                  📩 <strong>Invoice from Acme Co</strong> — payment due tomorrow
-                  <br />
-                  📅 <strong>Team meeting moved</strong> — now at 3pm instead of 2pm
-                  <br />
-                  ✈️ <strong>Flight confirmation</strong> — your booking for Friday is confirmed
-                  <br /><br />
-                  Want me to handle any of these?
-                </div>
-                <div className="chatBubble chatBubbleUser">
-                  Pay the invoice and update my calendar for the meeting
-                </div>
-                <div className="chatBubble chatBubbleBot">
-                  Done! Invoice payment initiated and your calendar is updated. Anything else?
-                </div>
-              </div>
+            <AnimatedChat />
+          </div>
+        </section>
+
+        <section className="landingValueProps">
+          <div className="valueProp">
+            <div className="valuePropIcon">⚡</div>
+            <div>
+              <h3>Works where you already are</h3>
+              <p>Chat on Telegram. No new apps to learn, no dashboards to figure out.</p>
+            </div>
+          </div>
+          <div className="valueProp">
+            <div className="valuePropIcon">🧠</div>
+            <div>
+              <h3>Actually does things for you</h3>
+              <p>This isn't just a chatbot. It reads emails, moves files, updates your calendar — real actions.</p>
+            </div>
+          </div>
+          <div className="valueProp">
+            <div className="valuePropIcon">🔐</div>
+            <div>
+              <h3>Safe and sandboxed</h3>
+              <p>Runs in its own secure space. You choose what it can access. Your data stays yours.</p>
             </div>
           </div>
         </section>
 
-        <section className="landingProblem">
-          <h2>AI is powerful. But getting your own assistant? That was hard.</h2>
-          <p>
-            Until now, you needed technical skills just to get started.
-            We believe everyone deserves an AI that works for them —
-            not just developers. So we made it ridiculously simple.
-          </p>
-        </section>
-
         <section className="landingSteps" id="how-it-works">
-          <h2>Up and running in three steps</h2>
+          <h2>Three steps. That's it.</h2>
           <div className="stepsGrid">
             <div className="stepCard">
               <span className="stepNumber">1</span>
-              <h3>Sign up</h3>
-              <p>Create your account. No credit card needed to get started.</p>
+              <h3>Create your account</h3>
+              <p>Quick signup, no credit card. You're in within a minute.</p>
             </div>
+            <div className="stepConnector" aria-hidden="true">→</div>
             <div className="stepCard">
               <span className="stepNumber">2</span>
-              <h3>Pick where to chat</h3>
-              <p>
-                Connect Telegram — that's it. WhatsApp and more coming soon.
-              </p>
+              <h3>Connect Telegram</h3>
+              <p>We walk you through it. Takes about two minutes.</p>
             </div>
+            <div className="stepConnector" aria-hidden="true">→</div>
             <div className="stepCard">
               <span className="stepNumber">3</span>
-              <h3>Start talking</h3>
-              <p>
-                Your assistant is ready. Ask it anything or give it a task.
-              </p>
+              <h3>Say hello</h3>
+              <p>Your assistant is live. Start with a question, give it a task — it's ready.</p>
             </div>
           </div>
         </section>
@@ -120,8 +176,8 @@ export default function HomePage() {
         <section className="landingCapabilities">
           <h2>Start simple. Add more when you're ready.</h2>
           <p>
-            You control what your assistant can access. Begin with chat, then
-            unlock more as you get comfortable.
+            You control what your assistant can access. Start with chat,
+            then unlock more capabilities as you get comfortable.
           </p>
           <div className="capGrid">
             <div className="capCard">
@@ -136,27 +192,30 @@ export default function HomePage() {
               <div className="capIcon">📧</div>
               <h3>Connect your email</h3>
               <p>
-                "What's urgent today?" Get morning briefings and let your
-                assistant draft replies.
+                "What's urgent today?" Morning briefings, draft replies,
+                flag what matters.
               </p>
             </div>
             <div className="capCard">
               <div className="capIcon">📁</div>
               <h3>Connect your drive</h3>
               <p>
-                "Find that proposal from last week." Your assistant searches
-                and retrieves files for you.
+                "Find that proposal from last week." It searches and
+                retrieves files for you.
               </p>
             </div>
             <div className="capCard">
               <div className="capIcon">📅</div>
               <h3>Connect your calendar</h3>
               <p>
-                "Reschedule Thursday's meeting to Friday." Your assistant
-                manages your schedule.
+                "Move Thursday's meeting to Friday." It manages your
+                schedule so you don't have to.
               </p>
             </div>
           </div>
+          <p className="capMore">
+            And this is just the beginning — more integrations are on the way.
+          </p>
         </section>
 
         <section className="landingSecurity">
@@ -192,7 +251,7 @@ export default function HomePage() {
         <section className="landingFooterCta">
           <h2>Ready to meet your AI assistant?</h2>
           <p>
-            Join the waitlist. We're onboarding new users every week.
+            Join the waitlist and we'll get in touch.
           </p>
           <Link href="/waitlist" className="button landingButton">
             Join the Waitlist

@@ -339,47 +339,42 @@ textarea {
 
 .landingTopbar {
   margin-bottom: 48px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
+  padding: 12px 20px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .landingBrand {
   font-family: "Space Grotesk", sans-serif;
-  letter-spacing: -0.01em;
-  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  font-size: 1.12rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .landingNavLinks {
-  gap: 16px;
+  gap: 8px;
 }
 
 .landingNavLink {
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-muted);
-  border-bottom: 1px solid transparent;
-  padding-bottom: 2px;
-  transition: color 0.15s ease;
+  padding: 8px 16px;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+  border: none;
 }
 
 .landingNavLink:hover {
   color: var(--primary);
-  border-color: var(--primary);
-}
-
-.landingPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  padding: 5px 14px;
-  border: 1px solid #c7d2fe;
   background: var(--primary-soft);
-  color: var(--primary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  margin-bottom: 20px;
 }
 
 .landingHero {
@@ -520,13 +515,6 @@ textarea {
   gap: 5px;
 }
 
-.chatMessages {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .chatBubble {
   padding: 12px 16px;
   border-radius: 16px;
@@ -548,6 +536,117 @@ textarea {
   align-self: flex-start;
   border-bottom-left-radius: 4px;
   border: 1px solid var(--line);
+}
+
+/* Chat animation */
+
+@keyframes chatSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatBubbleAnimate {
+  animation: chatSlideIn 0.35s ease-out both;
+}
+
+.chatTyping {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 14px 18px;
+  align-self: flex-start;
+  border: 1px solid var(--line);
+  animation: chatSlideIn 0.2s ease-out both;
+}
+
+.typingDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typingDot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typingDot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.chatMessages {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 280px;
+}
+
+/* ── Value props ── */
+
+.landingValueProps {
+  margin-top: 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.valueProp {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.valueProp:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.valuePropIcon {
+  font-size: 1.5rem;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-soft) 0%, #f5f3ff 100%);
+  border-radius: 12px;
+}
+
+.valueProp h3 {
+  margin: 0 0 4px;
+  font-size: 0.98rem;
+}
+
+.valueProp p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 /* ── Problem section ── */
@@ -593,8 +692,16 @@ textarea {
 
 .stepsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.stepConnector {
+  font-size: 1.5rem;
+  color: var(--line-strong);
+  font-weight: 300;
+  user-select: none;
 }
 
 .stepCard {
@@ -699,6 +806,14 @@ textarea {
   color: var(--text-muted);
   font-size: 0.92rem;
   line-height: 1.55;
+}
+
+.capMore {
+  text-align: center;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-top: 24px;
 }
 
 /* ── Security section ── */
@@ -812,8 +927,17 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .landingValueProps {
+    grid-template-columns: 1fr;
+  }
+
   .stepsGrid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stepConnector {
+    display: none;
   }
 
   .capGrid {
