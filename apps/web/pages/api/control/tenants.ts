@@ -1,18 +1,28 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { workerBaseUrl } from "./_worker";
+import { requireAuth } from "./_auth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "GET" && req.method !== "POST") {
-    res.setHeader("Allow", "GET, POST");
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
+  const user = await requireAuth(req);
+  if (!user) {
+    return res.status(401).json({ error: "unauthorized" });
+  }
 
-  const response = await fetch(`${workerBaseUrl()}/api/tenants`, {
-    method: req.method,
-    headers: { "content-type": "application/json" },
-    body: req.method === "POST" ? JSON.stringify(req.body) : undefined
-  });
+  const response = await fetch(
+    `${workerBaseUrl()}/api/tenants`
+  );
+  if (!response.ok) {
+    const payload = await response.text();
+    return res.status(response.status).send(payload);
+  }
+  const payload = (await response.json()) as {
+    tenants?: Array<{ id: string } & Record<string, unknown>>;
+  };
+  const tenant = payload.tenants?.find((item) => item.id === user.tenantId) ?? null;
 
-  const payload = await response.text();
-  res.status(response.status).send(payload);
+  return res.status(200).json({ tenant });
 }

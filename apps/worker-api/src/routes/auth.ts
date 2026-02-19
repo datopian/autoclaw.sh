@@ -32,11 +32,17 @@ type SessionRow = {
   id: string;
   account_id: string;
   expires_at: string;
+  last_seen_at: string | null;
   status: string;
   tenant_id: string;
   email: string;
   name: string;
 };
+
+const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const SESSION_IDLE_TIMEOUT_MS = 7 * 24 * 60 * 60 * 1000;
+const OTP_WINDOW_MS = 15 * 60 * 1000;
+const OTP_LIMIT_PER_WINDOW = 5;
 
 function validEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -96,6 +102,31 @@ async function sendVerificationEmail(input: {
   }
 }
 
+async function logAuditEvent(input: {
+  env: Env;
+  tenantId?: string | null;
+  actorType: string;
+  actorId?: string | null;
+  action: string;
+  metadata?: Record<string, unknown>;
+}): Promise<void> {
+  const db = requireDb(input.env);
+  await db
+    .prepare(
+      "INSERT INTO audit_events (id, tenant_id, actor_type, actor_id, action, metadata_json, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
+    )
+    .bind(
+      crypto.randomUUID(),
+      input.tenantId ?? null,
+      input.actorType,
+      input.actorId ?? null,
+      input.action,
+      JSON.stringify(input.metadata ?? {}),
+      new Date().toISOString()
+    )
+    .run();
+}
+
 async function resolveSession(
   request: Request,
   env: Env
@@ -112,7 +143,7 @@ async function resolveSession(
   const db = requireDb(env);
   const row = await db
     .prepare(
-      "SELECT s.id, s.account_id, s.expires_at, s.status, a.tenant_id, a.email, a.name FROM auth_sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ?1 LIMIT 1"
+      "SELECT s.id, s.account_id, s.expires_at, s.last_seen_at, s.status, a.tenant_id, a.email, a.name FROM auth_sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token_hash = ?1 LIMIT 1"
     )
     .bind(tokenHash)
     .first<SessionRow | null>();
@@ -126,9 +157,20 @@ async function resolveSession(
       .run();
     return null;
   }
+  const lastSeenAtMs = row.last_seen_at ? new Date(row.last_seen_at).getTime() : 0;
+  if (lastSeenAtMs > 0 && Date.now() - lastSeenAtMs > SESSION_IDLE_TIMEOUT_MS) {
+    await db
+      .prepare("UPDATE auth_sessions SET status = 'expired' WHERE id = ?1")
+      .bind(row.id)
+      .run();
+    return null;
+  }
+
+  const now = new Date().toISOString();
+  const refreshedExpiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
   await db
-    .prepare("UPDATE auth_sessions SET last_seen_at = ?1 WHERE id = ?2")
-    .bind(new Date().toISOString(), row.id)
+    .prepare("UPDATE auth_sessions SET last_seen_at = ?1, expires_at = ?2 WHERE id = ?3")
+    .bind(now, refreshedExpiresAt, row.id)
     .run();
   return row;
 }
@@ -149,6 +191,25 @@ export async function handleAuthStart(
   const db = requireDb(env);
   const email = body.email.toLowerCase();
   const tenants = createTenantRepository(db);
+  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+
+  const recentCodeCount = await db
+    .prepare(
+      "SELECT COUNT(*) as count FROM email_verification_codes WHERE email = ?1 AND created_at >= ?2"
+    )
+    .bind(email, new Date(Date.now() - OTP_WINDOW_MS).toISOString())
+    .first<{ count: number } | null>();
+
+  if ((recentCodeCount?.count ?? 0) >= OTP_LIMIT_PER_WINDOW) {
+    await logAuditEvent({
+      env,
+      actorType: "account",
+      actorId: email,
+      action: "auth.otp_rate_limited",
+      metadata: { email, ip }
+    });
+    return json({ error: "too many code requests, please wait 15 minutes" }, 429);
+  }
 
   let account = await db
     .prepare(
@@ -198,6 +259,14 @@ export async function handleAuthStart(
     .run();
 
   await sendVerificationEmail({ env, email, code });
+  await logAuditEvent({
+    env,
+    tenantId: account.tenant_id,
+    actorType: "account",
+    actorId: account.id,
+    action: "auth.otp_sent",
+    metadata: { email, ip }
+  });
 
   return json({
     ok: true,
@@ -224,6 +293,7 @@ export async function handleAuthVerify(
   const email = body.email.toLowerCase();
   const code = body.code.trim();
   const db = requireDb(env);
+  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
 
   const verification = await db
     .prepare(
@@ -233,6 +303,13 @@ export async function handleAuthVerify(
     .first<VerificationRow | null>();
 
   if (!verification) {
+    await logAuditEvent({
+      env,
+      actorType: "account",
+      actorId: email,
+      action: "auth.otp_verify_failed",
+      metadata: { email, ip, reason: "invalid_code" }
+    });
     return json({ error: "invalid verification code" }, 400);
   }
   if (new Date(verification.expires_at).getTime() < Date.now()) {
@@ -240,6 +317,13 @@ export async function handleAuthVerify(
       .prepare("UPDATE email_verification_codes SET status = 'expired' WHERE id = ?1")
       .bind(verification.id)
       .run();
+    await logAuditEvent({
+      env,
+      actorType: "account",
+      actorId: email,
+      action: "auth.otp_verify_failed",
+      metadata: { email, ip, reason: "expired_code" }
+    });
     return json({ error: "verification code expired" }, 400);
   }
 
@@ -271,13 +355,21 @@ export async function handleAuthVerify(
 
   const token = generateSessionToken();
   const tokenHash = await hashToken(token);
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
   await db
     .prepare(
       "INSERT INTO auth_sessions (id, account_id, token_hash, status, expires_at, created_at, revoked_at, last_seen_at) VALUES (?1, ?2, ?3, 'active', ?4, ?5, NULL, ?6)"
     )
     .bind(crypto.randomUUID(), account.id, tokenHash, expiresAt, now, now)
     .run();
+  await logAuditEvent({
+    env,
+    tenantId: account.tenant_id,
+    actorType: "account",
+    actorId: account.id,
+    action: "auth.login_success",
+    metadata: { email, ip }
+  });
 
   return json({
     ok: true,
@@ -329,9 +421,22 @@ export async function handleAuthLogout(
     return json({ ok: true });
   }
   const tokenHash = await hashToken(token);
-  await requireDb(env)
+  const db = requireDb(env);
+  const session = await db
+    .prepare("SELECT account_id FROM auth_sessions WHERE token_hash = ?1 LIMIT 1")
+    .bind(tokenHash)
+    .first<{ account_id: string } | null>();
+  await db
     .prepare("UPDATE auth_sessions SET status = 'revoked', revoked_at = ?1 WHERE token_hash = ?2")
     .bind(new Date().toISOString(), tokenHash)
     .run();
+  if (session?.account_id) {
+    await logAuditEvent({
+      env,
+      actorType: "account",
+      actorId: session.account_id,
+      action: "auth.logout"
+    });
+  }
   return json({ ok: true });
 }
