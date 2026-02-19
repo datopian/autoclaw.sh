@@ -57,8 +57,8 @@ export default function LoginPage() {
             OpenClaw AaaS
           </Link>
           <nav className="navLinks">
-            <Link href="/signup" className="navLink">
-              Signup
+            <Link href="/pricing" className="navLink">
+              Pricing
             </Link>
           </nav>
         </header>
@@ -67,7 +67,8 @@ export default function LoginPage() {
           <span className="pill">Login</span>
           <h1 className="heroTitle">Sign in with one-time code.</h1>
           <p className="heroSub">
-            We send a short-lived verification code to your email. No password needed.
+            Enter your email and we will send a short-lived verification code. First-time email
+            automatically creates your account.
           </p>
         </section>
 
@@ -110,13 +111,10 @@ export default function LoginPage() {
           </article>
 
           <aside className="panel">
-            <h3 className="panelTitle">New here?</h3>
+            <h3 className="panelTitle">One-step access</h3>
             <p className="panelText">
-              Create an account first, then come back to login with one-time codes.
+              No signup page and no password. Use your email here, verify OTP, and continue.
             </p>
-            <Link href="/signup" className="button">
-              Go to Signup
-            </Link>
           </aside>
         </section>
       </main>

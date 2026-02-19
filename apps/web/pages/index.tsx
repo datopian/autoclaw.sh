@@ -46,8 +46,8 @@ export default function HomePage() {
             <Link href="/pricing" className="landingNavLink">
               Pricing
             </Link>
-            <Link href="/signup" className="landingNavLink">
-              Signup
+            <Link href="/login" className="landingNavLink">
+              Login
             </Link>
             <Link href="/dashboard" className="landingNavLink">
               Dashboard
@@ -68,7 +68,7 @@ export default function HomePage() {
               data and workflow isolated from your personal devices.
             </p>
             <div className="actions landingActions">
-              <Link href="/signup" className="button landingButton">
+              <Link href="/login" className="button landingButton">
                 Create Agent
               </Link>
               <Link href="/dashboard" className="button ghostButton landingGhostButton">

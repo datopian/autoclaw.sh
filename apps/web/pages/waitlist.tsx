@@ -44,8 +44,8 @@ export default function WaitlistPage() {
             <Link href="/pricing" className="navLink">
               Pricing
             </Link>
-            <Link href="/signup" className="navLink">
-              Signup
+            <Link href="/login" className="navLink">
+              Login
             </Link>
           </nav>
         </header>

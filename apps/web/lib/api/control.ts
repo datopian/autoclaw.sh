@@ -42,7 +42,7 @@ export type PairingStatus = {
   telegramUserId: string | null;
 };
 
-export type SignupStartResult = {
+export type AuthStartResult = {
   ok: boolean;
   requiresVerification: boolean;
   devCode?: string;
@@ -69,49 +69,11 @@ export async function createTenant(input: TenantInput): Promise<Tenant> {
   return response.json() as Promise<Tenant>;
 }
 
-export async function startAccountSignup(input: TenantInput): Promise<SignupStartResult> {
-  const response = await fetch("/api/control/accounts/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input)
-  });
-  const payload = (await response.json()) as {
-    error?: string;
-    ok?: boolean;
-    requiresVerification?: boolean;
-    devCode?: string;
-  };
-  if (!response.ok) {
-    throw new Error(payload.error ?? "Failed to start signup");
-  }
-  return {
-    ok: payload.ok ?? false,
-    requiresVerification: payload.requiresVerification ?? true,
-    devCode: payload.devCode
-  };
-}
-
-export async function verifyAccountSignup(input: {
-  email: string;
-  code: string;
-}): Promise<{ user: AuthUser }> {
-  const response = await fetch("/api/auth/verify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...input, mode: "signup" })
-  });
-  const payload = (await response.json()) as { error?: string; user?: AuthUser };
-  if (!response.ok || !payload.user) {
-    throw new Error(payload.error ?? "Failed to verify email");
-  }
-  return { user: payload.user };
-}
-
 export async function startAuth(input: {
   email: string;
   name?: string;
   mode: "signup" | "login";
-}): Promise<SignupStartResult> {
+}): Promise<AuthStartResult> {
   const response = await fetch("/api/auth/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

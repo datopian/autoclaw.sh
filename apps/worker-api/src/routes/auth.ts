@@ -6,7 +6,6 @@ import type { Env } from "../types";
 type StartAuthInput = {
   email?: string;
   name?: string;
-  mode?: "signup" | "login";
 };
 
 type VerifyAuthInput = {
@@ -147,11 +146,6 @@ export async function handleAuthStart(
     return json({ error: "valid email is required" }, 400);
   }
 
-  const mode = body.mode ?? "login";
-  if (mode === "signup" && !body.name?.trim()) {
-    return json({ error: "name is required for signup" }, 400);
-  }
-
   const db = requireDb(env);
   const email = body.email.toLowerCase();
   const tenants = createTenantRepository(db);
@@ -163,32 +157,34 @@ export async function handleAuthStart(
     .bind(email)
     .first<AccountRow | null>();
 
-  if (!account && mode === "login") {
-    return json({ error: "account not found" }, 404);
-  }
+  const requestedName = body.name?.trim();
+  const inferredName = requestedName || email.split("@")[0] || "OpenClaw User";
 
-  if (!account && mode === "signup") {
-    const tenant = await tenants.create({ name: body.name!.trim(), email });
+  if (!account) {
+    const tenant = await tenants.create({ name: inferredName, email });
     const now = new Date().toISOString();
     const accountId = crypto.randomUUID();
     await db
       .prepare(
         "INSERT INTO accounts (id, tenant_id, name, email, status, email_verified_at, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, 'pending_email_verification', NULL, ?5, ?6)"
       )
-      .bind(accountId, tenant.id, body.name!.trim(), email, now, now)
+      .bind(accountId, tenant.id, inferredName, email, now, now)
       .run();
     account = {
       id: accountId,
       tenant_id: tenant.id,
-      name: body.name!.trim(),
+      name: inferredName,
       email,
       status: "pending_email_verification",
       email_verified_at: null
     };
   }
 
-  if (!account) {
-    return json({ error: "account not found" }, 404);
+  if (account && requestedName && account.name !== requestedName) {
+    await db
+      .prepare("UPDATE accounts SET name = ?1, updated_at = ?2 WHERE id = ?3")
+      .bind(requestedName, new Date().toISOString(), account.id)
+      .run();
   }
 
   const code = generateVerificationCode();
