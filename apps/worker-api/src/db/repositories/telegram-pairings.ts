@@ -95,6 +95,19 @@ export function createTelegramPairingRepository(db: D1Database) {
       return row ? toRecord(row) : null;
     },
 
+    async findPairedByTelegramUserId(
+      telegramUserId: string
+    ): Promise<TelegramPairingRecord | null> {
+      const row = await db
+        .prepare(
+          "SELECT id, tenant_id, telegram_user_id, telegram_chat_id, pairing_code, status, issued_at, expires_at, paired_at FROM telegram_pairings WHERE telegram_user_id = ?1 AND status = 'paired' ORDER BY paired_at DESC LIMIT 1"
+        )
+        .bind(telegramUserId)
+        .first<TelegramPairingRow | null>();
+
+      return row ? toRecord(row) : null;
+    },
+
     async pairToTenant(input: { id: string; tenantId: string }): Promise<void> {
       const now = new Date().toISOString();
       await db
