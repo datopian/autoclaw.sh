@@ -42,6 +42,16 @@ export type PairingStatus = {
   telegramUserId: string | null;
 };
 
+export type TenantProfile = {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  modelProvider: string | null;
+  modelId: string | null;
+  hasApiKey: boolean;
+};
+
 export type AuthStartResult = {
   ok: boolean;
   requiresVerification: boolean;
@@ -145,6 +155,15 @@ export async function getTelegramPairingStatus(tenantId: string): Promise<Pairin
     throw new Error("Failed to load Telegram pairing status");
   }
   return response.json() as Promise<PairingStatus>;
+}
+
+export async function getTenantProfile(): Promise<TenantProfile | null> {
+  const response = await fetch("/api/control/tenants");
+  const payload = (await response.json()) as { error?: string; tenant?: TenantProfile | null };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "Failed to load tenant profile");
+  }
+  return payload.tenant ?? null;
 }
 
 export async function pairTelegram(input: {

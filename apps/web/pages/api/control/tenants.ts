@@ -23,6 +23,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     tenants?: Array<{ id: string } & Record<string, unknown>>;
   };
   const tenant = payload.tenants?.find((item) => item.id === user.tenantId) ?? null;
-
-  return res.status(200).json({ tenant });
+  if (!tenant) {
+    return res.status(200).json({ tenant: null });
+  }
+  return res.status(200).json({
+    tenant: {
+      id: tenant.id,
+      name: tenant.name,
+      email: tenant.email,
+      status: tenant.status,
+      modelProvider: tenant.modelProvider ?? null,
+      modelId: tenant.modelId ?? null,
+      hasApiKey: Boolean(tenant.byokApiKey)
+    }
+  });
 }
