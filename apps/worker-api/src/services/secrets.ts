@@ -1,8 +1,8 @@
-export type SupportedProvider = "openai" | "anthropic";
+export type SupportedProvider = "openai" | "anthropic" | "google";
 
 export function normalizeProvider(input: string): SupportedProvider {
   const provider = input.trim().toLowerCase();
-  if (provider === "openai" || provider === "anthropic") {
+  if (provider === "openai" || provider === "anthropic" || provider === "google") {
     return provider;
   }
 
