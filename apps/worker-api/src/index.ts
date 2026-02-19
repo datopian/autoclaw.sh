@@ -5,6 +5,7 @@ import { createRunRepository } from "./db/repositories/runs";
 import { handleRuns } from "./routes/runs";
 import { handleTemplates } from "./routes/templates";
 import { handleTenants } from "./routes/tenants";
+import { handleAccountsStart, handleAccountsVerify } from "./routes/accounts";
 import { handleStripeWebhook } from "./routes/webhooks/stripe";
 import { handleTelegramWebhook } from "./routes/webhooks/telegram";
 import { handleSubscriptions } from "./routes/subscriptions";
@@ -25,6 +26,14 @@ const worker: ExportedHandler<Env> = {
 
     if (url.pathname === "/api/tenants") {
       return handleTenants(request, env);
+    }
+
+    if (url.pathname === "/api/accounts/start") {
+      return handleAccountsStart(request, env);
+    }
+
+    if (url.pathname === "/api/accounts/verify") {
+      return handleAccountsVerify(request, env);
     }
 
     if (url.pathname === "/api/templates") {
