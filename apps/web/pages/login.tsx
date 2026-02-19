@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError("");
     setIsSubmitting(true);
     try {
-      const result = await startAuth({ email, mode: "login" });
+      const result = await startAuth({ email });
       setIsCodeSent(result.requiresVerification);
       setDevCodeHint(result.devCode ?? "");
       setIsSubmitting(false);

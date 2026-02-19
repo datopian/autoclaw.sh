@@ -72,7 +72,6 @@ export async function createTenant(input: TenantInput): Promise<Tenant> {
 export async function startAuth(input: {
   email: string;
   name?: string;
-  mode: "signup" | "login";
 }): Promise<AuthStartResult> {
   const response = await fetch("/api/auth/start", {
     method: "POST",
