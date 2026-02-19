@@ -3,8 +3,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 import {
+  getAuthMe,
   getTelegramPairingStatus,
   getSubscription,
+  logoutAuth,
   pairTelegram,
   saveTenantAgentConfig,
   PairingStatus,
@@ -62,6 +64,7 @@ const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "
 export default function DashboardPage() {
   const router = useRouter();
   const [tenantId, setTenantId] = useState("");
+  const [userName, setUserName] = useState("");
   const [modelProvider, setModelProvider] = useState("openai");
   const [modelId, setModelId] = useState("gpt-5.2");
   const [byokApiKey, setByokApiKey] = useState("");
@@ -76,11 +79,15 @@ export default function DashboardPage() {
   const paymentUrl = useSubscriptionUrl(undefined, tenantId);
 
   useEffect(() => {
-    const incomingTenant = router.query.tenantId;
-    if (typeof incomingTenant === "string" && incomingTenant) {
-      setTenantId(incomingTenant);
-    }
-  }, [router.query.tenantId]);
+    getAuthMe()
+      .then(({ user }) => {
+        setTenantId(user.tenantId);
+        setUserName(user.name);
+      })
+      .catch(() => {
+        router.replace("/login");
+      });
+  }, [router]);
 
   useEffect(() => {
     if (!tenantId) return;
@@ -145,6 +152,11 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleLogout() {
+    await logoutAuth();
+    router.replace("/login");
+  }
+
   return (
     <>
       <Head>
@@ -161,9 +173,9 @@ export default function DashboardPage() {
             <Link href="/pricing" className="navLink">
               Pricing
             </Link>
-            <Link href="/signup" className="navLink">
-              Signup
-            </Link>
+            <button type="button" className="navLink" onClick={handleLogout}>
+              Logout
+            </button>
           </nav>
         </header>
 
@@ -171,8 +183,8 @@ export default function DashboardPage() {
           <span className="pill">Dashboard</span>
           <h1 className="heroTitle">Start using your agent from Telegram.</h1>
           <p className="heroSub">
-            Your free trial starts automatically. Use the onboarding checklist first, then run
-            your first action.
+            {userName ? `${userName}, your free trial starts automatically.` : "Your free trial starts automatically."}{" "}
+            Use the onboarding checklist first, then run your first action.
           </p>
         </section>
 
