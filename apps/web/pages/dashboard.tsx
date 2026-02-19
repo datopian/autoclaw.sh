@@ -5,9 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import {
   createRun,
   getSubscription,
-  getTemplates,
   SubscriptionStatus,
-  Template
 } from "../lib/api/control";
 import { useSubscriptionUrl } from "../lib/hooks/use-payment";
 
@@ -18,14 +16,51 @@ function formatTrialTime(ms: number): string {
   return `${hours}h ${minutes}m`;
 }
 
+type ProviderOption = {
+  value: string;
+  label: string;
+  models: Array<{ id: string; label: string }>;
+};
+
+const PROVIDERS: ProviderOption[] = [
+  {
+    value: "openai",
+    label: "OpenAI",
+    models: [
+      { id: "gpt-5.2", label: "GPT-5.2 (latest)" },
+      { id: "gpt-5.2-mini", label: "GPT-5.2 mini" },
+      { id: "gpt-5.2-nano", label: "GPT-5.2 nano" }
+    ]
+  },
+  {
+    value: "anthropic",
+    label: "Anthropic Claude",
+    models: [
+      { id: "claude-sonnet-4-0", label: "Claude Sonnet 4" },
+      { id: "claude-opus-4-1", label: "Claude Opus 4.1" },
+      { id: "claude-3-5-haiku-latest", label: "Claude Haiku 3.5" }
+    ]
+  },
+  {
+    value: "google",
+    label: "Google Gemini",
+    models: [
+      { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+      { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+      { id: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite" }
+    ]
+  }
+];
+
+const DEFAULT_TEMPLATE_ID = "support-agent";
+const DEFAULT_TEMPLATE_NAME = "Assistant AI";
+
 export default function DashboardPage() {
   const router = useRouter();
   const [tenantId, setTenantId] = useState("");
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [templateId, setTemplateId] = useState("support-agent");
+  const templateId = DEFAULT_TEMPLATE_ID;
   const [modelProvider, setModelProvider] = useState("openai");
-  const [modelId, setModelId] = useState("gpt-4o-mini");
-  const [prompt, setPrompt] = useState("Run starter workflow");
+  const [modelId, setModelId] = useState("gpt-5.2");
   const [byokApiKey, setByokApiKey] = useState("");
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
@@ -52,15 +87,15 @@ export default function DashboardPage() {
   }, [tenantId]);
 
   useEffect(() => {
-    getTemplates()
-      .then((items) => {
-        setTemplates(items);
-        if (items[0]) {
-          setTemplateId(items[0].id);
-        }
-      })
-      .catch(() => setError("Unable to load templates"));
-  }, []);
+    const provider = PROVIDERS.find((item) => item.value === modelProvider);
+    if (!provider) {
+      return;
+    }
+    const currentStillValid = provider.models.some((model) => model.id === modelId);
+    if (!currentStillValid && provider.models[0]) {
+      setModelId(provider.models[0].id);
+    }
+  }, [modelProvider, modelId]);
 
   async function handleLaunch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,8 +108,7 @@ export default function DashboardPage() {
         templateId,
         modelProvider,
         modelId,
-        byokApiKey,
-        prompt
+        byokApiKey
       });
       setResponse(`Run queued successfully: ${result.runId}`);
     } catch (runError) {
@@ -118,15 +152,20 @@ export default function DashboardPage() {
           <article className="panel">
             <h2 className="panelTitle">Step 2: Connect Telegram</h2>
             <p className="panelText">
-              This is the quickest way to use your OpenClaw agent today.
+              We set up the bot infrastructure for you. You only pair your Telegram account and
+              start chatting.
             </p>
             <ol className="plainList">
-              <li>Open Telegram and start a chat with your configured OpenClaw bot.</li>
-              <li>Send: <code>/start</code>.</li>
-              <li>Send a test instruction, for example: <code>summarize today&apos;s tasks</code>.</li>
-              <li>Return here to trigger advanced runs only when needed.</li>
+              <li>After signup, we provision your Telegram bot access for your account.</li>
+              <li>Open that bot in Telegram and send: <code>/start</code>.</li>
+              <li>When asked, enter your one-time pairing code shared by our team.</li>
+              <li>Send a simple test message, for example: <code>summarize my tasks for today</code>.</li>
             </ol>
-            <p className="helper">WhatsApp support is planned next after Telegram-first onboarding.</p>
+            <p className="helper">
+              No BotFather setup is needed on your side. Pairing is currently handled manually by
+              our team. If details do not arrive, contact{" "}
+              <a href="mailto:hello@datopian.com">hello@datopian.com</a>.
+            </p>
             {subscription?.trialActive && (
               <div className="notice">
                 Free trial active. Time remaining: <strong>{formatTrialTime(subscription.trialRemainingMs)}</strong>
@@ -145,44 +184,52 @@ export default function DashboardPage() {
           <article className="panel">
             <h2 className="panelTitle">Advanced Run Configuration</h2>
             <form className="stacked" onSubmit={handleLaunch}>
-              <input
-                required
-                placeholder="Tenant ID"
-                value={tenantId}
-                onChange={(event) => setTenantId(event.target.value)}
-              />
+              {!tenantId && (
+                <div className="cta-box">
+                  <p>Account session not found. Start from signup so your workspace is linked.</p>
+                  <Link href="/signup" className="button">
+                    Go to Signup
+                  </Link>
+                </div>
+              )}
 
-              <select value={templateId} onChange={(event) => setTemplateId(event.target.value)}>
-                {templates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.name}
-                  </option>
-                ))}
-              </select>
+              <div className="notice">
+                Agent template: <strong>{DEFAULT_TEMPLATE_NAME}</strong>
+              </div>
 
               <div className="waitlist">
-                <input
-                  placeholder="Model provider"
+                <select
+                  aria-label="Model provider"
                   value={modelProvider}
                   onChange={(event) => setModelProvider(event.target.value)}
-                />
+                >
+                  {PROVIDERS.map((provider) => (
+                    <option key={provider.value} value={provider.value}>
+                      {provider.label}
+                    </option>
+                  ))}
+                </select>
                 <input
-                  placeholder="Model ID"
+                  aria-label="Model ID"
+                  list="model-options"
                   value={modelId}
                   onChange={(event) => setModelId(event.target.value)}
                 />
+                <datalist id="model-options">
+                  {(PROVIDERS.find((provider) => provider.value === modelProvider)?.models ?? []).map(
+                    (model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.label}
+                      </option>
+                    )
+                  )}
+                </datalist>
               </div>
 
               <input
                 placeholder="BYOK API key"
                 value={byokApiKey}
                 onChange={(event) => setByokApiKey(event.target.value)}
-              />
-
-              <textarea
-                placeholder="Prompt"
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
               />
 
               {subscription && !subscription.active ? (
