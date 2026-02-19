@@ -9,6 +9,8 @@ export type Env = {
   DEFAULT_MODEL_ID?: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_WEBHOOK_SECRET?: string;
+  RESEND_API_KEY?: string;
+  EMAIL_FROM?: string;
   DB: D1Database;
   ARTIFACTS: R2Bucket;
   RUN_QUEUE: Queue;

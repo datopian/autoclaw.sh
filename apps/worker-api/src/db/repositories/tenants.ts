@@ -59,6 +59,17 @@ export function createTenantRepository(db: D1Database) {
       return row ? toRecord(row) : null;
     },
 
+    async findByEmail(email: string): Promise<TenantRecord | null> {
+      const row = await db
+        .prepare(
+          "SELECT id, name, email, status, model_provider, model_id, byok_api_key, created_at, updated_at FROM tenants WHERE email = ?1 LIMIT 1"
+        )
+        .bind(email.toLowerCase())
+        .first<TenantRow | null>();
+
+      return row ? toRecord(row) : null;
+    },
+
     async create(input: { name: string; email: string }): Promise<TenantRecord> {
       const now = new Date().toISOString();
       const id = crypto.randomUUID();

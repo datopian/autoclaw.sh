@@ -2,26 +2,47 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
-import { createTenant } from "../lib/api/control";
+import { startAccountSignup, verifyAccountSignup } from "../lib/api/control";
 
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [devCodeHint, setDevCodeHint] = useState("");
+  const [isCodeSent, setIsCodeSent] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleStart(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setIsSubmitting(true);
 
     try {
-      const tenant = await createTenant({ name, email });
-      // Redirect to dashboard immediately
-      router.push(`/dashboard?tenantId=${tenant.id}`);
+      const result = await startAccountSignup({ name, email });
+      setIsCodeSent(result.requiresVerification);
+      setDevCodeHint(result.devCode ?? "");
+      setIsSubmitting(false);
     } catch {
       setError("Unable to create account. Please retry.");
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleVerify(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const verified = await verifyAccountSignup({
+        email,
+        code: verificationCode
+      });
+      router.push(`/dashboard?tenantId=${verified.tenantId}`);
+    } catch {
+      setError("Unable to verify email. Please check code and retry.");
       setIsSubmitting(false);
     }
   }
@@ -59,36 +80,61 @@ export default function SignupPage() {
 
         <section className="pageGrid">
           <article className="panel">
-            <h2 className="panelTitle">Step 1: Create your account</h2>
+            <h2 className="panelTitle">
+              {isCodeSent ? "Step 2: Verify your email" : "Step 1: Create your account"}
+            </h2>
             <p className="panelText">
-              Use your work email so we can keep your agent and memory private to your account.
+              {isCodeSent
+                ? "Enter the 6-digit code we sent to your email. Verification is required before setup."
+                : "Use your work email so we can keep your agent and memory private to your account."}
             </p>
-            <form className="stacked" onSubmit={handleSubmit}>
-              <input
-                required
-                placeholder="Your name or company name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-              <input
-                required
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-              <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating Account..." : "Create Account & Continue"}
-              </button>
-            </form>
+            {!isCodeSent ? (
+              <form className="stacked" onSubmit={handleStart}>
+                <input
+                  required
+                  placeholder="Your name or company name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+                <input
+                  required
+                  type="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+                <button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Sending Code..." : "Send Verification Code"}
+                </button>
+              </form>
+            ) : (
+              <form className="stacked" onSubmit={handleVerify}>
+                <input
+                  required
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="6-digit verification code"
+                  value={verificationCode}
+                  onChange={(event) => setVerificationCode(event.target.value)}
+                />
+                <button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Verifying..." : "Verify Email & Continue"}
+                </button>
+              </form>
+            )}
             {error && <p className="error">{error}</p>}
+            {devCodeHint && (
+              <p className="helper">
+                Dev code (email provider not configured): <strong>{devCodeHint}</strong>
+              </p>
+            )}
           </article>
 
           <aside className="panel">
             <h3 className="panelTitle">What happens next</h3>
             <p className="panelText">
-              We will take you to your dashboard with Telegram setup instructions and a quick
-              checklist to start chatting with your agent.
+              After email verification, we will take you to your dashboard with Telegram setup
+              instructions and a quick checklist to start chatting with your agent.
             </p>
             <ul className="plainList">
               <li>48-hour free trial starts immediately.</li>
