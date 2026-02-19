@@ -116,9 +116,6 @@ export default function DashboardPage() {
       if (!tenantId) {
         throw new Error("Account session not found. Go through signup again.");
       }
-      if (!subscription?.active) {
-        throw new Error("Subscription or trial is required to finish setup.");
-      }
       if (!pairingCode.trim()) {
         throw new Error("Pairing code is required.");
       }
@@ -248,18 +245,9 @@ export default function DashboardPage() {
                 onChange={(event) => setByokApiKey(event.target.value)}
               />
 
-              {subscription && !subscription.active ? (
-                <div className="cta-box">
-                  <p>Subscription required after trial period.</p>
-                  <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
-                    Subscribe via Stripe
-                  </a>
-                </div>
-              ) : (
-                <button type="submit" disabled={isCheckingAccess || isSubmitting || !tenantId}>
-                  {isSubmitting ? "Creating..." : "Create Agent"}
-                </button>
-              )}
+              <button type="submit" disabled={isCheckingAccess || isSubmitting || !tenantId}>
+                {isSubmitting ? "Creating..." : "Create Agent"}
+              </button>
             </form>
 
             {subscription?.trialActive && (
