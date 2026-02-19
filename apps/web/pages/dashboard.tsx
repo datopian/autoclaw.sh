@@ -158,10 +158,10 @@ export default function DashboardPage() {
         throw new Error("Account session not found. Login again.");
       }
       if (!pairing?.paired && !pairingCode.trim()) {
-        throw new Error("Pairing code is required.");
+        throw new Error("Please paste your Telegram code.");
       }
       if (!byokApiKey.trim()) {
-        throw new Error("API key is required.");
+        throw new Error("Please add your model API key.");
       }
 
       if (!pairing?.paired && pairingCode.trim()) {
@@ -202,10 +202,10 @@ export default function DashboardPage() {
         throw new Error("Account session not found. Login again.");
       }
       if (!pairing?.paired && !pairingCode.trim()) {
-        throw new Error("Pairing code is required until Telegram is paired.");
+        throw new Error("Please paste your Telegram code to finish pairing.");
       }
       if (!byokApiKey.trim()) {
-        throw new Error("Enter API key to save changes.");
+        throw new Error("Please add your model API key to save changes.");
       }
 
       if ((!pairing?.paired || pairingCode.trim()) && pairingCode.trim()) {
@@ -242,7 +242,7 @@ export default function DashboardPage() {
     }
     if (wizardStep === 2) {
       if (!pairing?.paired && !pairingCode.trim()) {
-        setError("Paste your pairing code from Telegram before continuing.");
+        setError("Paste the code you got in Telegram before continuing.");
         return;
       }
       setWizardStep(3);
@@ -333,16 +333,16 @@ export default function DashboardPage() {
 
               {!showSuccessScreen && (
                 <div className="wizardSteps" aria-label="Onboarding steps">
-                  <span className={wizardStep === 1 ? "active" : ""}>1. Open Telegram Bot</span>
-                  <span className={wizardStep === 2 ? "active" : ""}>2. Pairing Code</span>
-                  <span className={wizardStep === 3 ? "active" : ""}>3. Model + API Key</span>
+                  <span className={wizardStep === 1 ? "active" : ""}>1. Open Telegram</span>
+                  <span className={wizardStep === 2 ? "active" : ""}>2. Paste Code</span>
+                  <span className={wizardStep === 3 ? "active" : ""}>3. Choose AI Model</span>
                 </div>
               )}
 
               {!showSuccessScreen && wizardStep === 1 && (
                 <div className="wizardCard">
                   <p className="panelText">
-                    Open your Telegram bot directly, send <code>/start</code>, and get your pairing code.
+                    Tap the button below, then send <code>/start</code> in Telegram. The bot will reply with a short code.
                   </p>
                   <div className="actions">
                     <a href={telegramBotUrl} target="_blank" rel="noreferrer" className="button">
@@ -357,9 +357,11 @@ export default function DashboardPage() {
 
               {!showSuccessScreen && wizardStep === 2 && (
                 <div className="wizardCard">
-                  <p className="panelText">Paste the pairing code Telegram gave you.</p>
+                  <p className="panelText">
+                    Paste the code from Telegram here. This links your chat account to your agent.
+                  </p>
                   <input
-                    placeholder="Paste pairing code"
+                    placeholder="Example: AB12CD"
                     value={pairingCode}
                     onChange={(event) => setPairingCode(event.target.value)}
                   />
@@ -376,10 +378,12 @@ export default function DashboardPage() {
 
               {!showSuccessScreen && wizardStep === 3 && (
                 <form className="stacked wizardCard" onSubmit={handleCreateAgent}>
-                  <p className="panelText">Choose your model and add your API key.</p>
+                  <p className="panelText">
+                    Pick your AI provider, choose a model, and paste your API key.
+                  </p>
                   <div className="waitlist">
                     <select
-                      aria-label="Model provider"
+                      aria-label="AI provider"
                       value={modelProvider}
                       onChange={(event) => setModelProvider(event.target.value)}
                     >
@@ -389,7 +393,7 @@ export default function DashboardPage() {
                         </option>
                       ))}
                     </select>
-                    <select aria-label="Model ID" value={modelId} onChange={(event) => setModelId(event.target.value)}>
+                    <select aria-label="AI model" value={modelId} onChange={(event) => setModelId(event.target.value)}>
                       {selectedProvider.models.map((model) => (
                         <option key={model.id} value={model.id}>
                           {model.label}
@@ -400,7 +404,7 @@ export default function DashboardPage() {
 
                   <input
                     type="password"
-                    placeholder="LLM API key"
+                    placeholder="Paste your API key"
                     value={byokApiKey}
                     onChange={(event) => setByokApiKey(event.target.value)}
                   />
@@ -462,7 +466,7 @@ export default function DashboardPage() {
                     </button>
                   </div>
                   <p className="panelText">
-                    Update model, pairing, and API key. Save explicitly when done.
+                    Update your Telegram link, model, and API key. Click Save when finished.
                   </p>
 
                   <form className="stacked" onSubmit={handleSaveAgent}>
@@ -471,14 +475,14 @@ export default function DashboardPage() {
                     </div>
 
                     <input
-                      placeholder={pairing?.paired ? "Enter new pairing code to re-pair (optional)" : "Paste pairing code from Telegram"}
+                      placeholder={pairing?.paired ? "Paste a new Telegram code to re-link (optional)" : "Paste Telegram code"}
                       value={pairingCode}
                       onChange={(event) => setPairingCode(event.target.value)}
                     />
 
                     <div className="waitlist">
                       <select
-                        aria-label="Model provider"
+                        aria-label="AI provider"
                         value={modelProvider}
                         onChange={(event) => setModelProvider(event.target.value)}
                       >
@@ -488,7 +492,7 @@ export default function DashboardPage() {
                           </option>
                         ))}
                       </select>
-                      <select aria-label="Model ID" value={modelId} onChange={(event) => setModelId(event.target.value)}>
+                      <select aria-label="AI model" value={modelId} onChange={(event) => setModelId(event.target.value)}>
                         {selectedProvider.models.map((model) => (
                           <option key={model.id} value={model.id}>
                             {model.label}
@@ -499,11 +503,11 @@ export default function DashboardPage() {
 
                     <input
                       type="password"
-                      placeholder="LLM API key"
+                      placeholder="Paste your API key"
                       value={byokApiKey}
                       onChange={(event) => setByokApiKey(event.target.value)}
                     />
-                    <p className="helper">For security, API key is not displayed and must be re-entered to save.</p>
+                    <p className="helper">For security, your key is hidden and must be entered again when saving.</p>
 
                     <div className="actions">
                       <button type="submit" disabled={isCheckingAccess || isSubmitting || !tenantId}>
