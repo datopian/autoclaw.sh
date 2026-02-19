@@ -1,7 +1,10 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useAuthStatus } from "../lib/hooks/use-auth-status";
 
 export default function PricingPage() {
+  const { authenticated } = useAuthStatus();
+
   return (
     <>
       <Head>
@@ -21,9 +24,11 @@ export default function PricingPage() {
             <Link href="/login" className="landingNavLink">
               Login
             </Link>
-            <Link href="/dashboard" className="landingNavLink">
-              Dashboard
-            </Link>
+            {authenticated && (
+              <Link href="/dashboard" className="landingNavLink">
+                Dashboard
+              </Link>
+            )}
           </nav>
         </header>
 

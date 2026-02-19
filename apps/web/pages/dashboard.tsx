@@ -69,6 +69,7 @@ export default function DashboardPage() {
   const [modelId, setModelId] = useState("gpt-5.2");
   const [byokApiKey, setByokApiKey] = useState("");
   const [pairingCode, setPairingCode] = useState("");
+  const [selectedAgentId, setSelectedAgentId] = useState("assistant-ai");
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
@@ -113,7 +114,7 @@ export default function DashboardPage() {
     }
   }, [modelProvider, modelId]);
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
+  async function handleSaveAgent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setResponse("");
@@ -121,19 +122,21 @@ export default function DashboardPage() {
 
     try {
       if (!tenantId) {
-        throw new Error("Account session not found. Go through signup again.");
+        throw new Error("Account session not found. Login again.");
       }
-      if (!pairingCode.trim()) {
-        throw new Error("Pairing code is required.");
+      if (!pairing?.paired && !pairingCode.trim()) {
+        throw new Error("Pairing code is required until Telegram is paired.");
       }
       if (!byokApiKey.trim()) {
         throw new Error("API key is required.");
       }
 
-      await pairTelegram({
-        tenantId,
-        pairingCode: pairingCode.trim().toUpperCase()
-      });
+      if (!pairing?.paired && pairingCode.trim()) {
+        await pairTelegram({
+          tenantId,
+          pairingCode: pairingCode.trim().toUpperCase()
+        });
+      }
       await saveTenantAgentConfig({
         tenantId,
         modelProvider,
@@ -143,7 +146,7 @@ export default function DashboardPage() {
 
       const updatedPairing = await getTelegramPairingStatus(tenantId);
       setPairing(updatedPairing);
-      setResponse("Agent is ready. Open Telegram and start chatting with your bot.");
+      setResponse("Agent settings saved. Open Telegram and start chatting with your bot.");
     } catch (setupError) {
       const message = setupError instanceof Error ? setupError.message : "Setup failed";
       setError(message);
@@ -156,6 +159,17 @@ export default function DashboardPage() {
     await logoutAuth();
     router.replace("/login");
   }
+
+  const selectedProviderLabel =
+    PROVIDERS.find((provider) => provider.value === modelProvider)?.label ?? modelProvider;
+  const agentInstances = [
+    {
+      id: "assistant-ai",
+      name: DEFAULT_TEMPLATE_NAME,
+      status: pairing?.paired ? "Ready" : "Needs setup",
+      summary: `${selectedProviderLabel} · ${modelId}`
+    }
+  ];
 
   return (
     <>
@@ -181,27 +195,56 @@ export default function DashboardPage() {
 
         <section className="heroPanel">
           <span className="pill">Dashboard</span>
-          <h1 className="heroTitle">Start using your agent from Telegram.</h1>
+          <h1 className="heroTitle">Manage your agent instances.</h1>
           <p className="heroSub">
             {userName ? `${userName}, your free trial starts automatically.` : "Your free trial starts automatically."}{" "}
-            Use the onboarding checklist first, then run your first action.
+            Select an agent, edit its settings, and use Telegram as your chat interface.
           </p>
         </section>
 
-        <section className="pageGrid">
+        <section className="dashboardGrid">
           <article className="panel">
-            <h2 className="panelTitle">Step 2: Connect Telegram</h2>
-            <p className="panelText">
-              Your bot is ready: <strong>@{TELEGRAM_BOT_USERNAME}</strong>
+            <h2 className="panelTitle">Agent Instances</h2>
+            <p className="panelText">Choose an agent to configure.</p>
+            <div className="agentList">
+              {agentInstances.map((agent) => (
+                <button
+                  key={agent.id}
+                  type="button"
+                  className={`agentItem ${selectedAgentId === agent.id ? "active" : ""}`}
+                  onClick={() => setSelectedAgentId(agent.id)}
+                >
+                  <strong>{agent.name}</strong>
+                  <span>{agent.summary}</span>
+                  <em>{agent.status}</em>
+                </button>
+              ))}
+            </div>
+            <p className="helper">
+              Telegram bot: <code>@{TELEGRAM_BOT_USERNAME}</code>
             </p>
-            <ol className="plainList">
-              <li>Open Telegram and find <strong>@{TELEGRAM_BOT_USERNAME}</strong>.</li>
-              <li>Send <code>/start</code> so the bot issues a pairing code.</li>
-              <li>Paste the pairing code below.</li>
-              <li>Select model provider and model, add your API key, then click <strong>Create Agent</strong>.</li>
-            </ol>
+            {subscription?.trialActive && (
+              <div className="notice">
+                Free trial active. Time remaining: <strong>{formatTrialTime(subscription.trialRemainingMs)}</strong>
+              </div>
+            )}
+            {subscription && !subscription.trialActive && !subscription.paidActive && (
+              <div className="cta-box">
+                <p>Trial ended. Subscribe to keep using your agent.</p>
+                <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
+                  Continue with Stripe
+                </a>
+              </div>
+            )}
+          </article>
 
-            <form className="stacked" onSubmit={handleCreate}>
+          <article className="panel">
+            <h2 className="panelTitle">Edit Agent: {DEFAULT_TEMPLATE_NAME}</h2>
+            <p className="panelText">
+              Update model and API key. Pair Telegram once using <code>/start</code>.
+            </p>
+
+            <form className="stacked" onSubmit={handleSaveAgent}>
               {!tenantId && (
                 <div className="cta-box">
                   <p>Account session not found. Login so your workspace is linked.</p>
@@ -258,23 +301,9 @@ export default function DashboardPage() {
               />
 
               <button type="submit" disabled={isCheckingAccess || isSubmitting || !tenantId}>
-                {isSubmitting ? "Creating..." : "Create Agent"}
+                {isSubmitting ? "Saving..." : "Save Agent Settings"}
               </button>
             </form>
-
-            {subscription?.trialActive && (
-              <div className="notice">
-                Free trial active. Time remaining: <strong>{formatTrialTime(subscription.trialRemainingMs)}</strong>
-              </div>
-            )}
-            {subscription && !subscription.trialActive && !subscription.paidActive && (
-              <div className="cta-box">
-                <p>Trial ended. Subscribe to keep using your agent.</p>
-                <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
-                  Continue with Stripe
-                </a>
-              </div>
-            )}
           </article>
 
           <aside className="panel">
