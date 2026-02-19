@@ -2,8 +2,21 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
-import { createRun, getSubscription, getTemplates, Template } from "../lib/api/control";
+import {
+  createRun,
+  getSubscription,
+  getTemplates,
+  SubscriptionStatus,
+  Template
+} from "../lib/api/control";
 import { useSubscriptionUrl } from "../lib/hooks/use-payment";
+
+function formatTrialTime(ms: number): string {
+  const safeMs = Math.max(0, ms);
+  const hours = Math.floor(safeMs / (1000 * 60 * 60));
+  const minutes = Math.floor((safeMs % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -16,7 +29,8 @@ export default function DashboardPage() {
   const [byokApiKey, setByokApiKey] = useState("");
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
-  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(false);
 
   const paymentUrl = useSubscriptionUrl(undefined, tenantId);
 
@@ -30,9 +44,11 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!tenantId) return;
 
+    setIsCheckingAccess(true);
     getSubscription(tenantId)
-      .then((sub) => setHasActiveSubscription(sub.active))
-      .catch(() => setHasActiveSubscription(false));
+      .then((sub) => setSubscription(sub))
+      .catch(() => setSubscription(null))
+      .finally(() => setIsCheckingAccess(false));
   }, [tenantId]);
 
   useEffect(() => {
@@ -91,16 +107,43 @@ export default function DashboardPage() {
 
         <section className="heroPanel">
           <span className="pill">Dashboard</span>
-          <h1 className="heroTitle">Launch Your First Agent Run.</h1>
+          <h1 className="heroTitle">Start using your agent from Telegram.</h1>
           <p className="heroSub">
-            This screen sends run requests to your deployed Worker API. Runs require
-            an active Starter subscription mapped to the tenant ID.
+            Your free trial starts automatically. Use the onboarding checklist first, then run
+            your first action.
           </p>
         </section>
 
         <section className="pageGrid">
           <article className="panel">
-            <h2 className="panelTitle">Run Configuration</h2>
+            <h2 className="panelTitle">Step 2: Connect Telegram</h2>
+            <p className="panelText">
+              This is the quickest way to use your OpenClaw agent today.
+            </p>
+            <ol className="plainList">
+              <li>Open Telegram and start a chat with your configured OpenClaw bot.</li>
+              <li>Send: <code>/start</code>.</li>
+              <li>Send a test instruction, for example: <code>summarize today&apos;s tasks</code>.</li>
+              <li>Return here to trigger advanced runs only when needed.</li>
+            </ol>
+            <p className="helper">WhatsApp support is planned next after Telegram-first onboarding.</p>
+            {subscription?.trialActive && (
+              <div className="notice">
+                Free trial active. Time remaining: <strong>{formatTrialTime(subscription.trialRemainingMs)}</strong>
+              </div>
+            )}
+            {subscription && !subscription.trialActive && !subscription.paidActive && (
+              <div className="cta-box">
+                <p>Trial ended. Subscribe to keep using your agent.</p>
+                <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
+                  Continue with Stripe
+                </a>
+              </div>
+            )}
+          </article>
+
+          <article className="panel">
+            <h2 className="panelTitle">Advanced Run Configuration</h2>
             <form className="stacked" onSubmit={handleLaunch}>
               <input
                 required
@@ -142,16 +185,16 @@ export default function DashboardPage() {
                 onChange={(event) => setPrompt(event.target.value)}
               />
 
-              {hasActiveSubscription === false ? (
+              {subscription && !subscription.active ? (
                 <div className="cta-box">
-                  <p>Active subscription required to run agents.</p>
+                  <p>Subscription required after trial period.</p>
                   <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
                     Subscribe via Stripe
                   </a>
                 </div>
               ) : (
-                <button type="submit" disabled={!hasActiveSubscription}>
-                  {hasActiveSubscription === null ? "Checking subscription..." : "Queue Run"}
+                <button type="submit" disabled={isCheckingAccess || !subscription?.active}>
+                  {isCheckingAccess ? "Checking access..." : "Queue Run"}
                 </button>
               )}
             </form>
@@ -163,8 +206,8 @@ export default function DashboardPage() {
             {response && <p className="success">{response}</p>}
             {error && <p className="error">{error}</p>}
             <p className="helper">
-              If you see `active subscription required`, complete Stripe checkout and
-              resend subscription events for this tenant.
+              If trial is over and you see `active subscription required`, complete Stripe checkout
+              and retry.
             </p>
           </aside>
         </section>

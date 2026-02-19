@@ -288,6 +288,20 @@ textarea {
   font-family: "IBM Plex Mono", monospace;
 }
 
+.cta-box {
+  border: 1px solid #f1d6d8;
+  background: #fff5f6;
+  color: #63171f;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.cta-box p {
+  margin: 0;
+}
+
 .helper {
   margin: 6px 0 0;
   font-size: 0.88rem;

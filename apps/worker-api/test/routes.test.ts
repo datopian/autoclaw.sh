@@ -108,9 +108,11 @@ describe("worker routing", () => {
         },
         DB: mockDb({
           firstResultBySql: (sql) =>
-            sql.includes("FROM subscriptions")
-              ? { status: "active", tenant_id: "t_123" }
-              : null
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: "2026-02-19T06:00:00.000Z" }
+              : sql.includes("FROM subscriptions")
+                ? { status: "active", tenant_id: "t_123" }
+                : null
         })
       } as Env
     );
@@ -136,14 +138,43 @@ describe("worker routing", () => {
         },
         DB: mockDb({
           firstResultBySql: (sql) =>
-            sql.includes("FROM subscriptions")
-              ? { status: "past_due", tenant_id: "t_123" }
-              : null
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: "2026-02-15T01:00:00.000Z" }
+              : sql.includes("FROM subscriptions")
+                ? { status: "past_due", tenant_id: "t_123" }
+                : null
         })
       } as Env
     );
 
     expect(res.status).toBe(402);
+  });
+
+  it("allows run request during trial without active subscription", async () => {
+    const req = new Request("https://example.com/api/runs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tenantId: "t_123", templateId: "support-agent" })
+    });
+
+    const res = await invokeFetch(
+      req,
+      {
+        RUN_QUEUE: {
+          send: async () => {}
+        },
+        DB: mockDb({
+          firstResultBySql: (sql) =>
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: new Date().toISOString() }
+              : sql.includes("FROM subscriptions")
+                ? { status: "past_due", tenant_id: "t_123" }
+                : null
+        })
+      } as Env
+    );
+
+    expect(res.status).toBe(202);
   });
 
   it("persists supported Stripe subscription events", async () => {
