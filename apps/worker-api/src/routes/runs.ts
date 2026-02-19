@@ -2,6 +2,7 @@ import type { Env } from "../types";
 import { requireDb } from "../db/client";
 import { createRunRepository } from "../db/repositories/runs";
 import { createSubscriptionRepository } from "../db/repositories/subscriptions";
+import { createTenantRepository } from "../db/repositories/tenants";
 import { json, methodNotAllowed, parseJson } from "../lib/http";
 
 type RunInput = {
@@ -12,6 +13,16 @@ type RunInput = {
   byokApiKey?: string;
   prompt?: string;
 };
+
+const TRIAL_PERIOD_MS = 48 * 60 * 60 * 1000;
+
+function tenantTrialEndsAt(createdAt: string): string {
+  return new Date(new Date(createdAt).getTime() + TRIAL_PERIOD_MS).toISOString();
+}
+
+function isTrialActive(createdAt: string, now: Date): boolean {
+  return new Date(tenantTrialEndsAt(createdAt)).getTime() > now.getTime();
+}
 
 export async function handleRuns(request: Request, env: Env): Promise<Response> {
   if (request.method !== "POST") {
@@ -28,13 +39,26 @@ export async function handleRuns(request: Request, env: Env): Promise<Response> 
 
   const runId = crypto.randomUUID();
   const db = requireDb(env);
+  const tenants = createTenantRepository(db);
   const subscriptions = createSubscriptionRepository(db);
-  const subscription = await subscriptions.findLatestByTenant(body.tenantId);
-  if (!subscription || subscription.status !== "active") {
+  const [tenant, subscription] = await Promise.all([
+    tenants.findById(body.tenantId),
+    subscriptions.findLatestByTenant(body.tenantId)
+  ]);
+
+  if (!tenant) {
+    return json({ error: "tenant not found", code: "tenant_missing" }, 404);
+  }
+
+  const now = new Date();
+  const trialActive = isTrialActive(tenant.createdAt, now);
+  const paidActive = subscription?.status === "active";
+  if (!trialActive && !paidActive) {
     return json(
       {
         error: "active subscription required",
-        code: "subscription_inactive"
+        code: "subscription_inactive",
+        trialEndsAt: tenantTrialEndsAt(tenant.createdAt)
       },
       402
     );

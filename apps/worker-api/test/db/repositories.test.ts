@@ -56,7 +56,14 @@ describe("tenant repository", () => {
 
   it("lists tenants", async () => {
     const db = new MockD1([
-      { id: "t_1", name: "A", email: "a@a.com", status: "active", created_at: "x" }
+      {
+        id: "t_1",
+        name: "A",
+        email: "a@a.com",
+        status: "active",
+        created_at: "x",
+        updated_at: "y"
+      }
     ]) as unknown as D1Database;
     const tenants = createTenantRepository(db);
 

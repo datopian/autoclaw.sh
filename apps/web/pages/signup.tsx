@@ -1,34 +1,15 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import { createTenant } from "../lib/api/control";
 
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [tenantId, setTenantId] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const paymentUrl = useMemo(() => {
-    const base = process.env.NEXT_PUBLIC_STRIPE_STARTER_URL;
-    if (!base) {
-      return "";
-    }
-
-    const url = new URL(base);
-    if (email) {
-      url.searchParams.set("prefilled_email", email);
-    }
-    if (tenantId) {
-      url.searchParams.set("client_reference_id", tenantId);
-      url.searchParams.set("tenant_id", tenantId);
-    }
-
-    return url.toString();
-  }, [email, tenantId]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,7 +21,7 @@ export default function SignupPage() {
       // Redirect to dashboard immediately
       router.push(`/dashboard?tenantId=${tenant.id}`);
     } catch {
-      setError("Unable to create tenant. Please retry.");
+      setError("Unable to create account. Please retry.");
       setIsSubmitting(false);
     }
   }
@@ -69,21 +50,23 @@ export default function SignupPage() {
 
         <section className="heroPanel">
           <span className="pill">Signup</span>
-          <h1 className="heroTitle">Create Tenant, Then Activate Starter.</h1>
+          <h1 className="heroTitle">Create your account and start your first agent.</h1>
           <p className="heroSub">
-            We create your tenant first so Stripe and runtime entitlements can be
-            mapped to one stable tenant ID.
+            No payment required to begin. You get a 48-hour free trial so you can test your
+            agent in Telegram before subscribing.
           </p>
         </section>
 
         <section className="pageGrid">
           <article className="panel">
-            <h2 className="panelTitle">Step 1: Tenant Setup</h2>
-            <p className="panelText">Use a stable project name and billing email.</p>
+            <h2 className="panelTitle">Step 1: Create your account</h2>
+            <p className="panelText">
+              Use your work email so we can keep your agent and memory private to your account.
+            </p>
             <form className="stacked" onSubmit={handleSubmit}>
               <input
                 required
-                placeholder="Project or company name"
+                placeholder="Your name or company name"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
@@ -95,18 +78,23 @@ export default function SignupPage() {
                 onChange={(event) => setEmail(event.target.value)}
               />
               <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating Tenant..." : "Create Tenant & Continue"}
+                {isSubmitting ? "Creating Account..." : "Create Account & Continue"}
               </button>
             </form>
             {error && <p className="error">{error}</p>}
           </article>
 
           <aside className="panel">
-            <h3 className="panelTitle">What happens next?</h3>
+            <h3 className="panelTitle">What happens next</h3>
             <p className="panelText">
-              You will be redirected to the dashboard where you can activate your subscription and
-              start running agents.
+              We will take you to your dashboard with Telegram setup instructions and a quick
+              checklist to start chatting with your agent.
             </p>
+            <ul className="plainList">
+              <li>48-hour free trial starts immediately.</li>
+              <li>Telegram is the primary chat channel right now.</li>
+              <li>You only subscribe once you are ready to continue.</li>
+            </ul>
           </aside>
         </section>
       </main>

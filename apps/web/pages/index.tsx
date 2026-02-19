@@ -1,23 +1,28 @@
 import Head from "next/head";
 import Link from "next/link";
 
-const capabilityRows = [
+const valueRows = [
   {
-    label: "Control Plane",
+    label: "Easy to Start",
     detail:
-      "Tenant setup, template lifecycle, and run routing are managed so you can ship agent behavior, not admin glue.",
+      "Create your account, choose an agent template, and get step-by-step instructions to use your agent from chat.",
   },
   {
-    label: "Execution Fabric",
+    label: "Chat-First Experience",
     detail:
-      "Queued runs, retries, and recovery are built in on a globally distributed infrastructure with BYOK model access.",
+      "Telegram is supported first so you can talk to your agent where you already work. WhatsApp support is next.",
+  },
+  {
+    label: "Private and Isolated",
+    detail:
+      "Your agent runs in a sandboxed cloud environment, not on your laptop. Only your account can access your agent, memory, and history.",
   },
 ];
 
-const operationFlow = [
-  "Select a production-ready OpenClaw template.",
-  "Connect keys and tenant settings.",
-  "Run in managed infrastructure with auditable execution history.",
+const onboardingFlow = [
+  "Create your agent in under two minutes.",
+  "Follow Telegram setup steps from your dashboard.",
+  "Start chatting and get work done right away.",
 ];
 
 export default function HomePage() {
@@ -27,7 +32,7 @@ export default function HomePage() {
         <title>OpenClaw AaaS</title>
         <meta
           name="description"
-          content="Managed OpenClaw service for teams that need reliable execution, tenancy, and billing without building platform infrastructure."
+          content="Launch your own AI agent and use it from Telegram. OpenClaw handles secure infrastructure so you do not expose your personal computer."
         />
       </Head>
 
@@ -52,22 +57,22 @@ export default function HomePage() {
 
         <section className="landingHero">
           <div className="landingHeroCopy">
-            <p className="landingKicker">Managed OpenClaw Runtime</p>
+            <p className="landingKicker">OpenClaw Agent-as-a-Service</p>
             <h1 className="landingTitle">
-              OpenClaw
+              Your own AI agent.
               <br />
-              Agent-as-a-Service. No Mac Mini Required.
+              Run it safely. Chat with it anywhere.
             </h1>
             <p className="landingLead">
-              Deploy production-ready agents without managing infrastructure. Start chatting
-              with your AI assistant in minutes.
+              Set up once, then use your agent from Telegram with clear instructions. Keep your
+              data and workflow isolated from your personal devices.
             </p>
             <div className="actions landingActions">
               <Link href="/signup" className="button landingButton">
                 Create Agent
               </Link>
-              <Link href="/pricing" className="button ghostButton landingGhostButton">
-                See Pricing
+              <Link href="/dashboard" className="button ghostButton landingGhostButton">
+                See Demo Dashboard
               </Link>
             </div>
           </div>
@@ -83,8 +88,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="landingSignals" aria-label="Core capabilities">
-          {capabilityRows.map((item) => (
+        <section className="landingSignals" aria-label="Why OpenClaw">
+          {valueRows.map((item) => (
             <article className="landingSignalRow" key={item.label}>
               <h2>{item.label}</h2>
               <p>{item.detail}</p>
@@ -92,18 +97,17 @@ export default function HomePage() {
           ))}
         </section>
 
-        <section className="landingFlow" aria-label="How it works">
-          <h2>How teams ship with OpenClaw AaaS</h2>
+        <section className="landingFlow" aria-label="How to get started">
+          <h2>How it works</h2>
           <ol>
-            {operationFlow.map((step) => (
+            {onboardingFlow.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
         </section>
 
         <p className="footer landingFooter">
-          Redline focus: launch reliable agent operations first, expand custom logic after
-          real usage data.
+          Includes a 48-hour free trial so you can test before paying.
         </p>
       </main >
     </>
