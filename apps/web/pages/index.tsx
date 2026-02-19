@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useAuthStatus } from "../lib/hooks/use-auth-status";
 
 const valueRows = [
   {
@@ -26,6 +27,8 @@ const onboardingFlow = [
 ];
 
 export default function HomePage() {
+  const { authenticated } = useAuthStatus();
+
   return (
     <>
       <Head>
@@ -49,9 +52,11 @@ export default function HomePage() {
             <Link href="/login" className="landingNavLink">
               Login
             </Link>
-            <Link href="/dashboard" className="landingNavLink">
-              Dashboard
-            </Link>
+            {authenticated && (
+              <Link href="/dashboard" className="landingNavLink">
+                Dashboard
+              </Link>
+            )}
           </nav>
         </header>
 
@@ -70,9 +75,6 @@ export default function HomePage() {
             <div className="actions landingActions">
               <Link href="/login" className="button landingButton">
                 Create Agent
-              </Link>
-              <Link href="/dashboard" className="button ghostButton landingGhostButton">
-                See Demo Dashboard
               </Link>
             </div>
           </div>

@@ -340,6 +340,47 @@ textarea {
   font-size: 0.92rem;
 }
 
+.dashboardGrid {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 0.95fr 1.05fr 0.8fr;
+}
+
+.agentList {
+  display: grid;
+  gap: 10px;
+}
+
+.agentItem {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.agentItem span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.agentItem em {
+  font-style: normal;
+  font-size: 0.82rem;
+  color: #1d4ed8;
+}
+
+.agentItem.active {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.12);
+}
+
 .landingMain {
   max-width: 1230px;
   padding-top: 24px;
@@ -529,6 +570,10 @@ textarea {
   }
 
   .pageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardGrid {
     grid-template-columns: 1fr;
   }
 
