@@ -233,6 +233,12 @@ button:disabled {
   padding: 20px;
 }
 
+.dashboardSinglePanel {
+  margin-top: 16px;
+  display: grid;
+  gap: 14px;
+}
+
 .panelTitle {
   margin: 0 0 6px;
   font-size: 1.2rem;
@@ -379,6 +385,42 @@ textarea {
 .agentItem.active {
   border-color: #1d4ed8;
   box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.12);
+}
+
+.wizardSteps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wizardSteps span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
+.wizardSteps span.active {
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.wizardCard {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: #fff;
+}
+
+.dashboardHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .landingMain {
