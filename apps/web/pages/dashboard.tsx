@@ -204,9 +204,9 @@ export default function DashboardPage() {
             <form className="stacked" onSubmit={handleCreate}>
               {!tenantId && (
                 <div className="cta-box">
-                  <p>Account session not found. Start from signup so your workspace is linked.</p>
-                  <Link href="/signup" className="button">
-                    Go to Signup
+                  <p>Account session not found. Login so your workspace is linked.</p>
+                  <Link href="/login" className="button">
+                    Go to Login
                   </Link>
                 </div>
               )}

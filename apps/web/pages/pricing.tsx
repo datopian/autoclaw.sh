@@ -18,8 +18,8 @@ export default function PricingPage() {
             <Link href="/" className="landingNavLink">
               Home
             </Link>
-            <Link href="/signup" className="landingNavLink">
-              Signup
+            <Link href="/login" className="landingNavLink">
+              Login
             </Link>
             <Link href="/dashboard" className="landingNavLink">
               Dashboard
@@ -47,8 +47,8 @@ export default function PricingPage() {
               <li>BYOK model provider support</li>
             </ul>
             <div className="actions">
-              <Link href="/signup?plan=starter" className="button">
-                Continue to Signup
+              <Link href="/login?plan=starter" className="button">
+                Continue to Login
               </Link>
             </div>
           </article>
