@@ -48,6 +48,13 @@ export type SignupStartResult = {
   devCode?: string;
 };
 
+export type AuthUser = {
+  accountId: string;
+  tenantId: string;
+  email: string;
+  name: string;
+};
+
 export async function createTenant(input: TenantInput): Promise<Tenant> {
   const response = await fetch("/api/control/tenants", {
     method: "POST",
@@ -87,17 +94,78 @@ export async function startAccountSignup(input: TenantInput): Promise<SignupStar
 export async function verifyAccountSignup(input: {
   email: string;
   code: string;
-}): Promise<{ tenantId: string }> {
-  const response = await fetch("/api/control/accounts/verify", {
+}): Promise<{ user: AuthUser }> {
+  const response = await fetch("/api/auth/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...input, mode: "signup" })
+  });
+  const payload = (await response.json()) as { error?: string; user?: AuthUser };
+  if (!response.ok || !payload.user) {
+    throw new Error(payload.error ?? "Failed to verify email");
+  }
+  return { user: payload.user };
+}
+
+export async function startAuth(input: {
+  email: string;
+  name?: string;
+  mode: "signup" | "login";
+}): Promise<SignupStartResult> {
+  const response = await fetch("/api/auth/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input)
   });
-  const payload = (await response.json()) as { error?: string; tenantId?: string };
-  if (!response.ok || !payload.tenantId) {
-    throw new Error(payload.error ?? "Failed to verify email");
+  const payload = (await response.json()) as {
+    error?: string;
+    ok?: boolean;
+    requiresVerification?: boolean;
+    devCode?: string;
+  };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "Failed to start authentication");
   }
-  return { tenantId: payload.tenantId };
+  return {
+    ok: payload.ok ?? false,
+    requiresVerification: payload.requiresVerification ?? true,
+    devCode: payload.devCode
+  };
+}
+
+export async function verifyAuth(input: {
+  email: string;
+  code: string;
+}): Promise<{ user: AuthUser }> {
+  const response = await fetch("/api/auth/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  const payload = (await response.json()) as { error?: string; user?: AuthUser };
+  if (!response.ok || !payload.user) {
+    throw new Error(payload.error ?? "Failed to verify login code");
+  }
+  return { user: payload.user };
+}
+
+export async function getAuthMe(): Promise<{ user: AuthUser }> {
+  const response = await fetch("/api/auth/me");
+  const payload = (await response.json()) as {
+    error?: string;
+    authenticated?: boolean;
+    user?: AuthUser;
+  };
+  if (!response.ok || !payload.authenticated || !payload.user) {
+    throw new Error(payload.error ?? "Not authenticated");
+  }
+  return { user: payload.user };
+}
+
+export async function logoutAuth(): Promise<void> {
+  await fetch("/api/auth/logout", {
+    method: "POST"
+  });
 }
 
 export async function getTemplates(): Promise<Template[]> {

@@ -6,6 +6,12 @@ import { handleRuns } from "./routes/runs";
 import { handleTemplates } from "./routes/templates";
 import { handleTenants } from "./routes/tenants";
 import { handleAccountsStart, handleAccountsVerify } from "./routes/accounts";
+import {
+  handleAuthLogout,
+  handleAuthMe,
+  handleAuthStart,
+  handleAuthVerify
+} from "./routes/auth";
 import { handleStripeWebhook } from "./routes/webhooks/stripe";
 import { handleTelegramWebhook } from "./routes/webhooks/telegram";
 import { handleSubscriptions } from "./routes/subscriptions";
@@ -34,6 +40,22 @@ const worker: ExportedHandler<Env> = {
 
     if (url.pathname === "/api/accounts/verify") {
       return handleAccountsVerify(request, env);
+    }
+
+    if (url.pathname === "/api/auth/start") {
+      return handleAuthStart(request, env);
+    }
+
+    if (url.pathname === "/api/auth/verify") {
+      return handleAuthVerify(request, env);
+    }
+
+    if (url.pathname === "/api/auth/me") {
+      return handleAuthMe(request, env);
+    }
+
+    if (url.pathname === "/api/auth/logout") {
+      return handleAuthLogout(request, env);
     }
 
     if (url.pathname === "/api/templates") {

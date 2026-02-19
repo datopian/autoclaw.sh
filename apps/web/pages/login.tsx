@@ -4,28 +4,27 @@ import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 import { startAuth, verifyAuth } from "../lib/api/control";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
+  const [code, setCode] = useState("");
   const [devCodeHint, setDevCodeHint] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleStart(event: FormEvent<HTMLFormElement>) {
+  async function handleSendCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setIsSubmitting(true);
-
     try {
-      const result = await startAuth({ name, email, mode: "signup" });
+      const result = await startAuth({ email, mode: "login" });
       setIsCodeSent(result.requiresVerification);
       setDevCodeHint(result.devCode ?? "");
       setIsSubmitting(false);
-    } catch {
-      setError("Unable to create account. Please retry.");
+    } catch (sendError) {
+      const message = sendError instanceof Error ? sendError.message : "Unable to send login code";
+      setError(message);
       setIsSubmitting(false);
     }
   }
@@ -34,15 +33,13 @@ export default function SignupPage() {
     event.preventDefault();
     setError("");
     setIsSubmitting(true);
-
     try {
-      await verifyAuth({
-        email,
-        code: verificationCode
-      });
+      await verifyAuth({ email, code });
       router.push("/dashboard");
-    } catch {
-      setError("Unable to verify email. Please check code and retry.");
+    } catch (verifyError) {
+      const message =
+        verifyError instanceof Error ? verifyError.message : "Unable to verify login code";
+      setError(message);
       setIsSubmitting(false);
     }
   }
@@ -50,7 +47,7 @@ export default function SignupPage() {
   return (
     <>
       <Head>
-        <title>Signup | OpenClaw AaaS</title>
+        <title>Login | OpenClaw AaaS</title>
       </Head>
 
       <main>
@@ -60,42 +57,24 @@ export default function SignupPage() {
             OpenClaw AaaS
           </Link>
           <nav className="navLinks">
-            <Link href="/pricing" className="navLink">
-              Pricing
-            </Link>
-            <Link href="/dashboard" className="navLink">
-              Dashboard
+            <Link href="/signup" className="navLink">
+              Signup
             </Link>
           </nav>
         </header>
 
         <section className="heroPanel">
-          <span className="pill">Signup</span>
-          <h1 className="heroTitle">Create your account and start your first agent.</h1>
+          <span className="pill">Login</span>
+          <h1 className="heroTitle">Sign in with one-time code.</h1>
           <p className="heroSub">
-            No payment required to begin. You get a 48-hour free trial so you can test your
-            agent in Telegram before subscribing.
+            We send a short-lived verification code to your email. No password needed.
           </p>
         </section>
 
         <section className="pageGrid">
           <article className="panel">
-            <h2 className="panelTitle">
-              {isCodeSent ? "Step 2: Verify your email" : "Step 1: Create your account"}
-            </h2>
-            <p className="panelText">
-              {isCodeSent
-                ? "Enter the 6-digit code we sent to your email. Verification is required before setup."
-                : "Use your work email so we can keep your agent and memory private to your account."}
-            </p>
             {!isCodeSent ? (
-              <form className="stacked" onSubmit={handleStart}>
-                <input
-                  required
-                  placeholder="Your name or company name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
+              <form className="stacked" onSubmit={handleSendCode}>
                 <input
                   required
                   type="email"
@@ -104,7 +83,7 @@ export default function SignupPage() {
                   onChange={(event) => setEmail(event.target.value)}
                 />
                 <button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Sending Code..." : "Send Verification Code"}
+                  {isSubmitting ? "Sending..." : "Send Login Code"}
                 </button>
               </form>
             ) : (
@@ -113,12 +92,12 @@ export default function SignupPage() {
                   required
                   type="text"
                   inputMode="numeric"
-                  placeholder="6-digit verification code"
-                  value={verificationCode}
-                  onChange={(event) => setVerificationCode(event.target.value)}
+                  placeholder="6-digit code"
+                  value={code}
+                  onChange={(event) => setCode(event.target.value)}
                 />
                 <button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Verifying..." : "Verify Email & Continue"}
+                  {isSubmitting ? "Verifying..." : "Verify & Login"}
                 </button>
               </form>
             )}
@@ -131,16 +110,13 @@ export default function SignupPage() {
           </article>
 
           <aside className="panel">
-            <h3 className="panelTitle">What happens next</h3>
+            <h3 className="panelTitle">New here?</h3>
             <p className="panelText">
-              After email verification, we will take you to your dashboard with Telegram setup
-              instructions and a quick checklist to start chatting with your agent.
+              Create an account first, then come back to login with one-time codes.
             </p>
-            <ul className="plainList">
-              <li>48-hour free trial starts immediately.</li>
-              <li>Telegram is the primary chat channel right now.</li>
-              <li>You only subscribe once you are ready to continue.</li>
-            </ul>
+            <Link href="/signup" className="button">
+              Go to Signup
+            </Link>
           </aside>
         </section>
       </main>
