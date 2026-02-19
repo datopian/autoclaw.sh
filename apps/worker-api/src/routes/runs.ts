@@ -76,11 +76,11 @@ export async function handleRuns(request: Request, env: Env): Promise<Response> 
     runId,
     tenantId: body.tenantId,
     templateId: body.templateId,
-    byok: body.byokApiKey
+    byok: (body.byokApiKey || tenant.byokApiKey)
       ? {
-          provider: body.modelProvider,
-          model: body.modelId,
-          apiKey: body.byokApiKey,
+          provider: body.modelProvider ?? tenant.modelProvider ?? env.DEFAULT_MODEL_PROVIDER,
+          model: body.modelId ?? tenant.modelId ?? env.DEFAULT_MODEL_ID,
+          apiKey: body.byokApiKey ?? tenant.byokApiKey ?? "",
           prompt: body.prompt
         }
       : undefined,

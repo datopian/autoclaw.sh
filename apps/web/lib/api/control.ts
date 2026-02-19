@@ -36,6 +36,12 @@ export type RunInput = {
   prompt?: string;
 };
 
+export type PairingStatus = {
+  paired: boolean;
+  pairedAt: string | null;
+  telegramUserId: string | null;
+};
+
 export async function createTenant(input: TenantInput): Promise<Tenant> {
   const response = await fetch("/api/control/tenants", {
     method: "POST",
@@ -58,6 +64,46 @@ export async function getTemplates(): Promise<Template[]> {
 
   const payload = (await response.json()) as { templates: Template[] };
   return payload.templates;
+}
+
+export async function getTelegramPairingStatus(tenantId: string): Promise<PairingStatus> {
+  const response = await fetch(`/api/control/telegram-pairing?tenantId=${tenantId}`);
+  if (!response.ok) {
+    throw new Error("Failed to load Telegram pairing status");
+  }
+  return response.json() as Promise<PairingStatus>;
+}
+
+export async function pairTelegram(input: {
+  tenantId: string;
+  pairingCode: string;
+}): Promise<void> {
+  const response = await fetch("/api/control/telegram-pairing", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  const payload = (await response.json()) as { error?: string };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "Failed to pair Telegram");
+  }
+}
+
+export async function saveTenantAgentConfig(input: {
+  tenantId: string;
+  modelProvider: string;
+  modelId: string;
+  byokApiKey: string;
+}): Promise<void> {
+  const response = await fetch("/api/control/tenant-agent-config", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  const payload = (await response.json()) as { error?: string };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "Failed to save agent config");
+  }
 }
 
 export async function getSubscription(

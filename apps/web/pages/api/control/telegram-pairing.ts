@@ -1,0 +1,20 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { workerBaseUrl } from "./_worker";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "GET" && req.method !== "POST") {
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const tenantId = req.query.tenantId;
+  const query = typeof tenantId === "string" ? `?tenantId=${encodeURIComponent(tenantId)}` : "";
+  const response = await fetch(`${workerBaseUrl()}/api/telegram/pairing${query}`, {
+    method: req.method,
+    headers: { "content-type": "application/json" },
+    body: req.method === "POST" ? JSON.stringify(req.body) : undefined
+  });
+
+  const payload = await response.text();
+  res.status(response.status).send(payload);
+}

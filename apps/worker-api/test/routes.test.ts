@@ -3,6 +3,8 @@ import worker from "../src/index";
 
 type Env = {
   STRIPE_WEBHOOK_SECRET?: string;
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_WEBHOOK_SECRET?: string;
   DB?: {
     prepare: (sql: string) => {
       bind: (...args: unknown[]) => {
@@ -231,6 +233,66 @@ describe("worker routing", () => {
     );
 
     expect(res.status).toBe(401);
+  });
+
+  it("pairs telegram code to tenant", async () => {
+    const req = new Request("https://example.com/api/telegram/pairing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tenantId: "t_123", pairingCode: "ABC123" })
+    });
+
+    const res = await invokeFetch(
+      req,
+      {
+        DB: mockDb({
+          firstResultBySql: (sql) =>
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: "2026-02-19T06:00:00.000Z" }
+              : sql.includes("FROM telegram_pairings")
+                ? {
+                    id: "p_1",
+                    pairing_code: "ABC123",
+                    status: "pending",
+                    expires_at: "2099-01-01T00:00:00.000Z"
+                  }
+                : null
+        })
+      } as Env
+    );
+
+    expect(res.status).toBe(200);
+    const payload = await json(res);
+    expect(payload.ok).toBe(true);
+  });
+
+  it("stores tenant agent config", async () => {
+    const req = new Request("https://example.com/api/tenants/agent-config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tenantId: "t_123",
+        modelProvider: "google",
+        modelId: "gemini-2.5-pro",
+        byokApiKey: "sk-key"
+      })
+    });
+
+    const res = await invokeFetch(
+      req,
+      {
+        DB: mockDb({
+          firstResultBySql: (sql) =>
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: "2026-02-19T06:00:00.000Z" }
+              : null
+        })
+      } as Env
+    );
+
+    expect(res.status).toBe(200);
+    const payload = await json(res);
+    expect(payload.ok).toBe(true);
   });
 
   it("returns 404 for unknown routes", async () => {

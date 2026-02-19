@@ -3,8 +3,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 import {
-  createRun,
+  getTelegramPairingStatus,
   getSubscription,
+  pairTelegram,
+  saveTenantAgentConfig,
+  PairingStatus,
   SubscriptionStatus,
 } from "../lib/api/control";
 import { useSubscriptionUrl } from "../lib/hooks/use-payment";
@@ -54,18 +57,21 @@ const PROVIDERS: ProviderOption[] = [
 
 const DEFAULT_TEMPLATE_ID = "support-agent";
 const DEFAULT_TEMPLATE_NAME = "Assistant AI";
+const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "openclaw_ai_bot";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [tenantId, setTenantId] = useState("");
-  const templateId = DEFAULT_TEMPLATE_ID;
   const [modelProvider, setModelProvider] = useState("openai");
   const [modelId, setModelId] = useState("gpt-5.2");
   const [byokApiKey, setByokApiKey] = useState("");
+  const [pairingCode, setPairingCode] = useState("");
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [pairing, setPairing] = useState<PairingStatus | null>(null);
   const [isCheckingAccess, setIsCheckingAccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const paymentUrl = useSubscriptionUrl(undefined, tenantId);
 
@@ -80,8 +86,11 @@ export default function DashboardPage() {
     if (!tenantId) return;
 
     setIsCheckingAccess(true);
-    getSubscription(tenantId)
-      .then((sub) => setSubscription(sub))
+    Promise.all([getSubscription(tenantId), getTelegramPairingStatus(tenantId)])
+      .then(([sub, pairingStatus]) => {
+        setSubscription(sub);
+        setPairing(pairingStatus);
+      })
       .catch(() => setSubscription(null))
       .finally(() => setIsCheckingAccess(false));
   }, [tenantId]);
@@ -97,23 +106,45 @@ export default function DashboardPage() {
     }
   }, [modelProvider, modelId]);
 
-  async function handleLaunch(event: FormEvent<HTMLFormElement>) {
+  async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setResponse("");
+    setIsSubmitting(true);
 
     try {
-      const result = await createRun({
+      if (!tenantId) {
+        throw new Error("Account session not found. Go through signup again.");
+      }
+      if (!subscription?.active) {
+        throw new Error("Subscription or trial is required to finish setup.");
+      }
+      if (!pairingCode.trim()) {
+        throw new Error("Pairing code is required.");
+      }
+      if (!byokApiKey.trim()) {
+        throw new Error("API key is required.");
+      }
+
+      await pairTelegram({
         tenantId,
-        templateId,
+        pairingCode: pairingCode.trim().toUpperCase()
+      });
+      await saveTenantAgentConfig({
+        tenantId,
         modelProvider,
         modelId,
         byokApiKey
       });
-      setResponse(`Run queued successfully: ${result.runId}`);
-    } catch (runError) {
-      const message = runError instanceof Error ? runError.message : "Run failed";
+
+      const updatedPairing = await getTelegramPairingStatus(tenantId);
+      setPairing(updatedPairing);
+      setResponse("Agent is ready. Open Telegram and start chatting with your bot.");
+    } catch (setupError) {
+      const message = setupError instanceof Error ? setupError.message : "Setup failed";
       setError(message);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -152,38 +183,16 @@ export default function DashboardPage() {
           <article className="panel">
             <h2 className="panelTitle">Step 2: Connect Telegram</h2>
             <p className="panelText">
-              We set up the bot infrastructure for you. You only pair your Telegram account and
-              start chatting.
+              Your bot is ready: <strong>@{TELEGRAM_BOT_USERNAME}</strong>
             </p>
             <ol className="plainList">
-              <li>After signup, we provision your Telegram bot access for your account.</li>
-              <li>Open that bot in Telegram and send: <code>/start</code>.</li>
-              <li>When asked, enter your one-time pairing code shared by our team.</li>
-              <li>Send a simple test message, for example: <code>summarize my tasks for today</code>.</li>
+              <li>Open Telegram and find <strong>@{TELEGRAM_BOT_USERNAME}</strong>.</li>
+              <li>Send <code>/start</code> so the bot issues a pairing code.</li>
+              <li>Paste the pairing code below.</li>
+              <li>Select model provider and model, add your API key, then click <strong>Create Agent</strong>.</li>
             </ol>
-            <p className="helper">
-              No BotFather setup is needed on your side. Pairing is currently handled manually by
-              our team. If details do not arrive, contact{" "}
-              <a href="mailto:hello@datopian.com">hello@datopian.com</a>.
-            </p>
-            {subscription?.trialActive && (
-              <div className="notice">
-                Free trial active. Time remaining: <strong>{formatTrialTime(subscription.trialRemainingMs)}</strong>
-              </div>
-            )}
-            {subscription && !subscription.trialActive && !subscription.paidActive && (
-              <div className="cta-box">
-                <p>Trial ended. Subscribe to keep using your agent.</p>
-                <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
-                  Continue with Stripe
-                </a>
-              </div>
-            )}
-          </article>
 
-          <article className="panel">
-            <h2 className="panelTitle">Advanced Run Configuration</h2>
-            <form className="stacked" onSubmit={handleLaunch}>
+            <form className="stacked" onSubmit={handleCreate}>
               {!tenantId && (
                 <div className="cta-box">
                   <p>Account session not found. Start from signup so your workspace is linked.</p>
@@ -193,8 +202,15 @@ export default function DashboardPage() {
                 </div>
               )}
 
+              <input
+                placeholder="Paste pairing code from Telegram"
+                value={pairingCode}
+                onChange={(event) => setPairingCode(event.target.value)}
+              />
+
               <div className="notice">
                 Agent template: <strong>{DEFAULT_TEMPLATE_NAME}</strong>
+                <input type="hidden" value={DEFAULT_TEMPLATE_ID} readOnly />
               </div>
 
               <div className="waitlist">
@@ -227,7 +243,7 @@ export default function DashboardPage() {
               </div>
 
               <input
-                placeholder="BYOK API key"
+                placeholder="LLM API key"
                 value={byokApiKey}
                 onChange={(event) => setByokApiKey(event.target.value)}
               />
@@ -240,21 +256,39 @@ export default function DashboardPage() {
                   </a>
                 </div>
               ) : (
-                <button type="submit" disabled={isCheckingAccess || !subscription?.active}>
-                  {isCheckingAccess ? "Checking access..." : "Queue Run"}
+                <button type="submit" disabled={isCheckingAccess || isSubmitting || !tenantId}>
+                  {isSubmitting ? "Creating..." : "Create Agent"}
                 </button>
               )}
             </form>
+
+            {subscription?.trialActive && (
+              <div className="notice">
+                Free trial active. Time remaining: <strong>{formatTrialTime(subscription.trialRemainingMs)}</strong>
+              </div>
+            )}
+            {subscription && !subscription.trialActive && !subscription.paidActive && (
+              <div className="cta-box">
+                <p>Trial ended. Subscribe to keep using your agent.</p>
+                <a href={paymentUrl} target="_blank" rel="noreferrer" className="button">
+                  Continue with Stripe
+                </a>
+              </div>
+            )}
           </article>
 
           <aside className="panel">
-            <h3 className="panelTitle">Run Status</h3>
-            <p className="panelText">Responses from `/api/runs` appear below.</p>
+            <h3 className="panelTitle">Setup Status</h3>
+            <p className="panelText">Agent setup and Telegram pairing status.</p>
+            {pairing?.paired ? (
+              <p className="success">Telegram paired successfully.</p>
+            ) : (
+              <p className="helper">Not paired yet.</p>
+            )}
             {response && <p className="success">{response}</p>}
             {error && <p className="error">{error}</p>}
             <p className="helper">
-              If trial is over and you see `active subscription required`, complete Stripe checkout
-              and retry.
+              Once created, continue in Telegram using <code>@{TELEGRAM_BOT_USERNAME}</code>.
             </p>
           </aside>
         </section>
