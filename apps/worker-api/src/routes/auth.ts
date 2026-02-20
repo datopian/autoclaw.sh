@@ -258,7 +258,20 @@ export async function handleAuthStart(
     .bind(crypto.randomUUID(), account.id, email, code, expiresAt, now)
     .run();
 
-  await sendVerificationEmail({ env, email, code });
+  try {
+    await sendVerificationEmail({ env, email, code });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown error";
+    await logAuditEvent({
+      env,
+      tenantId: account.tenant_id,
+      actorType: "account",
+      actorId: account.id,
+      action: "auth.otp_send_failed",
+      metadata: { email, ip, reason }
+    });
+    return json({ error: "unable to deliver verification code email right now" }, 502);
+  }
   await logAuditEvent({
     env,
     tenantId: account.tenant_id,
