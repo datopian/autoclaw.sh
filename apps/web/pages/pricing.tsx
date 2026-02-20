@@ -21,6 +21,9 @@ export default function PricingPage() {
             <Link href="/" className="landingNavLink">
               Home
             </Link>
+            <Link href="/blog" className="landingNavLink">
+              Blog
+            </Link>
             <Link href="/login" className="landingNavLink">
               Login
             </Link>
