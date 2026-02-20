@@ -85,6 +85,40 @@ export function createMemoryRepository(db: D1Database) {
       return row.last_ingested_seq;
     },
 
+    async getWatermark(tenantId: string): Promise<{
+      tenantId: string;
+      lastIngestedSeq: number;
+      lastDistilledSeq: number;
+      updatedAt: string;
+    }> {
+      await this.ensureWatermark(tenantId);
+      const row = await db
+        .prepare(
+          "SELECT tenant_id, last_ingested_seq, last_distilled_seq, updated_at FROM memory_seq_watermarks WHERE tenant_id = ?1 LIMIT 1"
+        )
+        .bind(tenantId)
+        .first<WatermarkRow | null>();
+      if (!row) {
+        throw new Error("missing memory watermark row");
+      }
+      return {
+        tenantId: row.tenant_id,
+        lastIngestedSeq: row.last_ingested_seq,
+        lastDistilledSeq: row.last_distilled_seq,
+        updatedAt: row.updated_at
+      };
+    },
+
+    async markIngestedSeq(tenantId: string, seq: number): Promise<void> {
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "UPDATE memory_seq_watermarks SET last_ingested_seq = ?1, updated_at = ?2 WHERE tenant_id = ?3 AND last_ingested_seq < ?1"
+        )
+        .bind(seq, now, tenantId)
+        .run();
+    },
+
     async appendEvent(input: {
       tenantId: string;
       sessionId?: string | null;

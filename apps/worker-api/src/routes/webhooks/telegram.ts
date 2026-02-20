@@ -1,8 +1,11 @@
 import { requireDb } from "../../db/client";
+import { createMemoryRepository } from "../../db/repositories/memory";
 import { createTelegramPairingRepository } from "../../db/repositories/telegram-pairings";
 import { createTenantRepository } from "../../db/repositories/tenants";
+import { createWorkspaceRepository } from "../../db/repositories/workspaces";
 import { json, methodNotAllowed, parseJson } from "../../lib/http";
 import { invokeAIGateway } from "../../services/ai-gateway";
+import { buildTenantPrompt } from "../../services/context-pack";
 import { normalizeProvider, requireApiKey } from "../../services/secrets";
 import type { Env } from "../../types";
 
@@ -71,6 +74,12 @@ function extractGatewayText(payload: unknown): string | null {
   return null;
 }
 
+function buildMemoryObjectKey(input: { tenantId: string; eventId: string; at: Date }): string {
+  const yyyy = String(input.at.getUTCFullYear());
+  const mm = String(input.at.getUTCMonth() + 1).padStart(2, "0");
+  return `tenant/${input.tenantId}/memory/raw/${yyyy}/${mm}/${input.eventId}.json`;
+}
+
 export async function handleTelegramWebhook(
   request: Request,
   env: Env
@@ -109,6 +118,8 @@ export async function handleTelegramWebhook(
   const db = requireDb(env);
   const pairings = createTelegramPairingRepository(db);
   const tenants = createTenantRepository(db);
+  const workspaces = createWorkspaceRepository(db);
+  const memory = createMemoryRepository(db);
   const lower = text.toLowerCase();
 
   if (lower === "/start") {
@@ -159,6 +170,22 @@ export async function handleTelegramWebhook(
   }
 
   try {
+    const workspace = await workspaces.ensureForTenant({ tenantId: pairing.tenantId });
+    const promptRecord = await workspaces.getPrompt(workspace.id);
+    let systemPrompt: string | null = null;
+    if (promptRecord?.system_prompt_r2_key) {
+      const object = await env.ARTIFACTS.get(promptRecord.system_prompt_r2_key);
+      if (object) {
+        systemPrompt = await object.text();
+      }
+    }
+    const profiles = await memory.listProfiles(pairing.tenantId, 8);
+    const prompt = buildTenantPrompt({
+      userMessage: text,
+      systemPrompt,
+      profiles
+    });
+
     const gatewayResponse = await invokeAIGateway({
       accountId: env.CF_ACCOUNT_ID,
       gatewayId: env.AI_GATEWAY_ID,
@@ -166,7 +193,7 @@ export async function handleTelegramWebhook(
       provider: normalizeProvider(tenant.modelProvider),
       model: tenant.modelId,
       apiKey: requireApiKey(tenant.byokApiKey),
-      prompt: text
+      prompt
     });
 
     const reply = extractGatewayText(gatewayResponse) ?? "Processed. No text content returned.";
@@ -174,6 +201,79 @@ export async function handleTelegramWebhook(
       botToken: env.TELEGRAM_BOT_TOKEN,
       chatId: String(chatId),
       text: reply
+    });
+
+    const now = new Date();
+    const userEventId = crypto.randomUUID();
+    const userObjectKey = buildMemoryObjectKey({
+      tenantId: pairing.tenantId,
+      eventId: userEventId,
+      at: now
+    });
+    await env.ARTIFACTS.put(
+      userObjectKey,
+      JSON.stringify(
+        {
+          eventId: userEventId,
+          tenantId: pairing.tenantId,
+          telegramUserId: String(userId),
+          telegramChatId: String(chatId),
+          role: "user",
+          text,
+          createdAt: now.toISOString()
+        },
+        null,
+        2
+      ),
+      { httpMetadata: { contentType: "application/json" } }
+    );
+    const userEvent = await memory.appendEvent({
+      tenantId: pairing.tenantId,
+      role: "user",
+      contentR2Key: userObjectKey,
+      redactionVersion: "v1"
+    });
+    await env.MEMORY_INGEST_QUEUE.send({
+      tenantId: pairing.tenantId,
+      eventId: userEvent.id,
+      seq: userEvent.seq,
+      eventTime: userEvent.createdAt
+    });
+
+    const assistantEventId = crypto.randomUUID();
+    const assistantObjectKey = buildMemoryObjectKey({
+      tenantId: pairing.tenantId,
+      eventId: assistantEventId,
+      at: now
+    });
+    await env.ARTIFACTS.put(
+      assistantObjectKey,
+      JSON.stringify(
+        {
+          eventId: assistantEventId,
+          tenantId: pairing.tenantId,
+          telegramUserId: String(userId),
+          telegramChatId: String(chatId),
+          role: "assistant",
+          text: reply,
+          createdAt: now.toISOString()
+        },
+        null,
+        2
+      ),
+      { httpMetadata: { contentType: "application/json" } }
+    );
+    const assistantEvent = await memory.appendEvent({
+      tenantId: pairing.tenantId,
+      role: "assistant",
+      contentR2Key: assistantObjectKey,
+      redactionVersion: "v1"
+    });
+    await env.MEMORY_INGEST_QUEUE.send({
+      tenantId: pairing.tenantId,
+      eventId: assistantEvent.id,
+      seq: assistantEvent.seq,
+      eventTime: assistantEvent.createdAt
     });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "unknown error";
