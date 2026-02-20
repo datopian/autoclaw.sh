@@ -24,6 +24,7 @@ import { handleTelegramWebhook } from "./routes/webhooks/telegram";
 import { handleSubscriptions } from "./routes/subscriptions";
 import { handleTelegramPairing } from "./routes/telegram-pairing";
 import { handleTenantAgentConfig } from "./routes/tenant-agent-config";
+import { handleWorkspaceSkills } from "./routes/workspace-skills";
 import { AgentSession } from "./durable/agent-session";
 import { createRunOrchestrator } from "./services/run-orchestrator";
 import { createEmbeddingClient } from "./services/embeddings";
@@ -127,6 +128,10 @@ const worker: ExportedHandler<Env> = {
 
     if (url.pathname === "/api/tenants/agent-config") {
       return handleTenantAgentConfig(request, env);
+    }
+
+    if (url.pathname === "/api/workspaces/skills") {
+      return handleWorkspaceSkills(request, env);
     }
 
     if (url.pathname === "/api/webhooks/telegram") {
