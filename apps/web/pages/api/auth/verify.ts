@@ -13,11 +13,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     headers: { "content-type": "application/json" },
     body: JSON.stringify(req.body)
   });
-  const payload = (await response.json()) as {
+  const raw = await response.text();
+  let payload: {
     sessionToken?: string;
     user?: unknown;
     error?: string;
-  };
+  } = {};
+  try {
+    payload = JSON.parse(raw) as {
+      sessionToken?: string;
+      user?: unknown;
+      error?: string;
+    };
+  } catch {
+    payload = {
+      error: raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 240)
+    };
+  }
   if (!response.ok || !payload.sessionToken) {
     return res.status(response.status).json(payload);
   }

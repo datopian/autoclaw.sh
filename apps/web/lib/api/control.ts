@@ -75,6 +75,28 @@ export type AuthUser = {
   name: string;
 };
 
+async function readJsonSafe<T>(
+  response: Response
+): Promise<{ data: T | null; raw: string }> {
+  const raw = await response.text();
+  if (!raw.trim()) {
+    return { data: null, raw };
+  }
+  try {
+    return { data: JSON.parse(raw) as T, raw };
+  } catch {
+    return { data: null, raw };
+  }
+}
+
+function extractErrorMessage(raw: string, fallback: string): string {
+  const cleaned = raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return fallback;
+  }
+  return cleaned.slice(0, 240);
+}
+
 export async function createTenant(input: TenantInput): Promise<Tenant> {
   const response = await fetch("/api/control/tenants", {
     method: "POST",
@@ -98,14 +120,17 @@ export async function startAuth(input: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input)
   });
-  const payload = (await response.json()) as {
+  const { data, raw } = await readJsonSafe<{
     error?: string;
     ok?: boolean;
     requiresVerification?: boolean;
     devCode?: string;
-  };
+  }>(response);
+  const payload = data ?? {};
   if (!response.ok) {
-    throw new Error(payload.error ?? "Failed to start authentication");
+    throw new Error(
+      payload.error ?? extractErrorMessage(raw, "Failed to start authentication")
+    );
   }
   return {
     ok: payload.ok ?? false,
@@ -123,22 +148,24 @@ export async function verifyAuth(input: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input)
   });
-  const payload = (await response.json()) as { error?: string; user?: AuthUser };
+  const { data, raw } = await readJsonSafe<{ error?: string; user?: AuthUser }>(response);
+  const payload = data ?? {};
   if (!response.ok || !payload.user) {
-    throw new Error(payload.error ?? "Failed to verify login code");
+    throw new Error(payload.error ?? extractErrorMessage(raw, "Failed to verify login code"));
   }
   return { user: payload.user };
 }
 
 export async function getAuthMe(): Promise<{ user: AuthUser }> {
   const response = await fetch("/api/auth/me");
-  const payload = (await response.json()) as {
+  const { data, raw } = await readJsonSafe<{
     error?: string;
     authenticated?: boolean;
     user?: AuthUser;
-  };
+  }>(response);
+  const payload = data ?? {};
   if (!response.ok || !payload.authenticated || !payload.user) {
-    throw new Error(payload.error ?? "Not authenticated");
+    throw new Error(payload.error ?? extractErrorMessage(raw, "Not authenticated"));
   }
   return { user: payload.user };
 }
