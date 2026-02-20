@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { createTenantRepository } from "../../src/db/repositories/tenants";
 import { createRunRepository } from "../../src/db/repositories/runs";
 import { createSubscriptionRepository } from "../../src/db/repositories/subscriptions";
+import { createWorkspaceRepository } from "../../src/db/repositories/workspaces";
+import { createMemoryRepository } from "../../src/db/repositories/memory";
 
 class MockStmt {
   public bound: unknown[] = [];
@@ -131,5 +133,74 @@ describe("subscription repository", () => {
     expect(db.statements.some((sql: string) => sql.includes("subscriptions"))).toBe(
       true
     );
+  });
+});
+
+describe("workspace repository", () => {
+  it("finds tenant workspace", async () => {
+    const db = new MockD1({
+      id: "ws_1",
+      tenant_id: "t_1",
+      memory_mode: "vector",
+      created_at: "x",
+      updated_at: "y"
+    }) as unknown as D1Database;
+    const workspaces = createWorkspaceRepository(db);
+
+    const found = await workspaces.findByTenant("t_1");
+    expect(found?.id).toBe("ws_1");
+    expect(found?.memoryMode).toBe("vector");
+  });
+
+  it("sets workspace prompt", async () => {
+    const db = new MockD1(null);
+    const workspaces = createWorkspaceRepository(db as unknown as D1Database);
+
+    await workspaces.setPrompt({
+      workspaceId: "ws_1",
+      systemPromptR2Key: "tenant/t_1/prompts/system.md"
+    });
+
+    expect(db.statements.some((sql: string) => sql.includes("agent_prompts"))).toBe(true);
+  });
+});
+
+describe("memory repository", () => {
+  it("appends memory event with sequence", async () => {
+    const db = new MockD1({
+      tenant_id: "t_1",
+      last_ingested_seq: 3,
+      last_distilled_seq: 0,
+      updated_at: "x"
+    });
+    const memory = createMemoryRepository(db as unknown as D1Database);
+
+    const event = await memory.appendEvent({
+      tenantId: "t_1",
+      role: "user",
+      contentR2Key: "tenant/t_1/memory/raw/2026/02/e_1.json"
+    });
+
+    expect(event.seq).toBe(3);
+    expect(db.statements.some((sql: string) => sql.includes("memory_events"))).toBe(true);
+  });
+
+  it("lists memory profiles for tenant", async () => {
+    const db = new MockD1([
+      {
+        id: "p_1",
+        tenant_id: "t_1",
+        fact_key: "timezone",
+        value_json: "\"UTC\"",
+        confidence: 0.9,
+        version: 1,
+        updated_at: "x"
+      }
+    ]);
+    const memory = createMemoryRepository(db as unknown as D1Database);
+
+    const profiles = await memory.listProfiles("t_1", 10);
+    expect(profiles.length).toBe(1);
+    expect(profiles[0].factKey).toBe("timezone");
   });
 });
