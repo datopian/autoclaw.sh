@@ -6,6 +6,12 @@ export type PromptMemorySnippet = {
   createdAt: string;
 };
 
+export type PromptSkillSnippet = {
+  name: string;
+  kind: string;
+  content: string;
+};
+
 function profileValueToText(valueJson: string): string {
   try {
     const parsed = JSON.parse(valueJson) as unknown;
@@ -23,6 +29,7 @@ export function buildTenantPrompt(input: {
   systemPrompt?: string | null;
   profiles?: MemoryProfileRecord[];
   recentMemories?: PromptMemorySnippet[];
+  skills?: PromptSkillSnippet[];
 }): string {
   const sections: string[] = [];
 
@@ -43,6 +50,14 @@ export function buildTenantPrompt(input: {
     .map((item) => `- [${item.role}] ${item.text.trim()}`);
   if (memoryLines.length > 0) {
     sections.push(`Recent Conversation Memory:\n${memoryLines.join("\n")}`);
+  }
+
+  const skillLines = (input.skills ?? [])
+    .filter((skill) => skill.content.trim().length > 0)
+    .slice(0, 5)
+    .map((skill) => `- ${skill.name} (${skill.kind}): ${skill.content.trim()}`);
+  if (skillLines.length > 0) {
+    sections.push(`Enabled Skills:\n${skillLines.join("\n")}`);
   }
 
   sections.push(`User Message:\n${input.userMessage.trim()}`);

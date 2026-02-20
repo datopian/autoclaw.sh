@@ -3,7 +3,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
+  AgentSkill,
+  createSkill,
+  deleteSkill,
   getAuthMe,
+  getSkills,
   getTelegramPairingStatus,
   getSubscription,
   getTenantProfile,
@@ -13,6 +17,7 @@ import {
   saveTenantAgentConfig,
   SubscriptionStatus,
   TenantProfile,
+  updateSkill,
 } from "../lib/api/control";
 import { useSubscriptionUrl } from "../lib/hooks/use-payment";
 
@@ -82,6 +87,9 @@ export default function DashboardPage() {
   const [pairing, setPairing] = useState<PairingStatus | null>(null);
   const [isCheckingAccess, setIsCheckingAccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [skills, setSkills] = useState<AgentSkill[]>([]);
+  const [skillsLoading, setSkillsLoading] = useState(false);
+  const [skillsBusyId, setSkillsBusyId] = useState<string | null>(null);
 
   const paymentUrl = useSubscriptionUrl(undefined, tenantId);
   const telegramBotUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}`;
@@ -146,6 +154,25 @@ export default function DashboardPage() {
     setPairing(pairingStatus);
     setTenantProfile(profile);
   }
+
+  async function loadSkills() {
+    setSkillsLoading(true);
+    try {
+      const list = await getSkills();
+      setSkills(list);
+    } catch {
+      setSkills([]);
+    } finally {
+      setSkillsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!tenantId) {
+      return;
+    }
+    void loadSkills();
+  }, [tenantId]);
 
   async function handleCreateAgent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -266,6 +293,65 @@ export default function DashboardPage() {
   }
 
   const selectedProvider = PROVIDERS.find((provider) => provider.value === modelProvider) ?? PROVIDERS[0];
+
+  async function handleCreateSkill() {
+    setError("");
+    setResponse("");
+    setSkillsBusyId("new");
+    try {
+      const created = await createSkill({
+        name: "Assistant AI",
+        kind: "instruction",
+        content: "Be helpful, concise, and action-oriented.",
+        enabled: true
+      });
+      setSkills((current) => [created, ...current]);
+      setResponse("Skill created.");
+    } catch (skillError) {
+      const message = skillError instanceof Error ? skillError.message : "Failed to create skill";
+      setError(message);
+    } finally {
+      setSkillsBusyId(null);
+    }
+  }
+
+  async function handleSaveSkill(skill: AgentSkill) {
+    setError("");
+    setResponse("");
+    setSkillsBusyId(skill.id);
+    try {
+      const updated = await updateSkill({
+        skillId: skill.id,
+        name: skill.name,
+        kind: skill.kind,
+        content: skill.content,
+        enabled: skill.enabled
+      });
+      setSkills((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      setResponse("Skill saved.");
+    } catch (skillError) {
+      const message = skillError instanceof Error ? skillError.message : "Failed to save skill";
+      setError(message);
+    } finally {
+      setSkillsBusyId(null);
+    }
+  }
+
+  async function handleDeleteSkill(skillId: string) {
+    setError("");
+    setResponse("");
+    setSkillsBusyId(skillId);
+    try {
+      await deleteSkill(skillId);
+      setSkills((current) => current.filter((skill) => skill.id !== skillId));
+      setResponse("Skill deleted.");
+    } catch (skillError) {
+      const message = skillError instanceof Error ? skillError.message : "Failed to delete skill";
+      setError(message);
+    } finally {
+      setSkillsBusyId(null);
+    }
+  }
 
   return (
     <>
@@ -515,6 +601,103 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   </form>
+
+                  <section className="panel" style={{ marginTop: 12 }}>
+                    <div className="dashboardHeaderRow">
+                      <h3 className="panelTitle" style={{ marginBottom: 0 }}>Skills</h3>
+                      <button
+                        type="button"
+                        className="ghostButton"
+                        onClick={handleCreateSkill}
+                        disabled={skillsBusyId === "new"}
+                      >
+                        {skillsBusyId === "new" ? "Adding..." : "Add Skill"}
+                      </button>
+                    </div>
+                    <p className="panelText">
+                      Enabled skills are injected into agent context on each Telegram message.
+                    </p>
+
+                    {skillsLoading && <p className="panelText">Loading skills...</p>}
+                    {!skillsLoading && skills.length === 0 && (
+                      <p className="panelText">No skills yet. Add one to guide your agent behavior.</p>
+                    )}
+
+                    {skills.map((skill) => (
+                      <div className="wizardCard stacked" key={skill.id}>
+                        <div className="waitlist">
+                          <input
+                            placeholder="Skill name"
+                            value={skill.name}
+                            onChange={(event) =>
+                              setSkills((current) =>
+                                current.map((item) =>
+                                  item.id === skill.id ? { ...item, name: event.target.value } : item
+                                )
+                              )
+                            }
+                          />
+                          <input
+                            placeholder="Kind (instruction/tool)"
+                            value={skill.kind}
+                            onChange={(event) =>
+                              setSkills((current) =>
+                                current.map((item) =>
+                                  item.id === skill.id ? { ...item, kind: event.target.value } : item
+                                )
+                              )
+                            }
+                          />
+                        </div>
+
+                        <textarea
+                          rows={5}
+                          placeholder="Skill content"
+                          value={skill.content}
+                          onChange={(event) =>
+                            setSkills((current) =>
+                              current.map((item) =>
+                                item.id === skill.id ? { ...item, content: event.target.value } : item
+                              )
+                            )
+                          }
+                        />
+
+                        <label className="helper" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <input
+                            type="checkbox"
+                            checked={skill.enabled}
+                            onChange={(event) =>
+                              setSkills((current) =>
+                                current.map((item) =>
+                                  item.id === skill.id ? { ...item, enabled: event.target.checked } : item
+                                )
+                              )
+                            }
+                          />
+                          Enabled
+                        </label>
+
+                        <div className="actions">
+                          <button
+                            type="button"
+                            onClick={() => handleSaveSkill(skill)}
+                            disabled={skillsBusyId === skill.id}
+                          >
+                            {skillsBusyId === skill.id ? "Saving..." : "Save Skill"}
+                          </button>
+                          <button
+                            type="button"
+                            className="ghostButton"
+                            onClick={() => handleDeleteSkill(skill.id)}
+                            disabled={skillsBusyId === skill.id}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </section>
                 </>
               )}
             </>

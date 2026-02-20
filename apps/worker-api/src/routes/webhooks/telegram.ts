@@ -6,7 +6,8 @@ import { createWorkspaceRepository } from "../../db/repositories/workspaces";
 import { json, methodNotAllowed, parseJson } from "../../lib/http";
 import {
   buildTenantPrompt,
-  type PromptMemorySnippet
+  type PromptMemorySnippet,
+  type PromptSkillSnippet
 } from "../../services/context-pack";
 import type { Env } from "../../types";
 
@@ -95,6 +96,34 @@ async function loadRecentMemorySnippets(input: {
     }
   }
   return snippets;
+}
+
+function compactSkillContent(value: string): string {
+  return value.replace(/\s+/g, " ").trim().slice(0, 420);
+}
+
+async function loadEnabledSkills(input: {
+  env: Env;
+  skills: Array<{ name: string; kind: string; r2Key: string }>;
+  limit: number;
+}): Promise<PromptSkillSnippet[]> {
+  const loaded: PromptSkillSnippet[] = [];
+  for (const skill of input.skills.slice(0, input.limit)) {
+    const object = await input.env.ARTIFACTS.get(skill.r2Key);
+    if (!object) {
+      continue;
+    }
+    const content = compactSkillContent(await object.text());
+    if (!content) {
+      continue;
+    }
+    loaded.push({
+      name: skill.name,
+      kind: skill.kind,
+      content
+    });
+  }
+  return loaded;
 }
 
 export async function handleTelegramWebhook(
@@ -203,11 +232,22 @@ export async function handleTelegramWebhook(
       events: recentEvents,
       limit: 6
     });
+    const enabledSkills = await workspaces.listEnabledSkills(workspace.id);
+    const skills = await loadEnabledSkills({
+      env,
+      skills: enabledSkills.map((skill) => ({
+        name: skill.name,
+        kind: skill.kind,
+        r2Key: skill.r2Key
+      })),
+      limit: 5
+    });
     const prompt = buildTenantPrompt({
       userMessage: text,
       systemPrompt,
       profiles,
-      recentMemories
+      recentMemories,
+      skills
     });
 
     const sessionId = env.AGENT_SESSION.idFromName(`${pairing.tenantId}:telegram`);

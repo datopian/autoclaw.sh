@@ -33,6 +33,16 @@ type SkillRow = {
   updated_at: string;
 };
 
+export type SkillRecord = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  kind: string;
+  r2Key: string;
+  enabled: boolean;
+  updatedAt: string;
+};
+
 function normalizeMemoryMode(value: string | null | undefined): MemoryMode {
   if (value === "hybrid" || value === "qmd") {
     return value;
@@ -46,6 +56,18 @@ function toWorkspaceRecord(row: WorkspaceRow): WorkspaceRecord {
     tenantId: row.tenant_id,
     memoryMode: normalizeMemoryMode(row.memory_mode),
     createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function toSkillRecord(row: SkillRow): SkillRecord {
+  return {
+    id: row.id,
+    workspaceId: row.workspace_id,
+    name: row.name,
+    kind: row.kind,
+    r2Key: row.r2_key,
+    enabled: row.enabled === 1,
     updatedAt: row.updated_at
   };
 }
@@ -139,7 +161,18 @@ export function createWorkspaceRepository(db: D1Database) {
         .run();
     },
 
-    async listEnabledSkills(workspaceId: string): Promise<SkillRow[]> {
+    async listSkills(workspaceId: string): Promise<SkillRecord[]> {
+      const result = await db
+        .prepare(
+          "SELECT id, workspace_id, name, kind, r2_key, enabled, updated_at FROM agent_skills WHERE workspace_id = ?1 ORDER BY updated_at DESC"
+        )
+        .bind(workspaceId)
+        .all<SkillRow>();
+
+      return result.results.map(toSkillRecord);
+    },
+
+    async listEnabledSkills(workspaceId: string): Promise<SkillRecord[]> {
       const result = await db
         .prepare(
           "SELECT id, workspace_id, name, kind, r2_key, enabled, updated_at FROM agent_skills WHERE workspace_id = ?1 AND enabled = 1 ORDER BY updated_at DESC"
@@ -147,7 +180,84 @@ export function createWorkspaceRepository(db: D1Database) {
         .bind(workspaceId)
         .all<SkillRow>();
 
-      return result.results;
+      return result.results.map(toSkillRecord);
+    },
+
+    async findSkill(workspaceId: string, skillId: string): Promise<SkillRecord | null> {
+      const row = await db
+        .prepare(
+          "SELECT id, workspace_id, name, kind, r2_key, enabled, updated_at FROM agent_skills WHERE workspace_id = ?1 AND id = ?2 LIMIT 1"
+        )
+        .bind(workspaceId, skillId)
+        .first<SkillRow | null>();
+      return row ? toSkillRecord(row) : null;
+    },
+
+    async createSkill(input: {
+      workspaceId: string;
+      name: string;
+      kind: string;
+      r2Key: string;
+      enabled?: boolean;
+      skillId?: string;
+    }): Promise<SkillRecord> {
+      const id = input.skillId ?? crypto.randomUUID();
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "INSERT INTO agent_skills (id, workspace_id, name, kind, r2_key, enabled, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
+        )
+        .bind(
+          id,
+          input.workspaceId,
+          input.name.trim(),
+          input.kind.trim() || "instruction",
+          input.r2Key,
+          input.enabled === false ? 0 : 1,
+          now
+        )
+        .run();
+      return {
+        id,
+        workspaceId: input.workspaceId,
+        name: input.name.trim(),
+        kind: input.kind.trim() || "instruction",
+        r2Key: input.r2Key,
+        enabled: input.enabled !== false,
+        updatedAt: now
+      };
+    },
+
+    async updateSkill(input: {
+      workspaceId: string;
+      skillId: string;
+      name: string;
+      kind: string;
+      r2Key: string;
+      enabled: boolean;
+    }): Promise<void> {
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "UPDATE agent_skills SET name = ?1, kind = ?2, r2_key = ?3, enabled = ?4, updated_at = ?5 WHERE workspace_id = ?6 AND id = ?7"
+        )
+        .bind(
+          input.name.trim(),
+          input.kind.trim() || "instruction",
+          input.r2Key,
+          input.enabled ? 1 : 0,
+          now,
+          input.workspaceId,
+          input.skillId
+        )
+        .run();
+    },
+
+    async deleteSkill(workspaceId: string, skillId: string): Promise<void> {
+      await db
+        .prepare("DELETE FROM agent_skills WHERE workspace_id = ?1 AND id = ?2")
+        .bind(workspaceId, skillId)
+        .run();
     }
   };
 }

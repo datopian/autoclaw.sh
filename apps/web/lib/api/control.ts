@@ -52,6 +52,16 @@ export type TenantProfile = {
   hasApiKey: boolean;
 };
 
+export type AgentSkill = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  kind: string;
+  enabled: boolean;
+  content: string;
+  updatedAt: string;
+};
+
 export type AuthStartResult = {
   ok: boolean;
   requiresVerification: boolean;
@@ -206,6 +216,64 @@ export async function getSubscription(
     throw new Error("Failed to check subscription");
   }
   return response.json() as Promise<SubscriptionStatus>;
+}
+
+export async function getSkills(): Promise<AgentSkill[]> {
+  const response = await fetch("/api/control/skills");
+  const payload = (await response.json()) as { error?: string; skills?: AgentSkill[] };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "Failed to load skills");
+  }
+  return payload.skills ?? [];
+}
+
+export async function createSkill(input: {
+  name: string;
+  kind?: string;
+  content: string;
+  enabled?: boolean;
+}): Promise<AgentSkill> {
+  const response = await fetch("/api/control/skills", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  const payload = (await response.json()) as { error?: string; skill?: AgentSkill };
+  if (!response.ok || !payload.skill) {
+    throw new Error(payload.error ?? "Failed to create skill");
+  }
+  return payload.skill;
+}
+
+export async function updateSkill(input: {
+  skillId: string;
+  name?: string;
+  kind?: string;
+  content?: string;
+  enabled?: boolean;
+}): Promise<AgentSkill> {
+  const response = await fetch("/api/control/skills", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  const payload = (await response.json()) as { error?: string; skill?: AgentSkill };
+  if (!response.ok || !payload.skill) {
+    throw new Error(payload.error ?? "Failed to update skill");
+  }
+  return payload.skill;
+}
+
+export async function deleteSkill(skillId: string): Promise<void> {
+  const response = await fetch("/api/control/skills", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ skillId })
+  });
+  const payload = (await response.json()) as { error?: string };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "Failed to delete skill");
+  }
 }
 
 export async function createRun(input: RunInput): Promise<{ runId: string; status: string }> {
