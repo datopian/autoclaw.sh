@@ -46,7 +46,10 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
           <h1 className="blogPostTitle">{post.title}</h1>
           <p className="blogExcerpt">{post.excerpt}</p>
 
-          <div className="blogBody" dangerouslySetInnerHTML={{ __html: post.html }} />
+          <div
+            className="blogBody prose prose-zinc max-w-none prose-headings:font-semibold prose-a:text-red-700 prose-a:no-underline hover:prose-a:underline"
+            dangerouslySetInnerHTML={{ __html: post.html }}
+          />
 
           <div className="actions">
             <Link href="/blog" className="button ghostButton">
