@@ -26,6 +26,9 @@
 			"remote": true
 		}
 	],
+	"ai": {
+		"binding": "AI"
+	},
 	"queues": {
 		"producers": [
 			{
