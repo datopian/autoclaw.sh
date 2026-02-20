@@ -46,10 +46,14 @@
 				"queue": "openclaw-runs"
 			},
 			{
-				"queue": "openclaw-memory-ingest"
+				"queue": "openclaw-memory-ingest",
+				"max_retries": 10,
+				"dead_letter_queue": "openclaw-memory-ingest-dead"
 			},
 			{
-				"queue": "openclaw-memory-distill"
+				"queue": "openclaw-memory-distill",
+				"max_retries": 10,
+				"dead_letter_queue": "openclaw-memory-distill-dead"
 			}
 		]
 	},

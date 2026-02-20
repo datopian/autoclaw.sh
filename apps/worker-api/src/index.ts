@@ -7,6 +7,7 @@ import {
   type MemoryIngestQueueMessage
 } from "./queues/memory-consumer";
 import { requireDb } from "./db/client";
+import { createMemoryRepository } from "./db/repositories/memory";
 import { createRunRepository } from "./db/repositories/runs";
 import { handleRuns } from "./routes/runs";
 import { handleTemplates } from "./routes/templates";
@@ -147,7 +148,11 @@ const worker: ExportedHandler<Env> = {
     }
 
     if (isMemoryIngestQueueMessage(firstBody)) {
-      await processMemoryIngestBatch(batch as MessageBatch<MemoryIngestQueueMessage>);
+      const memory = createMemoryRepository(requireDb(env));
+      await processMemoryIngestBatch(
+        batch as MessageBatch<MemoryIngestQueueMessage>,
+        memory
+      );
       return;
     }
 

@@ -12,11 +12,38 @@ export type MemoryDistillQueueMessage = {
   seqTo: number;
 };
 
+type MemoryWatermarkStore = {
+  getWatermark: (tenantId: string) => Promise<{
+    tenantId: string;
+    lastIngestedSeq: number;
+    lastDistilledSeq: number;
+    updatedAt: string;
+  }>;
+  markIngestedSeq: (tenantId: string, seq: number) => Promise<void>;
+};
+
 export async function processMemoryIngestBatch(
-  batch: MessageBatch<MemoryIngestQueueMessage>
+  batch: MessageBatch<MemoryIngestQueueMessage>,
+  memory: MemoryWatermarkStore
 ): Promise<void> {
   for (const message of batch.messages) {
-    // Phase 1 kickoff: binding + routing scaffold only.
+    const payload = message.body;
+    const watermark = await memory.getWatermark(payload.tenantId);
+
+    if (payload.seq <= watermark.lastIngestedSeq) {
+      // Duplicate delivery or replay; safe to ignore.
+      message.ack();
+      continue;
+    }
+
+    const expected = watermark.lastIngestedSeq + 1;
+    if (payload.seq !== expected) {
+      // Queue ordering is not guaranteed. Retry until preceding sequence lands.
+      message.retry();
+      continue;
+    }
+
+    await memory.markIngestedSeq(payload.tenantId, payload.seq);
     message.ack();
   }
 }
