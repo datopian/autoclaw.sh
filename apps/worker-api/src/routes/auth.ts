@@ -234,7 +234,10 @@ export async function handleAuthStart(
     const inferredName = requestedName || email.split("@")[0] || "OpenClaw User";
 
     if (!account) {
-      const tenant = await tenants.create({ name: inferredName, email });
+      const existingTenant = await tenants.findByEmail(email);
+      const tenant =
+        existingTenant ??
+        (await tenants.create({ name: inferredName, email }));
       const now = new Date().toISOString();
       const accountId = crypto.randomUUID();
       await db
