@@ -4,9 +4,7 @@ import { createTelegramPairingRepository } from "../../db/repositories/telegram-
 import { createTenantRepository } from "../../db/repositories/tenants";
 import { createWorkspaceRepository } from "../../db/repositories/workspaces";
 import { json, methodNotAllowed, parseJson } from "../../lib/http";
-import { invokeAIGateway } from "../../services/ai-gateway";
 import { buildTenantPrompt } from "../../services/context-pack";
-import { normalizeProvider, requireApiKey } from "../../services/secrets";
 import type { Env } from "../../types";
 
 type TelegramMessage = {
@@ -47,31 +45,6 @@ async function sendTelegramMessage(input: {
     const body = await response.text();
     throw new Error(`telegram send failed: ${response.status} ${body}`);
   }
-}
-
-function extractGatewayText(payload: unknown): string | null {
-  if (!payload || typeof payload !== "object") {
-    return null;
-  }
-  const choices = (payload as { choices?: Array<{ message?: { content?: unknown } }> }).choices;
-  const content = choices?.[0]?.message?.content;
-  if (typeof content === "string") {
-    return content.trim();
-  }
-  if (Array.isArray(content)) {
-    const textParts = content
-      .map((part) => {
-        if (part && typeof part === "object" && "text" in part) {
-          const text = (part as { text?: unknown }).text;
-          return typeof text === "string" ? text : "";
-        }
-        return "";
-      })
-      .filter(Boolean);
-    const joined = textParts.join("\n").trim();
-    return joined || null;
-  }
-  return null;
 }
 
 function buildMemoryObjectKey(input: { tenantId: string; eventId: string; at: Date }): string {
@@ -186,17 +159,26 @@ export async function handleTelegramWebhook(
       profiles
     });
 
-    const gatewayResponse = await invokeAIGateway({
-      accountId: env.CF_ACCOUNT_ID,
-      gatewayId: env.AI_GATEWAY_ID,
-      baseUrl: env.AI_GATEWAY_BASE_URL,
-      provider: normalizeProvider(tenant.modelProvider),
-      model: tenant.modelId,
-      apiKey: requireApiKey(tenant.byokApiKey),
-      prompt
+    const sessionId = env.AGENT_SESSION.idFromName(`${pairing.tenantId}:telegram`);
+    const session = env.AGENT_SESSION.get(sessionId);
+    const sessionResponse = await session.fetch("https://agent-session/v1/telegram/reply", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        tenantId: pairing.tenantId,
+        telegramUserId: String(userId),
+        prompt,
+        modelProvider: tenant.modelProvider,
+        modelId: tenant.modelId,
+        byokApiKey: tenant.byokApiKey
+      })
     });
-
-    const reply = extractGatewayText(gatewayResponse) ?? "Processed. No text content returned.";
+    if (!sessionResponse.ok) {
+      const body = await sessionResponse.text();
+      throw new Error(`agent session failed: ${body || sessionResponse.status}`);
+    }
+    const sessionPayload = (await sessionResponse.json()) as { reply?: string };
+    const reply = (sessionPayload.reply ?? "").trim() || "Processed. No text content returned.";
     await sendTelegramMessage({
       botToken: env.TELEGRAM_BOT_TOKEN,
       chatId: String(chatId),
