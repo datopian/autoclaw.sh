@@ -33,4 +33,4 @@ Our goal is simple: your AI should feel personal, reliable, and always available
 
 If you want an AI that grows with you instead of restarting every chat, OpenClaw Autopilot is for you.
 
-Visit **autopilot.datopian.com** to get started.
+Visit [autopilot.datopian.com](https://autopilot.datopian.com) to get started.
