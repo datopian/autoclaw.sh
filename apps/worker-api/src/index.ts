@@ -26,6 +26,7 @@ import { handleTelegramPairing } from "./routes/telegram-pairing";
 import { handleTenantAgentConfig } from "./routes/tenant-agent-config";
 import { AgentSession } from "./durable/agent-session";
 import { createRunOrchestrator } from "./services/run-orchestrator";
+import { createEmbeddingClient } from "./services/embeddings";
 import type { RunQueueMessage } from "./services/run-orchestrator";
 import type { Env } from "./types";
 
@@ -149,11 +150,14 @@ const worker: ExportedHandler<Env> = {
 
     if (isMemoryIngestQueueMessage(firstBody)) {
       const memory = createMemoryRepository(requireDb(env));
+      const embedding = createEmbeddingClient(env);
       await processMemoryIngestBatch(
         batch as MessageBatch<MemoryIngestQueueMessage>,
         {
           memory,
-          artifacts: env.ARTIFACTS
+          artifacts: env.ARTIFACTS,
+          embeddingModel: embedding.model,
+          embedText: embedding.embed
         }
       );
       return;

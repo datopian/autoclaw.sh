@@ -12,6 +12,9 @@ export type Env = {
   RESEND_API_KEY?: string;
   EMAIL_FROM?: string;
   DB: D1Database;
+  AI?: {
+    run: (model: string, inputs: unknown) => Promise<unknown>;
+  };
   ARTIFACTS: R2Bucket;
   RUN_QUEUE: Queue;
   MEMORY_INGEST_QUEUE: Queue;

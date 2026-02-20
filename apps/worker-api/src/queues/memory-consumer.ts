@@ -1,3 +1,5 @@
+import { buildLocalEmbedding } from "../services/embeddings";
+
 export type MemoryIngestQueueMessage = {
   tenantId: string;
   eventId: string;
@@ -90,32 +92,6 @@ function splitTextIntoChunks(text: string, chunkSize = 600, overlap = 120): stri
   return chunks;
 }
 
-function hashString(value: string): number {
-  let hash = 2166136261;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-function buildLocalEmbedding(text: string, dimensions = 64): number[] {
-  const out = new Array<number>(dimensions).fill(0);
-  const tokens = text.toLowerCase().match(/[a-z0-9]+/g) ?? [];
-  for (const token of tokens) {
-    const h = hashString(token);
-    const index = h % dimensions;
-    const sign = h & 1 ? 1 : -1;
-    out[index] += sign;
-  }
-
-  const norm = Math.sqrt(out.reduce((sum, value) => sum + value * value, 0));
-  if (!norm) {
-    return out;
-  }
-  return out.map((value) => Number((value / norm).toFixed(6)));
-}
-
 function buildChunkObjectKey(input: { tenantId: string; eventId: string; chunkIndex: number; at: Date }): string {
   const yyyy = String(input.at.getUTCFullYear());
   const mm = String(input.at.getUTCMonth() + 1).padStart(2, "0");
@@ -128,9 +104,13 @@ export async function processMemoryIngestBatch(
     memory: MemoryWatermarkStore;
     artifacts: MemoryArtifactsStore;
     embeddingModel?: string;
+    embedText?: (text: string) => Promise<number[]>;
   }
 ): Promise<void> {
   const model = deps.embeddingModel ?? "local-lexical-v1";
+  const embedText =
+    deps.embedText ??
+    (async (text: string) => buildLocalEmbedding(text));
   for (const message of batch.messages) {
     const payload = message.body;
     const { memory } = deps;
@@ -188,7 +168,7 @@ export async function processMemoryIngestBatch(
         chunkIndex: index,
         at: createdAt
       });
-      const embedding = buildLocalEmbedding(text);
+      const embedding = await embedText(text);
       await deps.artifacts.put(
         r2Key,
         JSON.stringify(
