@@ -1,5 +1,11 @@
 import type { MemoryProfileRecord } from "../db/repositories/memory";
 
+export type PromptMemorySnippet = {
+  role: string;
+  text: string;
+  createdAt: string;
+};
+
 function profileValueToText(valueJson: string): string {
   try {
     const parsed = JSON.parse(valueJson) as unknown;
@@ -16,6 +22,7 @@ export function buildTenantPrompt(input: {
   userMessage: string;
   systemPrompt?: string | null;
   profiles?: MemoryProfileRecord[];
+  recentMemories?: PromptMemorySnippet[];
 }): string {
   const sections: string[] = [];
 
@@ -28,6 +35,14 @@ export function buildTenantPrompt(input: {
     .slice(0, 12);
   if (profileLines.length > 0) {
     sections.push(`Known User Preferences:\n${profileLines.join("\n")}`);
+  }
+
+  const memoryLines = (input.recentMemories ?? [])
+    .filter((item) => item.text.trim().length > 0)
+    .slice(0, 10)
+    .map((item) => `- [${item.role}] ${item.text.trim()}`);
+  if (memoryLines.length > 0) {
+    sections.push(`Recent Conversation Memory:\n${memoryLines.join("\n")}`);
   }
 
   sections.push(`User Message:\n${input.userMessage.trim()}`);
