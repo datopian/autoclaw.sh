@@ -270,14 +270,14 @@ export default function DashboardPage() {
   return (
     <>
       <Head>
-        <title>Dashboard | OpenClaw AaaS</title>
+        <title>Dashboard | OpenClaw Autopilot</title>
       </Head>
 
       <main>
         <header className="topbar">
           <Link href="/" className="brand">
             <span className="brandMark" />
-            OpenClaw AaaS
+            OpenClaw Autopilot
           </Link>
           <nav className="navLinks">
             <Link href="/pricing" className="navLink">

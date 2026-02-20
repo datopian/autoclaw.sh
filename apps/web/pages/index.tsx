@@ -4,26 +4,26 @@ import { useAuthStatus } from "../lib/hooks/use-auth-status";
 
 const valueRows = [
   {
-    label: "Easy to Start",
+    label: "Persistent by Design",
     detail:
-      "Create your account, choose an agent template, and get step-by-step instructions to use your agent from chat.",
+      "Your agent does not reset every session. It remembers your context, preferences, and working style over time.",
   },
   {
-    label: "Chat-First Experience",
+    label: "Lives in Your Chat Apps",
     detail:
-      "Telegram is supported first so you can talk to your agent where you already work. WhatsApp support is next.",
+      "Use your AI in messaging apps like Telegram and WhatsApp, so your primary interface is where you already communicate.",
   },
   {
-    label: "Private and Isolated",
+    label: "Always-On Digital Operator",
     detail:
-      "Your agent runs in a sandboxed cloud environment, not on your laptop. Only your account can access your agent, memory, and history.",
+      "Connect tools like email and calendar, run with leading models behind the scenes, and let it monitor and act for you 24/7.",
   },
 ];
 
 const onboardingFlow = [
-  "Create your agent in under two minutes.",
-  "Follow Telegram setup steps from your dashboard.",
-  "Start chatting and get work done right away.",
+  "Create your account and connect your chat app.",
+  "Configure model and tool access (email, calendar, and more).",
+  "Teach it new skills and let it work continuously, even while you sleep.",
 ];
 
 export default function HomePage() {
@@ -32,10 +32,10 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>OpenClaw AaaS</title>
+        <title>OpenClaw Autopilot</title>
         <meta
           name="description"
-          content="Launch your own AI agent and use it from Telegram. OpenClaw handles secure infrastructure so you do not expose your personal computer."
+          content="Build a persistent personal AI that lives in WhatsApp and Telegram, remembers you over time, connects to your tools, and operates for you 24/7."
         />
       </Head>
 
@@ -43,7 +43,7 @@ export default function HomePage() {
         <header className="topbar landingTopbar">
           <Link href="/" className="brand landingBrand">
             <span className="brandMark" />
-            OpenClaw AaaS
+            OpenClaw Autopilot
           </Link>
           <nav className="navLinks landingNavLinks">
             <Link href="/blog" className="landingNavLink">
@@ -65,16 +65,16 @@ export default function HomePage() {
 
         <section className="landingHero">
           <div className="landingHeroCopy">
-            <p className="landingKicker">OpenClaw Agent-as-a-Service</p>
+            <p className="landingKicker">OpenClaw Autopilot</p>
             <h1 className="landingTitle">
-              Your AI.
+              Your personal AI.
               <br />
-              Anywhere.
+              Always on.
             </h1>
             <p className="landingLead">
-              Chat with it on WhatsApp, Telegram, and more.
+              It lives in WhatsApp, Telegram, and other chat apps.
               <br />
-              It remembers. It learns. It's yours.
+              It remembers, learns, and works for you 24/7.
             </p>
             <div className="actions landingActions">
               <Link href="/login" className="button landingButton">
@@ -113,7 +113,7 @@ export default function HomePage() {
         </section>
 
         <p className="footer landingFooter">
-          Includes a 48-hour free trial so you can test before paying.
+          Build an AI that grows with you instead of restarting every chat.
         </p>
       </main >
     </>
