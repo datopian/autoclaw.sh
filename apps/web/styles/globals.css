@@ -606,6 +606,90 @@ textarea {
   font-size: 0.74rem;
 }
 
+.blogList {
+  margin-top: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.blogCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
+
+.blogMeta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.blogTitle {
+  margin: 8px 0 6px;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.blogTitle a:hover {
+  color: #dc2626;
+}
+
+.blogExcerpt {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.blogReadMore {
+  color: #111827;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.blogPost {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+}
+
+.blogPostTitle {
+  margin: 10px 0 8px;
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  letter-spacing: -0.03em;
+}
+
+.blogBody {
+  margin-top: 16px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.blogBody h2,
+.blogBody h3 {
+  margin-top: 26px;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+
+.blogBody p,
+.blogBody ul,
+.blogBody ol {
+  margin: 0 0 12px;
+}
+
+.blogBody code {
+  font-family: "IBM Plex Mono", monospace;
+  background: #eef2f7;
+  border-radius: 6px;
+  padding: 2px 5px;
+}
+
 @media (max-width: 940px) {
   .sectionGrid {
     grid-template-columns: 1fr;

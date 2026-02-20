@@ -46,6 +46,9 @@ export default function HomePage() {
             OpenClaw AaaS
           </Link>
           <nav className="navLinks landingNavLinks">
+            <Link href="/blog" className="landingNavLink">
+              Blog
+            </Link>
             <Link href="/pricing" className="landingNavLink">
               Pricing
             </Link>
@@ -64,13 +67,14 @@ export default function HomePage() {
           <div className="landingHeroCopy">
             <p className="landingKicker">OpenClaw Agent-as-a-Service</p>
             <h1 className="landingTitle">
-              Your own AI agent.
+              Your AI.
               <br />
-              Run it safely. Chat with it anywhere.
+              Anywhere.
             </h1>
             <p className="landingLead">
-              Set up once, then use your agent from Telegram with clear instructions. Keep your
-              data and workflow isolated from your personal devices.
+              Chat with it on WhatsApp, Telegram, and more.
+              <br />
+              It remembers. It learns. It's yours.
             </p>
             <div className="actions landingActions">
               <Link href="/login" className="button landingButton">
