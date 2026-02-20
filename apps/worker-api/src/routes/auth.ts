@@ -194,112 +194,120 @@ export async function handleAuthStart(
     return methodNotAllowed("POST");
   }
 
-  const body = await parseJson<StartAuthInput>(request);
-  if (!body?.email || !validEmail(body.email)) {
-    return json({ error: "valid email is required" }, 400);
-  }
+  try {
+    const body = await parseJson<StartAuthInput>(request);
+    if (!body?.email || !validEmail(body.email)) {
+      return json({ error: "valid email is required" }, 400);
+    }
 
-  const db = requireDb(env);
-  const email = body.email.toLowerCase();
-  const tenants = createTenantRepository(db);
-  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+    const db = requireDb(env);
+    const email = body.email.toLowerCase();
+    const tenants = createTenantRepository(db);
+    const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
 
-  const recentCodeCount = await db
-    .prepare(
-      "SELECT COUNT(*) as count FROM email_verification_codes WHERE email = ?1 AND created_at >= ?2"
-    )
-    .bind(email, new Date(Date.now() - OTP_WINDOW_MS).toISOString())
-    .first<{ count: number } | null>();
+    const recentCodeCount = await db
+      .prepare(
+        "SELECT COUNT(*) as count FROM email_verification_codes WHERE email = ?1 AND created_at >= ?2"
+      )
+      .bind(email, new Date(Date.now() - OTP_WINDOW_MS).toISOString())
+      .first<{ count: number } | null>();
 
-  if ((recentCodeCount?.count ?? 0) >= OTP_LIMIT_PER_WINDOW) {
-    await logAuditEvent({
-      env,
-      actorType: "account",
-      actorId: email,
-      action: "auth.otp_rate_limited",
-      metadata: { email, ip }
-    });
-    return json({ error: "too many code requests, please wait 15 minutes" }, 429);
-  }
+    if ((recentCodeCount?.count ?? 0) >= OTP_LIMIT_PER_WINDOW) {
+      await logAuditEvent({
+        env,
+        actorType: "account",
+        actorId: email,
+        action: "auth.otp_rate_limited",
+        metadata: { email, ip }
+      });
+      return json({ error: "too many code requests, please wait 15 minutes" }, 429);
+    }
 
-  let account = await db
-    .prepare(
-      "SELECT id, tenant_id, name, email, status, email_verified_at FROM accounts WHERE email = ?1 LIMIT 1"
-    )
-    .bind(email)
-    .first<AccountRow | null>();
+    let account = await db
+      .prepare(
+        "SELECT id, tenant_id, name, email, status, email_verified_at FROM accounts WHERE email = ?1 LIMIT 1"
+      )
+      .bind(email)
+      .first<AccountRow | null>();
 
-  const requestedName = body.name?.trim();
-  const inferredName = requestedName || email.split("@")[0] || "OpenClaw User";
+    const requestedName = body.name?.trim();
+    const inferredName = requestedName || email.split("@")[0] || "OpenClaw User";
 
-  if (!account) {
-    const tenant = await tenants.create({ name: inferredName, email });
+    if (!account) {
+      const tenant = await tenants.create({ name: inferredName, email });
+      const now = new Date().toISOString();
+      const accountId = crypto.randomUUID();
+      await db
+        .prepare(
+          "INSERT INTO accounts (id, tenant_id, name, email, status, email_verified_at, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, 'pending_email_verification', NULL, ?5, ?6)"
+        )
+        .bind(accountId, tenant.id, inferredName, email, now, now)
+        .run();
+      account = {
+        id: accountId,
+        tenant_id: tenant.id,
+        name: inferredName,
+        email,
+        status: "pending_email_verification",
+        email_verified_at: null
+      };
+    }
+
+    if (account && requestedName && account.name !== requestedName) {
+      await db
+        .prepare("UPDATE accounts SET name = ?1, updated_at = ?2 WHERE id = ?3")
+        .bind(requestedName, new Date().toISOString(), account.id)
+        .run();
+    }
+
+    const code = generateVerificationCode();
     const now = new Date().toISOString();
-    const accountId = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
     await db
       .prepare(
-        "INSERT INTO accounts (id, tenant_id, name, email, status, email_verified_at, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, 'pending_email_verification', NULL, ?5, ?6)"
+        "INSERT INTO email_verification_codes (id, account_id, email, code, status, expires_at, created_at, used_at) VALUES (?1, ?2, ?3, ?4, 'pending', ?5, ?6, NULL)"
       )
-      .bind(accountId, tenant.id, inferredName, email, now, now)
+      .bind(crypto.randomUUID(), account.id, email, code, expiresAt, now)
       .run();
-    account = {
-      id: accountId,
-      tenant_id: tenant.id,
-      name: inferredName,
-      email,
-      status: "pending_email_verification",
-      email_verified_at: null
-    };
-  }
 
-  if (account && requestedName && account.name !== requestedName) {
-    await db
-      .prepare("UPDATE accounts SET name = ?1, updated_at = ?2 WHERE id = ?3")
-      .bind(requestedName, new Date().toISOString(), account.id)
-      .run();
-  }
-
-  const code = generateVerificationCode();
-  const now = new Date().toISOString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-  await db
-    .prepare(
-      "INSERT INTO email_verification_codes (id, account_id, email, code, status, expires_at, created_at, used_at) VALUES (?1, ?2, ?3, ?4, 'pending', ?5, ?6, NULL)"
-    )
-    .bind(crypto.randomUUID(), account.id, email, code, expiresAt, now)
-    .run();
-
-  try {
-    await sendVerificationEmail({ env, email, code });
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : "unknown error";
+    try {
+      await sendVerificationEmail({ env, email, code });
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "unknown error";
+      await logAuditEvent({
+        env,
+        tenantId: account.tenant_id,
+        actorType: "account",
+        actorId: account.id,
+        action: "auth.otp_send_failed",
+        metadata: { email, ip, reason }
+      });
+      return json({ error: "unable to deliver verification code email right now" }, 502);
+    }
     await logAuditEvent({
       env,
       tenantId: account.tenant_id,
       actorType: "account",
       actorId: account.id,
-      action: "auth.otp_send_failed",
-      metadata: { email, ip, reason }
+      action: "auth.otp_sent",
+      metadata: { email, ip }
     });
-    return json({ error: "unable to deliver verification code email right now" }, 502);
-  }
-  await logAuditEvent({
-    env,
-    tenantId: account.tenant_id,
-    actorType: "account",
-    actorId: account.id,
-    action: "auth.otp_sent",
-    metadata: { email, ip }
-  });
 
-  return json({
-    ok: true,
-    requiresVerification: true,
-    devCode:
-      !env.RESEND_API_KEY || !env.EMAIL_FROM
-        ? code
-        : undefined
-  });
+    return json({
+      ok: true,
+      requiresVerification: true,
+      devCode:
+        !env.RESEND_API_KEY || !env.EMAIL_FROM
+          ? code
+          : undefined
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown error";
+    console.error("auth start failed", {
+      reason
+    });
+    return json({ error: "unable to start authentication" }, 500);
+  }
 }
 
 export async function handleAuthVerify(
