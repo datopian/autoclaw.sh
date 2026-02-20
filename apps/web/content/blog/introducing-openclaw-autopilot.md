@@ -33,4 +33,4 @@ Our goal is simple: your AI should feel personal, reliable, and always available
 
 If you want an AI that grows with you instead of restarting every chat, OpenClaw Autopilot is for you.
 
-Visit **autoclaw.sh** to get started.
+Visit [autoclaw.sh](https://autoclaw.sh) to get started.
