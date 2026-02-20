@@ -19,6 +19,15 @@ export type MemoryProfileRecord = {
   updatedAt: string;
 };
 
+export type MemoryChunkRecord = {
+  id: string;
+  tenantId: string;
+  eventId: string;
+  r2Key: string;
+  tokenCount: number | null;
+  createdAt: string;
+};
+
 type MemoryEventRow = {
   id: string;
   tenant_id: string;
@@ -47,6 +56,15 @@ type MemoryProfileRow = {
   updated_at: string;
 };
 
+type MemoryChunkRow = {
+  id: string;
+  tenant_id: string;
+  event_id: string;
+  r2_key: string;
+  token_count: number | null;
+  created_at: string;
+};
+
 function toProfileRecord(row: MemoryProfileRow): MemoryProfileRecord {
   return {
     id: row.id,
@@ -68,6 +86,17 @@ function toEventRecord(row: MemoryEventRow): MemoryEventRecord {
     contentR2Key: row.content_r2_key,
     seq: row.seq,
     redactionVersion: row.redaction_version,
+    createdAt: row.created_at
+  };
+}
+
+function toChunkRecord(row: MemoryChunkRow): MemoryChunkRecord {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    eventId: row.event_id,
+    r2Key: row.r2_key,
+    tokenCount: row.token_count,
     createdAt: row.created_at
   };
 }
@@ -182,6 +211,79 @@ export function createMemoryRepository(db: D1Database) {
         redactionVersion: input.redactionVersion ?? null,
         createdAt: now
       };
+    },
+
+    async findEventById(
+      tenantId: string,
+      eventId: string
+    ): Promise<MemoryEventRecord | null> {
+      const row = await db
+        .prepare(
+          "SELECT id, tenant_id, session_id, role, content_r2_key, seq, redaction_version, created_at FROM memory_events WHERE tenant_id = ?1 AND id = ?2 LIMIT 1"
+        )
+        .bind(tenantId, eventId)
+        .first<MemoryEventRow | null>();
+
+      return row ? toEventRecord(row) : null;
+    },
+
+    async listChunksByEvent(
+      tenantId: string,
+      eventId: string
+    ): Promise<MemoryChunkRecord[]> {
+      const result = await db
+        .prepare(
+          "SELECT id, tenant_id, event_id, r2_key, token_count, created_at FROM memory_chunks WHERE tenant_id = ?1 AND event_id = ?2 ORDER BY created_at ASC"
+        )
+        .bind(tenantId, eventId)
+        .all<MemoryChunkRow>();
+      return result.results.map(toChunkRecord);
+    },
+
+    async upsertChunk(input: {
+      id: string;
+      tenantId: string;
+      eventId: string;
+      r2Key: string;
+      tokenCount?: number | null;
+    }): Promise<void> {
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "INSERT OR IGNORE INTO memory_chunks (id, tenant_id, event_id, r2_key, token_count, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)"
+        )
+        .bind(
+          input.id,
+          input.tenantId,
+          input.eventId,
+          input.r2Key,
+          input.tokenCount ?? null,
+          now
+        )
+        .run();
+    },
+
+    async upsertVector(input: {
+      chunkId: string;
+      tenantId: string;
+      vectorId: string;
+      embeddingModel: string;
+      status: string;
+    }): Promise<void> {
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "INSERT INTO memory_vectors (chunk_id, tenant_id, vector_id, embedding_model, status, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6) ON CONFLICT(chunk_id) DO UPDATE SET vector_id = excluded.vector_id, embedding_model = excluded.embedding_model, status = excluded.status, updated_at = excluded.updated_at"
+        )
+        .bind(
+          input.chunkId,
+          input.tenantId,
+          input.vectorId,
+          input.embeddingModel,
+          input.status,
+          now
+        )
+        .run();
     },
 
     async upsertProfile(input: {
