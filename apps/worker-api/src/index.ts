@@ -151,7 +151,10 @@ const worker: ExportedHandler<Env> = {
       const memory = createMemoryRepository(requireDb(env));
       await processMemoryIngestBatch(
         batch as MessageBatch<MemoryIngestQueueMessage>,
-        memory
+        {
+          memory,
+          artifacts: env.ARTIFACTS
+        }
       );
       return;
     }
