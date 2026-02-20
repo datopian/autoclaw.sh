@@ -39,11 +39,36 @@ Backend (`apps/worker-api`):
 - `/api/tenants`
 - `/api/templates`
 - `/api/runs`
+- `/api/auth/*`
+- `/api/telegram/*`
 - `/api/webhooks/stripe`
 - `/api/subscriptions`
 - `queue` consumer processes run messages and updates D1 run status.
 - Durable Object `AgentSession` coordinates per-agent execution sessions.
 - Storage/bindings: D1 (`DB`), R2 (`ARTIFACTS`), Queue (`RUN_QUEUE`), Durable Object (`AGENT_SESSION`).
+
+### Cloudflare Mapping
+
+This is how OpenClaw Autopilot components map to Cloudflare infrastructure:
+
+| Product Component | Cloudflare Primitive | Purpose |
+| --- | --- | --- |
+| API layer (`apps/worker-api`) | Workers | Handles auth, tenant config, Telegram pairing, runs, and webhook endpoints |
+| Persistent app data | D1 (`DB`) | Stores tenants, accounts/sessions, pairing state, runs, and subscription state |
+| Async run execution | Queues (`RUN_QUEUE`) | Decouples request/response from run processing and retries |
+| Agent runtime coordination | Durable Objects (`AGENT_SESSION`) | Keeps per-agent execution/session state consistent |
+| Artifacts/output storage | R2 (`ARTIFACTS`) | Stores run artifacts and generated output blobs |
+| Model provider abstraction | AI Gateway | Routes BYOK model calls with provider-agnostic observability |
+| Billing events ingress | Worker webhook (`/api/webhooks/stripe`) | Receives Stripe subscription lifecycle updates |
+| Telegram ingress | Worker webhook (`/api/telegram/webhook`) | Receives chat updates and forwards to tenant-scoped execution |
+
+High-level flow:
+
+1. User uses `apps/web` UI at `autoclaw.sh`.
+2. Next.js API routes proxy requests to Worker API (`WORKER_API_BASE_URL`).
+3. Worker validates auth/session and writes state to D1.
+4. Long-running work is enqueued to `RUN_QUEUE`.
+5. Queue consumer invokes `AgentSession` and model calls (AI Gateway/BYOK), then persists run status/results.
 
 ## Request Flow (Happy Path)
 

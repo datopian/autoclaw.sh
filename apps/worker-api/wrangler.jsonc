@@ -31,11 +31,25 @@
 			{
 				"binding": "RUN_QUEUE",
 				"queue": "openclaw-runs"
+			},
+			{
+				"binding": "MEMORY_INGEST_QUEUE",
+				"queue": "openclaw-memory-ingest"
+			},
+			{
+				"binding": "MEMORY_DISTILL_QUEUE",
+				"queue": "openclaw-memory-distill"
 			}
 		],
 		"consumers": [
 			{
 				"queue": "openclaw-runs"
+			},
+			{
+				"queue": "openclaw-memory-ingest"
+			},
+			{
+				"queue": "openclaw-memory-distill"
 			}
 		]
 	},

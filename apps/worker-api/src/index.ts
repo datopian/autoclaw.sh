@@ -1,5 +1,11 @@
 import { json } from "./lib/http";
 import { processRunBatch } from "./queues/run-consumer";
+import {
+  processMemoryDistillBatch,
+  processMemoryIngestBatch,
+  type MemoryDistillQueueMessage,
+  type MemoryIngestQueueMessage
+} from "./queues/memory-consumer";
 import { requireDb } from "./db/client";
 import { createRunRepository } from "./db/repositories/runs";
 import { handleRuns } from "./routes/runs";
@@ -21,6 +27,44 @@ import { AgentSession } from "./durable/agent-session";
 import { createRunOrchestrator } from "./services/run-orchestrator";
 import type { RunQueueMessage } from "./services/run-orchestrator";
 import type { Env } from "./types";
+
+function isRunQueueMessage(value: unknown): value is RunQueueMessage {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.runId === "string" &&
+    typeof candidate.tenantId === "string" &&
+    typeof candidate.templateId === "string"
+  );
+}
+
+function isMemoryIngestQueueMessage(value: unknown): value is MemoryIngestQueueMessage {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.tenantId === "string" &&
+    typeof candidate.eventId === "string" &&
+    typeof candidate.seq === "number" &&
+    typeof candidate.eventTime === "string"
+  );
+}
+
+function isMemoryDistillQueueMessage(value: unknown): value is MemoryDistillQueueMessage {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.tenantId === "string" &&
+    typeof candidate.scope === "string" &&
+    typeof candidate.seqFrom === "number" &&
+    typeof candidate.seqTo === "number"
+  );
+}
 
 const worker: ExportedHandler<Env> = {
   async fetch(request, env) {
@@ -90,9 +134,32 @@ const worker: ExportedHandler<Env> = {
   },
 
   async queue(batch, env) {
-    const runs = createRunRepository(requireDb(env));
-    const orchestrator = createRunOrchestrator({ env, runs });
-    await processRunBatch(batch as MessageBatch<RunQueueMessage>, orchestrator);
+    if (batch.messages.length === 0) {
+      return;
+    }
+    const firstBody = batch.messages[0].body as unknown;
+
+    if (isRunQueueMessage(firstBody)) {
+      const runs = createRunRepository(requireDb(env));
+      const orchestrator = createRunOrchestrator({ env, runs });
+      await processRunBatch(batch as MessageBatch<RunQueueMessage>, orchestrator);
+      return;
+    }
+
+    if (isMemoryIngestQueueMessage(firstBody)) {
+      await processMemoryIngestBatch(batch as MessageBatch<MemoryIngestQueueMessage>);
+      return;
+    }
+
+    if (isMemoryDistillQueueMessage(firstBody)) {
+      await processMemoryDistillBatch(batch as MessageBatch<MemoryDistillQueueMessage>);
+      return;
+    }
+
+    // Unknown batch payload: ack safely so mixed-queue bootstrapping cannot jam consumers.
+    for (const message of batch.messages) {
+      message.ack();
+    }
   }
 };
 

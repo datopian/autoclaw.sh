@@ -14,5 +14,7 @@ export type Env = {
   DB: D1Database;
   ARTIFACTS: R2Bucket;
   RUN_QUEUE: Queue;
+  MEMORY_INGEST_QUEUE: Queue;
+  MEMORY_DISTILL_QUEUE: Queue;
   AGENT_SESSION: DurableObjectNamespace;
 };
