@@ -110,21 +110,32 @@ async function logAuditEvent(input: {
   action: string;
   metadata?: Record<string, unknown>;
 }): Promise<void> {
-  const db = requireDb(input.env);
-  await db
-    .prepare(
-      "INSERT INTO audit_events (id, tenant_id, actor_type, actor_id, action, metadata_json, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
-    )
-    .bind(
-      crypto.randomUUID(),
-      input.tenantId ?? null,
-      input.actorType,
-      input.actorId ?? null,
-      input.action,
-      JSON.stringify(input.metadata ?? {}),
-      new Date().toISOString()
-    )
-    .run();
+  try {
+    const db = requireDb(input.env);
+    await db
+      .prepare(
+        "INSERT INTO audit_events (id, tenant_id, actor_type, actor_id, action, metadata_json, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
+      )
+      .bind(
+        crypto.randomUUID(),
+        input.tenantId ?? null,
+        input.actorType,
+        input.actorId ?? null,
+        input.action,
+        JSON.stringify(input.metadata ?? {}),
+        new Date().toISOString()
+      )
+      .run();
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown error";
+    console.warn("audit log insert failed", {
+      action: input.action,
+      tenantId: input.tenantId ?? null,
+      actorType: input.actorType,
+      actorId: input.actorId ?? null,
+      reason
+    });
+  }
 }
 
 async function resolveSession(
