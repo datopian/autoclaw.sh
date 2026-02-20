@@ -4,7 +4,10 @@ import { createTelegramPairingRepository } from "../../db/repositories/telegram-
 import { createTenantRepository } from "../../db/repositories/tenants";
 import { createWorkspaceRepository } from "../../db/repositories/workspaces";
 import { json, methodNotAllowed, parseJson } from "../../lib/http";
-import { buildTenantPrompt } from "../../services/context-pack";
+import {
+  buildTenantPrompt,
+  type PromptMemorySnippet
+} from "../../services/context-pack";
 import type { Env } from "../../types";
 
 type TelegramMessage = {
@@ -51,6 +54,47 @@ function buildMemoryObjectKey(input: { tenantId: string; eventId: string; at: Da
   const yyyy = String(input.at.getUTCFullYear());
   const mm = String(input.at.getUTCMonth() + 1).padStart(2, "0");
   return `tenant/${input.tenantId}/memory/raw/${yyyy}/${mm}/${input.eventId}.json`;
+}
+
+function compactMemoryText(value: string): string {
+  return value.replace(/\s+/g, " ").trim().slice(0, 240);
+}
+
+async function loadRecentMemorySnippets(input: {
+  env: Env;
+  events: Array<{ role: string; contentR2Key: string; createdAt: string }>;
+  limit: number;
+}): Promise<PromptMemorySnippet[]> {
+  const snippets: PromptMemorySnippet[] = [];
+  const events = [...input.events].reverse();
+  for (const event of events) {
+    if (snippets.length >= input.limit) {
+      break;
+    }
+    const object = await input.env.ARTIFACTS.get(event.contentR2Key);
+    if (!object) {
+      continue;
+    }
+    const body = await object.text();
+    try {
+      const payload = JSON.parse(body) as { text?: unknown };
+      if (typeof payload.text !== "string") {
+        continue;
+      }
+      const text = compactMemoryText(payload.text);
+      if (!text) {
+        continue;
+      }
+      snippets.push({
+        role: event.role,
+        text,
+        createdAt: event.createdAt
+      });
+    } catch {
+      continue;
+    }
+  }
+  return snippets;
 }
 
 export async function handleTelegramWebhook(
@@ -153,10 +197,17 @@ export async function handleTelegramWebhook(
       }
     }
     const profiles = await memory.listProfiles(pairing.tenantId, 8);
+    const recentEvents = await memory.listRecentEvents(pairing.tenantId, 8);
+    const recentMemories = await loadRecentMemorySnippets({
+      env,
+      events: recentEvents,
+      limit: 6
+    });
     const prompt = buildTenantPrompt({
       userMessage: text,
       systemPrompt,
-      profiles
+      profiles,
+      recentMemories
     });
 
     const sessionId = env.AGENT_SESSION.idFromName(`${pairing.tenantId}:telegram`);

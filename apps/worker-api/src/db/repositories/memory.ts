@@ -19,6 +19,17 @@ export type MemoryProfileRecord = {
   updatedAt: string;
 };
 
+type MemoryEventRow = {
+  id: string;
+  tenant_id: string;
+  session_id: string | null;
+  role: string;
+  content_r2_key: string;
+  seq: number;
+  redaction_version: string | null;
+  created_at: string;
+};
+
 type WatermarkRow = {
   tenant_id: string;
   last_ingested_seq: number;
@@ -45,6 +56,19 @@ function toProfileRecord(row: MemoryProfileRow): MemoryProfileRecord {
     confidence: row.confidence,
     version: row.version,
     updatedAt: row.updated_at
+  };
+}
+
+function toEventRecord(row: MemoryEventRow): MemoryEventRecord {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    sessionId: row.session_id,
+    role: row.role,
+    contentR2Key: row.content_r2_key,
+    seq: row.seq,
+    redactionVersion: row.redaction_version,
+    createdAt: row.created_at
   };
 }
 
@@ -208,6 +232,19 @@ export function createMemoryRepository(db: D1Database) {
         .all<MemoryProfileRow>();
 
       return result.results.map(toProfileRecord);
+    },
+
+    async listRecentEvents(
+      tenantId: string,
+      limit = 8
+    ): Promise<MemoryEventRecord[]> {
+      const result = await db
+        .prepare(
+          "SELECT id, tenant_id, session_id, role, content_r2_key, seq, redaction_version, created_at FROM memory_events WHERE tenant_id = ?1 ORDER BY seq DESC LIMIT ?2"
+        )
+        .bind(tenantId, limit)
+        .all<MemoryEventRow>();
+      return result.results.map(toEventRecord);
     }
   };
 }
