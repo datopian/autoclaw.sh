@@ -8,14 +8,14 @@ export default function PricingPage() {
   return (
     <>
       <Head>
-        <title>Pricing | OpenClaw AaaS</title>
+        <title>Pricing | OpenClaw Autopilot</title>
       </Head>
 
       <main className="landingMain">
         <header className="topbar landingTopbar">
           <Link href="/" className="brand landingBrand">
             <span className="brandMark" />
-            OpenClaw AaaS
+            OpenClaw Autopilot
           </Link>
           <nav className="navLinks landingNavLinks">
             <Link href="/" className="landingNavLink">

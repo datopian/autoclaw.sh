@@ -11,7 +11,7 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
   return (
     <>
       <Head>
-        <title>{post.title} | OpenClaw AaaS</title>
+        <title>{post.title} | OpenClaw Autopilot</title>
         <meta name="description" content={post.excerpt} />
       </Head>
 
@@ -19,7 +19,7 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
         <header className="topbar landingTopbar">
           <Link href="/" className="brand landingBrand">
             <span className="brandMark" />
-            OpenClaw AaaS
+            OpenClaw Autopilot
           </Link>
           <nav className="navLinks landingNavLinks">
             <Link href="/blog" className="landingNavLink">

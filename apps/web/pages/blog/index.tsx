@@ -11,7 +11,7 @@ export default function BlogIndexPage({ posts }: BlogIndexProps) {
   return (
     <>
       <Head>
-        <title>Blog | OpenClaw AaaS</title>
+        <title>Blog | OpenClaw Autopilot</title>
         <meta
           name="description"
           content="OpenClaw product updates, release notes, and guides for running your own AI agent."
@@ -22,7 +22,7 @@ export default function BlogIndexPage({ posts }: BlogIndexProps) {
         <header className="topbar landingTopbar">
           <Link href="/" className="brand landingBrand">
             <span className="brandMark" />
-            OpenClaw AaaS
+            OpenClaw Autopilot
           </Link>
           <nav className="navLinks landingNavLinks">
             <Link href="/" className="landingNavLink">

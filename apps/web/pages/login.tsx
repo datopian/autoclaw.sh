@@ -47,14 +47,14 @@ export default function LoginPage() {
   return (
     <>
       <Head>
-        <title>Login | OpenClaw AaaS</title>
+        <title>Login | OpenClaw Autopilot</title>
       </Head>
 
       <main>
         <header className="topbar">
           <Link href="/" className="brand">
             <span className="brandMark" />
-            OpenClaw AaaS
+            OpenClaw Autopilot
           </Link>
           <nav className="navLinks">
             <Link href="/pricing" className="navLink">
