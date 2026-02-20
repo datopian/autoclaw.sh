@@ -1,5 +1,6 @@
 export type Env = {
   APP_ENV?: string;
+  MEMORY_RETENTION_DAYS?: string;
   STRIPE_WEBHOOK_SECRET?: string;
   STRIPE_STARTER_PRICE_ID?: string;
   CF_ACCOUNT_ID?: string;

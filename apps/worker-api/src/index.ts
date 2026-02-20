@@ -27,6 +27,7 @@ import { handleTenantAgentConfig } from "./routes/tenant-agent-config";
 import { AgentSession } from "./durable/agent-session";
 import { createRunOrchestrator } from "./services/run-orchestrator";
 import { createEmbeddingClient } from "./services/embeddings";
+import { runMemoryMaintenance } from "./services/memory-maintenance";
 import type { RunQueueMessage } from "./services/run-orchestrator";
 import type { Env } from "./types";
 
@@ -172,6 +173,10 @@ const worker: ExportedHandler<Env> = {
     for (const message of batch.messages) {
       message.ack();
     }
+  },
+
+  async scheduled(_controller, env): Promise<void> {
+    await runMemoryMaintenance(env);
   }
 };
 
