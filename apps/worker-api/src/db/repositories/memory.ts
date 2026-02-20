@@ -65,6 +65,10 @@ type MemoryChunkRow = {
   created_at: string;
 };
 
+type TenantIdRow = {
+  tenant_id: string;
+};
+
 function toProfileRecord(row: MemoryProfileRow): MemoryProfileRecord {
   return {
     id: row.id,
@@ -167,6 +171,16 @@ export function createMemoryRepository(db: D1Database) {
       await db
         .prepare(
           "UPDATE memory_seq_watermarks SET last_ingested_seq = ?1, updated_at = ?2 WHERE tenant_id = ?3 AND last_ingested_seq < ?1"
+        )
+        .bind(seq, now, tenantId)
+        .run();
+    },
+
+    async markDistilledSeq(tenantId: string, seq: number): Promise<void> {
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "UPDATE memory_seq_watermarks SET last_distilled_seq = ?1, updated_at = ?2 WHERE tenant_id = ?3 AND last_distilled_seq < ?1"
         )
         .bind(seq, now, tenantId)
         .run();
@@ -286,6 +300,32 @@ export function createMemoryRepository(db: D1Database) {
         .run();
     },
 
+    async createDistillation(input: {
+      tenantId: string;
+      scope: string;
+      r2Key: string;
+      qualityScore?: number | null;
+      seqFrom?: number | null;
+      seqTo?: number | null;
+    }): Promise<void> {
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "INSERT INTO memory_distillations (id, tenant_id, scope, r2_key, quality_score, seq_from, seq_to, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)"
+        )
+        .bind(
+          crypto.randomUUID(),
+          input.tenantId,
+          input.scope,
+          input.r2Key,
+          input.qualityScore ?? null,
+          input.seqFrom ?? null,
+          input.seqTo ?? null,
+          now
+        )
+        .run();
+    },
+
     async upsertProfile(input: {
       tenantId: string;
       factKey: string;
@@ -347,6 +387,106 @@ export function createMemoryRepository(db: D1Database) {
         .bind(tenantId, limit)
         .all<MemoryEventRow>();
       return result.results.map(toEventRecord);
+    },
+
+    async listTenantsForMaintenance(limit = 200): Promise<string[]> {
+      const result = await db
+        .prepare(
+          "SELECT DISTINCT tenant_id FROM memory_seq_watermarks ORDER BY tenant_id ASC LIMIT ?1"
+        )
+        .bind(limit)
+        .all<TenantIdRow>();
+      return result.results.map((row) => row.tenant_id);
+    },
+
+    async listExpiredChunks(
+      cutoffIso: string,
+      limit = 200
+    ): Promise<MemoryChunkRecord[]> {
+      const result = await db
+        .prepare(
+          "SELECT id, tenant_id, event_id, r2_key, token_count, created_at FROM memory_chunks WHERE created_at < ?1 ORDER BY created_at ASC LIMIT ?2"
+        )
+        .bind(cutoffIso, limit)
+        .all<MemoryChunkRow>();
+      return result.results.map(toChunkRecord);
+    },
+
+    async deleteVectorsByChunkIds(chunkIds: string[]): Promise<void> {
+      if (chunkIds.length === 0) {
+        return;
+      }
+      const placeholders = chunkIds.map((_, index) => `?${index + 1}`).join(", ");
+      await db
+        .prepare(`DELETE FROM memory_vectors WHERE chunk_id IN (${placeholders})`)
+        .bind(...chunkIds)
+        .run();
+    },
+
+    async deleteChunksByIds(chunkIds: string[]): Promise<void> {
+      if (chunkIds.length === 0) {
+        return;
+      }
+      const placeholders = chunkIds.map((_, index) => `?${index + 1}`).join(", ");
+      await db
+        .prepare(`DELETE FROM memory_chunks WHERE id IN (${placeholders})`)
+        .bind(...chunkIds)
+        .run();
+    },
+
+    async listExpiredEventsWithoutChunks(
+      cutoffIso: string,
+      limit = 200
+    ): Promise<MemoryEventRecord[]> {
+      const result = await db
+        .prepare(
+          "SELECT e.id, e.tenant_id, e.session_id, e.role, e.content_r2_key, e.seq, e.redaction_version, e.created_at FROM memory_events e LEFT JOIN memory_chunks c ON c.event_id = e.id WHERE e.created_at < ?1 AND c.id IS NULL ORDER BY e.created_at ASC LIMIT ?2"
+        )
+        .bind(cutoffIso, limit)
+        .all<MemoryEventRow>();
+      return result.results.map(toEventRecord);
+    },
+
+    async deleteEventsByIds(eventIds: string[]): Promise<void> {
+      if (eventIds.length === 0) {
+        return;
+      }
+      const placeholders = eventIds.map((_, index) => `?${index + 1}`).join(", ");
+      await db
+        .prepare(`DELETE FROM memory_events WHERE id IN (${placeholders})`)
+        .bind(...eventIds)
+        .run();
+    },
+
+    async countTenantMemoryStats(tenantId: string): Promise<{
+      eventCount: number;
+      chunkCount: number;
+      vectorCount: number;
+      profileCount: number;
+    }> {
+      const eventRow = await db
+        .prepare("SELECT COUNT(*) AS count FROM memory_events WHERE tenant_id = ?1")
+        .bind(tenantId)
+        .first<{ count: number } | null>();
+      const chunkRow = await db
+        .prepare("SELECT COUNT(*) AS count FROM memory_chunks WHERE tenant_id = ?1")
+        .bind(tenantId)
+        .first<{ count: number } | null>();
+      const vectorRow = await db
+        .prepare("SELECT COUNT(*) AS count FROM memory_vectors WHERE tenant_id = ?1")
+        .bind(tenantId)
+        .first<{ count: number } | null>();
+      const profileRow = await db
+        .prepare("SELECT COUNT(*) AS count FROM memory_profiles WHERE tenant_id = ?1")
+        .bind(tenantId)
+        .first<{ count: number } | null>();
+
+      return {
+        eventCount: eventRow?.count ?? 0,
+        chunkCount: chunkRow?.count ?? 0,
+        vectorCount: vectorRow?.count ?? 0,
+        profileCount: profileRow?.count ?? 0
+      };
     }
   };
 }

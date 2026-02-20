@@ -6,10 +6,16 @@
 	"compatibility_date": "2026-02-08",
 	"vars": {
 		"APP_ENV": "dev",
+		"MEMORY_RETENTION_DAYS": "90",
 		"CF_ACCOUNT_ID": "YOUR_CLOUDFLARE_ACCOUNT_ID",
 		"AI_GATEWAY_ID": "openclaw-gateway-prod",
 		"DEFAULT_MODEL_PROVIDER": "openai",
 		"DEFAULT_MODEL_ID": "gpt-4o-mini"
+	},
+	"triggers": {
+		"crons": [
+			"0 * * * *"
+		]
 	},
 	"d1_databases": [
 		{
