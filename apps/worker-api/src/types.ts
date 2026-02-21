@@ -13,6 +13,9 @@ export type Env = {
   DEFAULT_MODEL_ID?: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_WEBHOOK_SECRET?: string;
+  TELEGRAM_RUNTIME_MODE?: string;
+  TELEGRAM_RUNTIME_ALLOWLIST?: string;
+  TELEGRAM_RUNTIME_FALLBACK_DIRECT?: string;
   RESEND_API_KEY?: string;
   EMAIL_FROM?: string;
   RUNTIME_BACKFILL_TOKEN?: string;
