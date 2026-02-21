@@ -19,8 +19,13 @@ export async function handleTenants(
 ): Promise<Response> {
   const tenants = createTenantRepository(requireDb(env));
 
+  if (request.method === "GET") {
+    const list = await tenants.list();
+    return json({ tenants: list });
+  }
+
   if (request.method !== "POST") {
-    return methodNotAllowed("POST");
+    return methodNotAllowed("GET, POST");
   }
 
   const body = await parseJson<CreateTenantInput>(request);
