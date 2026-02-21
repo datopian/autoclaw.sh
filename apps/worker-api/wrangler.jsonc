@@ -15,9 +15,9 @@
 		"AI_GATEWAY_ID": "openclaw-gateway-prod",
 		"DEFAULT_MODEL_PROVIDER": "openai",
 		"DEFAULT_MODEL_ID": "gpt-4o-mini",
-		"TELEGRAM_RUNTIME_MODE": "direct",
+		"TELEGRAM_RUNTIME_MODE": "openclaw_runtime",
 		"TELEGRAM_RUNTIME_ALLOWLIST": "",
-		"TELEGRAM_RUNTIME_FALLBACK_DIRECT": "1"
+		"TELEGRAM_RUNTIME_FALLBACK_DIRECT": "0"
 	},
 	"triggers": {
 		"crons": [
