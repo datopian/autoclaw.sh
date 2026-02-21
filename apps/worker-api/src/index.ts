@@ -26,6 +26,7 @@ import { handleTelegramPairing } from "./routes/telegram-pairing";
 import { handleTenantAgentConfig } from "./routes/tenant-agent-config";
 import { handleWorkspaceSkills } from "./routes/workspace-skills";
 import { AgentSession } from "./durable/agent-session";
+import { TenantSandbox } from "./durable/tenant-sandbox";
 import { createRunOrchestrator } from "./services/run-orchestrator";
 import { createEmbeddingClient } from "./services/embeddings";
 import { runMemoryMaintenance } from "./services/memory-maintenance";
@@ -186,4 +187,5 @@ const worker: ExportedHandler<Env> = {
 };
 
 export { AgentSession };
+export { TenantSandbox };
 export default worker;

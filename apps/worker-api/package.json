@@ -16,6 +16,7 @@
     "wrangler": "^4.63.0"
   },
   "dependencies": {
+    "@cloudflare/sandbox": "*",
     "next": "14.2.35"
   }
 }
