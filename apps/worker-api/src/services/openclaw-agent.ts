@@ -122,11 +122,15 @@ export async function runTenantOpenClawAgentTurn(input: {
   ) as SandboxLike;
 
   const sessionId = `telegram:${input.telegramUserId}`;
-  const command =
-    'openclaw agent --local --session-id "$OPENCLAW_SESSION_ID" --message "$OPENCLAW_USER_MESSAGE" --json';
+  const modelId = tenant.modelId?.trim();
+  if (!modelId) {
+    throw new Error("tenant model id is not configured");
+  }
+  const modelRef = `${tenant.modelProvider}/${modelId}`;
   const env: Record<string, string | undefined> = {
     OPENCLAW_SESSION_ID: sessionId,
-    OPENCLAW_USER_MESSAGE: input.message
+    OPENCLAW_USER_MESSAGE: input.message,
+    OPENCLAW_MODEL_REF: modelRef
   };
   if (tenant.modelProvider === "openai") {
     env.OPENAI_API_KEY = tenant.byokApiKey;
@@ -136,11 +140,26 @@ export async function runTenantOpenClawAgentTurn(input: {
     env.GEMINI_API_KEY = tenant.byokApiKey;
   }
 
-  const result = await sandbox.exec(command, {
+  const setModelResult = await sandbox.exec('openclaw models set "$OPENCLAW_MODEL_REF"', {
     cwd: "/root/clawd",
-    timeout: 90_000,
+    timeout: 30_000,
     env
   });
+
+  if (!setModelResult.success) {
+    throw new Error(
+      `openclaw models set failed (exit ${setModelResult.exitCode}): ${setModelResult.stderr.trim() || setModelResult.stdout.trim() || "unknown error"}`
+    );
+  }
+
+  const result = await sandbox.exec(
+    'openclaw agent --local --session-id "$OPENCLAW_SESSION_ID" --message "$OPENCLAW_USER_MESSAGE" --json',
+    {
+      cwd: "/root/clawd",
+      timeout: 90_000,
+      env
+    }
+  );
 
   if (!result.success) {
     throw new Error(
