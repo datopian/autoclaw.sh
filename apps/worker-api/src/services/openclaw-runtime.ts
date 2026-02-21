@@ -209,6 +209,9 @@ export async function ensureTenantOpenClawRuntime(
     if (tenant.modelProvider === "anthropic" && tenant.byokApiKey) {
       processEnv.ANTHROPIC_API_KEY = tenant.byokApiKey;
     }
+    if (tenant.modelProvider === "google" && tenant.byokApiKey) {
+      processEnv.GEMINI_API_KEY = tenant.byokApiKey;
+    }
 
     const process = await sandbox.startProcess(GATEWAY_COMMAND, {
       env: processEnv
