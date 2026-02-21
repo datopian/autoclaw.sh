@@ -1,0 +1,145 @@
+import { requireDb } from "../db/client";
+import { createTenantOpenClawRuntimeRepository } from "../db/repositories/openclaw-runtime";
+import type { Env } from "../types";
+
+type SandboxLike = {
+  exec: (
+    command: string,
+    options?: { env?: Record<string, string | undefined>; cwd?: string; timeout?: number }
+  ) => Promise<{
+    success: boolean;
+    exitCode: number;
+    stdout: string;
+    stderr: string;
+  }>;
+};
+
+function parseSleepAfter(value: string): { keepAlive?: boolean; sleepAfter?: string } {
+  if (value === "never") {
+    return { keepAlive: true };
+  }
+  return { sleepAfter: value };
+}
+
+function extractAssistantText(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  const candidate = payload as Record<string, unknown>;
+  const directKeys = ["reply", "output_text", "message", "text"];
+  for (const key of directKeys) {
+    const value = candidate[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  const output = candidate.output;
+  if (Array.isArray(output)) {
+    for (const item of output) {
+      if (!item || typeof item !== "object") {
+        continue;
+      }
+      const content = (item as { content?: unknown }).content;
+      if (!Array.isArray(content)) {
+        continue;
+      }
+      for (const part of content) {
+        if (!part || typeof part !== "object") {
+          continue;
+        }
+        const text = (part as { text?: unknown }).text;
+        if (typeof text === "string" && text.trim()) {
+          return text.trim();
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+function parseFirstJsonObject(value: string): unknown | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    // Continue scanning line-by-line for CLI output that includes logs + JSON.
+  }
+
+  const lines = trimmed.split("\n");
+  for (const line of lines) {
+    const candidate = line.trim();
+    if (!candidate.startsWith("{") || !candidate.endsWith("}")) {
+      continue;
+    }
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+}
+
+export async function runTenantOpenClawAgentTurn(input: {
+  env: Env;
+  tenantId: string;
+  telegramUserId: string;
+  message: string;
+}): Promise<{ reply: string }> {
+  const db = requireDb(input.env);
+  const runtimes = createTenantOpenClawRuntimeRepository(db);
+  const runtime = await runtimes.findByTenantId(input.tenantId);
+  if (!runtime) {
+    throw new Error("runtime record not found");
+  }
+
+  if (!input.env.Sandbox) {
+    throw new Error("sandbox binding is not configured");
+  }
+
+  const sandboxModule = await import("@cloudflare/sandbox");
+  const sandbox = sandboxModule.getSandbox(
+    input.env.Sandbox,
+    `tenant:${input.tenantId}`,
+    parseSleepAfter(runtime.sleepAfter)
+  ) as SandboxLike;
+
+  const sessionId = `telegram:${input.telegramUserId}`;
+  const command =
+    'openclaw agent --session-id "$OPENCLAW_SESSION_ID" --message "$OPENCLAW_USER_MESSAGE" --json';
+  const result = await sandbox.exec(command, {
+    cwd: "/root/clawd",
+    timeout: 90_000,
+    env: {
+      OPENCLAW_SESSION_ID: sessionId,
+      OPENCLAW_USER_MESSAGE: input.message
+    }
+  });
+
+  if (!result.success) {
+    throw new Error(
+      `openclaw agent failed (exit ${result.exitCode}): ${result.stderr.trim() || "unknown error"}`
+    );
+  }
+
+  const parsed = parseFirstJsonObject(result.stdout);
+  const text = extractAssistantText(parsed);
+  if (text) {
+    return { reply: text };
+  }
+
+  const fallback = result.stdout.trim();
+  if (fallback) {
+    return { reply: fallback };
+  }
+
+  throw new Error(`openclaw agent returned no reply: ${result.stderr.trim() || "empty output"}`);
+}

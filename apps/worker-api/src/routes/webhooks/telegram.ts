@@ -9,6 +9,9 @@ import {
   type PromptMemorySnippet,
   type PromptSkillSnippet
 } from "../../services/context-pack";
+import { ensureTenantOpenClawBootstrap } from "../../services/openclaw-bootstrap";
+import { runTenantOpenClawAgentTurn } from "../../services/openclaw-agent";
+import { ensureTenantOpenClawRuntime } from "../../services/openclaw-runtime";
 import type { Env } from "../../types";
 
 type TelegramMessage = {
@@ -126,6 +129,96 @@ async function loadEnabledSkills(input: {
   return loaded;
 }
 
+function parseCsvSet(value: string | undefined): Set<string> {
+  if (!value?.trim()) {
+    return new Set();
+  }
+  return new Set(
+    value
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean)
+  );
+}
+
+function shouldUseRuntimeMode(input: { env: Env; tenantId: string }): boolean {
+  if ((input.env.TELEGRAM_RUNTIME_MODE ?? "direct").trim().toLowerCase() !== "openclaw_runtime") {
+    return false;
+  }
+  const allowlist = parseCsvSet(input.env.TELEGRAM_RUNTIME_ALLOWLIST);
+  if (allowlist.size === 0) {
+    return true;
+  }
+  return allowlist.has(input.tenantId);
+}
+
+async function generateReplyViaAgentSession(input: {
+  env: Env;
+  tenantId: string;
+  telegramUserId: string;
+  userMessage: string;
+  modelProvider: string;
+  modelId: string;
+  byokApiKey: string;
+  memory: ReturnType<typeof createMemoryRepository>;
+  workspaces: ReturnType<typeof createWorkspaceRepository>;
+}): Promise<string> {
+  const workspace = await input.workspaces.ensureForTenant({ tenantId: input.tenantId });
+  const promptRecord = await input.workspaces.getPrompt(workspace.id);
+  let systemPrompt: string | null = null;
+  if (promptRecord?.system_prompt_r2_key) {
+    const object = await input.env.ARTIFACTS.get(promptRecord.system_prompt_r2_key);
+    if (object) {
+      systemPrompt = await object.text();
+    }
+  }
+  const profiles = await input.memory.listProfiles(input.tenantId, 8);
+  const recentEvents = await input.memory.listRecentEvents(input.tenantId, 8);
+  const recentMemories = await loadRecentMemorySnippets({
+    env: input.env,
+    events: recentEvents,
+    limit: 6
+  });
+  const enabledSkills = await input.workspaces.listEnabledSkills(workspace.id);
+  const skills = await loadEnabledSkills({
+    env: input.env,
+    skills: enabledSkills.map((skill) => ({
+      name: skill.name,
+      kind: skill.kind,
+      r2Key: skill.r2Key
+    })),
+    limit: 5
+  });
+  const prompt = buildTenantPrompt({
+    userMessage: input.userMessage,
+    systemPrompt,
+    profiles,
+    recentMemories,
+    skills
+  });
+
+  const sessionId = input.env.AGENT_SESSION.idFromName(`${input.tenantId}:telegram`);
+  const session = input.env.AGENT_SESSION.get(sessionId);
+  const sessionResponse = await session.fetch("https://agent-session/v1/telegram/reply", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      tenantId: input.tenantId,
+      telegramUserId: input.telegramUserId,
+      prompt,
+      modelProvider: input.modelProvider,
+      modelId: input.modelId,
+      byokApiKey: input.byokApiKey
+    })
+  });
+  if (!sessionResponse.ok) {
+    const body = await sessionResponse.text();
+    throw new Error(`agent session failed: ${body || sessionResponse.status}`);
+  }
+  const sessionPayload = (await sessionResponse.json()) as { reply?: string };
+  return (sessionPayload.reply ?? "").trim() || "Processed. No text content returned.";
+}
+
 export async function handleTelegramWebhook(
   request: Request,
   env: Env
@@ -206,70 +299,70 @@ export async function handleTelegramWebhook(
     return json({ ok: true });
   }
 
-  if (!env.CF_ACCOUNT_ID || !env.AI_GATEWAY_ID) {
-    await sendTelegramMessage({
-      botToken: env.TELEGRAM_BOT_TOKEN,
-      chatId: String(chatId),
-      text: "OpenClaw backend is not fully configured for model routing. Please contact support."
-    });
-    return json({ ok: true });
-  }
-
   try {
-    const workspace = await workspaces.ensureForTenant({ tenantId: pairing.tenantId });
-    const promptRecord = await workspaces.getPrompt(workspace.id);
-    let systemPrompt: string | null = null;
-    if (promptRecord?.system_prompt_r2_key) {
-      const object = await env.ARTIFACTS.get(promptRecord.system_prompt_r2_key);
-      if (object) {
-        systemPrompt = await object.text();
-      }
-    }
-    const profiles = await memory.listProfiles(pairing.tenantId, 8);
-    const recentEvents = await memory.listRecentEvents(pairing.tenantId, 8);
-    const recentMemories = await loadRecentMemorySnippets({
-      env,
-      events: recentEvents,
-      limit: 6
-    });
-    const enabledSkills = await workspaces.listEnabledSkills(workspace.id);
-    const skills = await loadEnabledSkills({
-      env,
-      skills: enabledSkills.map((skill) => ({
-        name: skill.name,
-        kind: skill.kind,
-        r2Key: skill.r2Key
-      })),
-      limit: 5
-    });
-    const prompt = buildTenantPrompt({
-      userMessage: text,
-      systemPrompt,
-      profiles,
-      recentMemories,
-      skills
-    });
+    let reply = "";
+    const runtimeMode = shouldUseRuntimeMode({ env, tenantId: pairing.tenantId });
 
-    const sessionId = env.AGENT_SESSION.idFromName(`${pairing.tenantId}:telegram`);
-    const session = env.AGENT_SESSION.get(sessionId);
-    const sessionResponse = await session.fetch("https://agent-session/v1/telegram/reply", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
+    if (runtimeMode) {
+      try {
+        await ensureTenantOpenClawBootstrap(env, pairing.tenantId);
+        const runtime = await ensureTenantOpenClawRuntime(env, pairing.tenantId);
+        const turn = await runTenantOpenClawAgentTurn({
+          env,
+          tenantId: pairing.tenantId,
+          telegramUserId: String(userId),
+          message: text
+        });
+        reply = turn.reply;
+        console.log("telegram runtime reply", {
+          tenantId: pairing.tenantId,
+          runtimeStarted: runtime.started,
+          runtimeReason: runtime.reason
+        });
+      } catch (runtimeError) {
+        const fallbackEnabled = (env.TELEGRAM_RUNTIME_FALLBACK_DIRECT ?? "1") !== "0";
+        if (!fallbackEnabled) {
+          throw runtimeError;
+        }
+        const reason = runtimeError instanceof Error ? runtimeError.message : "unknown runtime error";
+        console.warn("telegram runtime fallback to direct mode", {
+          tenantId: pairing.tenantId,
+          reason
+        });
+        reply = await generateReplyViaAgentSession({
+          env,
+          tenantId: pairing.tenantId,
+          telegramUserId: String(userId),
+          userMessage: text,
+          modelProvider: tenant.modelProvider,
+          modelId: tenant.modelId,
+          byokApiKey: tenant.byokApiKey,
+          memory,
+          workspaces
+        });
+      }
+    } else {
+      if (!env.CF_ACCOUNT_ID || !env.AI_GATEWAY_ID) {
+        await sendTelegramMessage({
+          botToken: env.TELEGRAM_BOT_TOKEN,
+          chatId: String(chatId),
+          text: "OpenClaw backend is not fully configured for model routing. Please contact support."
+        });
+        return json({ ok: true });
+      }
+      reply = await generateReplyViaAgentSession({
+        env,
         tenantId: pairing.tenantId,
         telegramUserId: String(userId),
-        prompt,
+        userMessage: text,
         modelProvider: tenant.modelProvider,
         modelId: tenant.modelId,
-        byokApiKey: tenant.byokApiKey
-      })
-    });
-    if (!sessionResponse.ok) {
-      const body = await sessionResponse.text();
-      throw new Error(`agent session failed: ${body || sessionResponse.status}`);
+        byokApiKey: tenant.byokApiKey,
+        memory,
+        workspaces
+      });
     }
-    const sessionPayload = (await sessionResponse.json()) as { reply?: string };
-    const reply = (sessionPayload.reply ?? "").trim() || "Processed. No text content returned.";
+
     await sendTelegramMessage({
       botToken: env.TELEGRAM_BOT_TOKEN,
       chatId: String(chatId),

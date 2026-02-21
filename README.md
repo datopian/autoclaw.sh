@@ -70,6 +70,39 @@ High-level flow:
 4. Long-running work is enqueued to `RUN_QUEUE`.
 5. Queue consumer invokes `AgentSession` and model calls (AI Gateway/BYOK), then persists run status/results.
 
+### Shared Telegram + Tenant Runtime Architecture
+
+The product uses one shared Telegram bot. Tenant isolation is handled by pairing each Telegram user to a tenant, then routing requests into that tenant's OpenClaw runtime workspace.
+
+```mermaid
+flowchart LR
+    U[User in Telegram] --> TG[Telegram Platform]
+    TG --> WB["Worker API: /api/webhooks/telegram"]
+
+    WB --> PR[(D1: telegram_pairings)]
+    PR -->|"telegram_user_id -> tenant_id"| TR[Tenant Router]
+
+    TR --> TT[(D1: tenants)]
+    TR --> RT[(D1: tenant_openclaw_runtime)]
+    TR --> WS[(R2: tenant/<id>/openclaw/workspace/*)]
+
+    TR --> SB["Cloudflare Sandbox DO: tenant:<tenant_id>"]
+    SB --> CT["Cloudflare Container\nOpenClaw Gateway + Workspace (/root/clawd)"]
+
+    CT --> WB
+    WB --> TG
+    TG --> U
+```
+
+Runtime lifecycle per tenant:
+
+1. Telegram message hits `/api/webhooks/telegram`.
+2. Pairing lookup resolves `telegram_user_id` to `tenant_id`.
+3. Runtime state is checked in `tenant_openclaw_runtime`.
+4. If needed, Worker bootstraps workspace files from R2 and starts tenant sandbox/container.
+5. Request is routed to tenant OpenClaw gateway process.
+6. Reply is sent back through Telegram.
+
 ## Request Flow (Happy Path)
 
 1. UI posts `POST /api/control/runs`.
