@@ -2,6 +2,7 @@ import type { Env } from "../types";
 import { requireDb } from "../db/client";
 import { createTenantRepository } from "../db/repositories/tenants";
 import { json, methodNotAllowed, parseJson } from "../lib/http";
+import { ensureTenantOpenClawBootstrap } from "../services/openclaw-bootstrap";
 
 type CreateTenantInput = {
   name?: string;
@@ -35,6 +36,7 @@ export async function handleTenants(
     name: body.name,
     email: body.email
   });
+  await ensureTenantOpenClawBootstrap(env, created.id);
 
   return json(created, 201);
 }

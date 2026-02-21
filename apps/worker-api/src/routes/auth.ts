@@ -1,6 +1,7 @@
 import { requireDb } from "../db/client";
 import { createTenantRepository } from "../db/repositories/tenants";
 import { json, methodNotAllowed, parseJson } from "../lib/http";
+import { ensureTenantOpenClawBootstrap } from "../services/openclaw-bootstrap";
 import type { Env } from "../types";
 
 type StartAuthInput = {
@@ -255,6 +256,8 @@ export async function handleAuthStart(
         email_verified_at: null
       };
     }
+
+    await ensureTenantOpenClawBootstrap(env, account.tenant_id);
 
     if (account && requestedName && account.name !== requestedName) {
       await db
