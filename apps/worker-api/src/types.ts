@@ -6,6 +6,7 @@ export type Env = {
   CF_ACCOUNT_ID?: string;
   AI_GATEWAY_ID?: string;
   AI_GATEWAY_BASE_URL?: string;
+  OPENCLAW_SANDBOX_SLEEP_AFTER?: string;
   DEFAULT_MODEL_PROVIDER?: string;
   DEFAULT_MODEL_ID?: string;
   TELEGRAM_BOT_TOKEN?: string;

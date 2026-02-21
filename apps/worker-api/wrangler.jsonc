@@ -7,6 +7,7 @@
 	"vars": {
 		"APP_ENV": "dev",
 		"MEMORY_RETENTION_DAYS": "90",
+		"OPENCLAW_SANDBOX_SLEEP_AFTER": "10m",
 		"CF_ACCOUNT_ID": "83025b28472d6aa2bf5ae59f3724aa78",
 		"AI_GATEWAY_ID": "openclaw-gateway-prod",
 		"DEFAULT_MODEL_PROVIDER": "openai",
