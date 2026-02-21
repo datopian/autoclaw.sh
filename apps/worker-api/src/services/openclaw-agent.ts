@@ -1,5 +1,6 @@
 import { requireDb } from "../db/client";
 import { createTenantOpenClawRuntimeRepository } from "../db/repositories/openclaw-runtime";
+import { createTenantRepository } from "../db/repositories/tenants";
 import type { Env } from "../types";
 
 type SandboxLike = {
@@ -96,9 +97,17 @@ export async function runTenantOpenClawAgentTurn(input: {
 }): Promise<{ reply: string }> {
   const db = requireDb(input.env);
   const runtimes = createTenantOpenClawRuntimeRepository(db);
+  const tenants = createTenantRepository(db);
   const runtime = await runtimes.findByTenantId(input.tenantId);
   if (!runtime) {
     throw new Error("runtime record not found");
+  }
+  const tenant = await tenants.findById(input.tenantId);
+  if (!tenant) {
+    throw new Error("tenant not found");
+  }
+  if (!tenant.byokApiKey || !tenant.modelProvider) {
+    throw new Error("tenant model provider/api key not configured");
   }
 
   if (!input.env.Sandbox) {
@@ -114,14 +123,23 @@ export async function runTenantOpenClawAgentTurn(input: {
 
   const sessionId = `telegram:${input.telegramUserId}`;
   const command =
-    'openclaw agent --session-id "$OPENCLAW_SESSION_ID" --message "$OPENCLAW_USER_MESSAGE" --json';
+    'openclaw agent --local --session-id "$OPENCLAW_SESSION_ID" --message "$OPENCLAW_USER_MESSAGE" --json';
+  const env: Record<string, string | undefined> = {
+    OPENCLAW_SESSION_ID: sessionId,
+    OPENCLAW_USER_MESSAGE: input.message
+  };
+  if (tenant.modelProvider === "openai") {
+    env.OPENAI_API_KEY = tenant.byokApiKey;
+  } else if (tenant.modelProvider === "anthropic") {
+    env.ANTHROPIC_API_KEY = tenant.byokApiKey;
+  } else if (tenant.modelProvider === "google") {
+    env.GEMINI_API_KEY = tenant.byokApiKey;
+  }
+
   const result = await sandbox.exec(command, {
     cwd: "/root/clawd",
     timeout: 90_000,
-    env: {
-      OPENCLAW_SESSION_ID: sessionId,
-      OPENCLAW_USER_MESSAGE: input.message
-    }
+    env
   });
 
   if (!result.success) {
