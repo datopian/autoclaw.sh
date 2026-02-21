@@ -14,7 +14,7 @@ RUN ARCH="$(dpkg --print-architecture)" \
 
 RUN npm install -g openclaw@2026.2.3 && openclaw --version
 
-COPY runtime/start-openclaw.sh /usr/local/bin/start-openclaw.sh
+COPY start-openclaw.sh /usr/local/bin/start-openclaw.sh
 RUN chmod +x /usr/local/bin/start-openclaw.sh
 
 WORKDIR /root/clawd
