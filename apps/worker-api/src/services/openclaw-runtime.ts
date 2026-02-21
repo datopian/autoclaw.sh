@@ -117,6 +117,17 @@ async function getTenantSandbox(input: {
   ) as SandboxLike;
 }
 
+async function resetTenantOpenClawLocalState(input: {
+  sandbox: SandboxLike;
+}): Promise<void> {
+  // Stop old gateway processes and force onboard to re-run with canonical workspace.
+  await input.sandbox.exec(
+    "pkill -f 'openclaw gateway' >/dev/null 2>&1 || true; " +
+      "pkill -f 'start-openclaw.sh' >/dev/null 2>&1 || true; " +
+      "rm -f /root/.openclaw/openclaw.json"
+  );
+}
+
 export async function ensureTenantOpenClawRuntime(
   env: Env,
   tenantId: string
@@ -229,4 +240,38 @@ export async function ensureTenantOpenClawRuntime(
     await runtimes.setStatus(tenantId, "failed");
     throw error;
   }
+}
+
+export async function rebootstrapTenantOpenClawRuntime(
+  env: Env,
+  tenantId: string
+): Promise<{ started: boolean; reason: string }> {
+  if (!env.Sandbox) {
+    return {
+      started: false,
+      reason: "sandbox binding is not configured"
+    };
+  }
+
+  const db = requireDb(env);
+  const runtimes = createTenantOpenClawRuntimeRepository(db);
+  const runtime = await runtimes.findByTenantId(tenantId);
+  if (!runtime) {
+    return {
+      started: false,
+      reason: "runtime record not found"
+    };
+  }
+
+  const sandbox = await getTenantSandbox({
+    namespace: env.Sandbox,
+    tenantId,
+    sleepAfter: runtime.sleepAfter
+  });
+  await resetTenantOpenClawLocalState({ sandbox });
+  await runtimes.setStatus(tenantId, "bootstrapped");
+  return {
+    started: false,
+    reason: "rebootstrapped; runtime will restart on next use"
+  };
 }

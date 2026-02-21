@@ -15,6 +15,7 @@ export type Env = {
   TELEGRAM_WEBHOOK_SECRET?: string;
   RESEND_API_KEY?: string;
   EMAIL_FROM?: string;
+  RUNTIME_BACKFILL_TOKEN?: string;
   DB: D1Database;
   AI?: {
     run: (model: string, inputs: unknown) => Promise<unknown>;
