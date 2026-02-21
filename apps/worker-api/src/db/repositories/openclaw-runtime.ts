@@ -79,6 +79,16 @@ export function createTenantOpenClawRuntimeRepository(db: D1Database) {
         )
         .bind(now, now, tenantId)
         .run();
+    },
+
+    async setStatus(tenantId: string, status: string): Promise<void> {
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          "UPDATE tenant_openclaw_runtime SET status = ?1, updated_at = ?2 WHERE tenant_id = ?3"
+        )
+        .bind(status, now, tenantId)
+        .run();
     }
   };
 }

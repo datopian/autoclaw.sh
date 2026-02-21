@@ -55,6 +55,10 @@ export async function ensureTenantOpenClawBootstrap(
   env: Env,
   tenantId: string
 ): Promise<void> {
+  if (!env.ARTIFACTS) {
+    return;
+  }
+
   const db = requireDb(env);
   const runtimes = createTenantOpenClawRuntimeRepository(db);
   const workspacePrefix = buildWorkspacePrefix(tenantId);

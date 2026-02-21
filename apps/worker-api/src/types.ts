@@ -1,3 +1,5 @@
+import type { Sandbox } from "@cloudflare/sandbox";
+
 export type Env = {
   APP_ENV?: string;
   MEMORY_RETENTION_DAYS?: string;
@@ -22,4 +24,5 @@ export type Env = {
   MEMORY_INGEST_QUEUE: Queue;
   MEMORY_DISTILL_QUEUE: Queue;
   AGENT_SESSION: DurableObjectNamespace;
+  Sandbox?: DurableObjectNamespace<Sandbox>;
 };

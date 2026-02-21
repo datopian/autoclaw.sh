@@ -4,6 +4,9 @@
 	"account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-02-08",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
 	"vars": {
 		"APP_ENV": "dev",
 		"MEMORY_RETENTION_DAYS": "90",
@@ -72,14 +75,32 @@
 			{
 				"name": "AGENT_SESSION",
 				"class_name": "AgentSession"
+			},
+			{
+				"name": "Sandbox",
+				"class_name": "TenantSandbox"
 			}
 		]
 	},
+	"containers": [
+		{
+			"class_name": "TenantSandbox",
+			"image": "./runtime/Dockerfile",
+			"instance_type": "standard-1",
+			"max_instances": 50
+		}
+	],
 	"migrations": [
 		{
 			"tag": "v1",
 			"new_sqlite_classes": [
 				"AgentSession"
+			]
+		},
+		{
+			"tag": "v2",
+			"new_sqlite_classes": [
+				"TenantSandbox"
 			]
 		}
 	]
