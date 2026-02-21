@@ -7,19 +7,28 @@ mkdir -p /root/.openclaw /root/clawd
 
 if [ ! -f /root/.openclaw/openclaw.json ]; then
   AUTH_ARGS=()
+  GATEWAY_AUTH_ARGS=()
   if [ -n "${OPENAI_API_KEY:-}" ]; then
     AUTH_ARGS=(--auth-choice openai-api-key --openai-api-key "$OPENAI_API_KEY")
   elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
     AUTH_ARGS=(--auth-choice apiKey --anthropic-api-key "$ANTHROPIC_API_KEY")
+  elif [ -n "${GEMINI_API_KEY:-}" ]; then
+    AUTH_ARGS=(--auth-choice gemini-api-key --gemini-api-key "$GEMINI_API_KEY")
+  fi
+
+  if [ -n "${OPENCLAW_GATEWAY_TOKEN:-}" ]; then
+    GATEWAY_AUTH_ARGS=(--gateway-auth token --gateway-token "$OPENCLAW_GATEWAY_TOKEN")
   fi
 
   openclaw onboard --non-interactive --accept-risk \
     --mode local \
+    --workspace /root/clawd \
     --gateway-port "$GATEWAY_PORT" \
     --gateway-bind lan \
     --skip-channels \
     --skip-skills \
     --skip-health \
+    "${GATEWAY_AUTH_ARGS[@]}" \
     "${AUTH_ARGS[@]}" || { echo "openclaw onboard failed; continuing"; true; }
 fi
 
