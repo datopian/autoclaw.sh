@@ -2,7 +2,6 @@ import { requireDb } from "../db/client";
 import { createTenantRepository } from "../db/repositories/tenants";
 import { json, methodNotAllowed, parseJson } from "../lib/http";
 import { ensureTenantOpenClawBootstrap } from "../services/openclaw-bootstrap";
-import { ensureTenantOpenClawRuntime } from "../services/openclaw-runtime";
 import { normalizeProvider, requireApiKey } from "../services/secrets";
 import type { Env } from "../types";
 
@@ -46,6 +45,11 @@ export async function handleTenantAgentConfig(
   });
 
   await ensureTenantOpenClawBootstrap(env, body.tenantId);
-  const runtime = await ensureTenantOpenClawRuntime(env, body.tenantId);
-  return json({ ok: true, runtime });
+  return json({
+    ok: true,
+    runtime: {
+      started: false,
+      reason: "startup deferred until first Telegram message"
+    }
+  });
 }
