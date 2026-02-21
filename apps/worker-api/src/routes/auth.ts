@@ -257,8 +257,6 @@ export async function handleAuthStart(
       };
     }
 
-    await ensureTenantOpenClawBootstrap(env, account.tenant_id);
-
     if (account && requestedName && account.name !== requestedName) {
       await db
         .prepare("UPDATE accounts SET name = ?1, updated_at = ?2 WHERE id = ?3")
@@ -324,101 +322,120 @@ export async function handleAuthVerify(
     return methodNotAllowed("POST");
   }
 
-  const body = await parseJson<VerifyAuthInput>(request);
-  if (!body?.email || !body.code) {
-    return json({ error: "email and code are required" }, 400);
-  }
-  const email = body.email.toLowerCase();
-  const code = body.code.trim();
-  const db = requireDb(env);
-  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+  try {
+    const body = await parseJson<VerifyAuthInput>(request);
+    if (!body?.email || !body.code) {
+      return json({ error: "email and code are required" }, 400);
+    }
+    const email = body.email.toLowerCase();
+    const code = body.code.trim();
+    const db = requireDb(env);
+    const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
 
-  const verification = await db
-    .prepare(
-      "SELECT id, account_id, expires_at FROM email_verification_codes WHERE email = ?1 AND code = ?2 AND status = 'pending' ORDER BY created_at DESC LIMIT 1"
-    )
-    .bind(email, code)
-    .first<VerificationRow | null>();
+    const verification = await db
+      .prepare(
+        "SELECT id, account_id, expires_at FROM email_verification_codes WHERE email = ?1 AND code = ?2 AND status = 'pending' ORDER BY created_at DESC LIMIT 1"
+      )
+      .bind(email, code)
+      .first<VerificationRow | null>();
 
-  if (!verification) {
-    await logAuditEvent({
-      env,
-      actorType: "account",
-      actorId: email,
-      action: "auth.otp_verify_failed",
-      metadata: { email, ip, reason: "invalid_code" }
-    });
-    return json({ error: "invalid verification code" }, 400);
-  }
-  if (new Date(verification.expires_at).getTime() < Date.now()) {
+    if (!verification) {
+      await logAuditEvent({
+        env,
+        actorType: "account",
+        actorId: email,
+        action: "auth.otp_verify_failed",
+        metadata: { email, ip, reason: "invalid_code" }
+      });
+      return json({ error: "invalid verification code" }, 400);
+    }
+    if (new Date(verification.expires_at).getTime() < Date.now()) {
+      await db
+        .prepare("UPDATE email_verification_codes SET status = 'expired' WHERE id = ?1")
+        .bind(verification.id)
+        .run();
+      await logAuditEvent({
+        env,
+        actorType: "account",
+        actorId: email,
+        action: "auth.otp_verify_failed",
+        metadata: { email, ip, reason: "expired_code" }
+      });
+      return json({ error: "verification code expired" }, 400);
+    }
+
     await db
-      .prepare("UPDATE email_verification_codes SET status = 'expired' WHERE id = ?1")
-      .bind(verification.id)
+      .prepare("UPDATE email_verification_codes SET status = 'used', used_at = ?1 WHERE id = ?2")
+      .bind(new Date().toISOString(), verification.id)
       .run();
-    await logAuditEvent({
-      env,
-      actorType: "account",
-      actorId: email,
-      action: "auth.otp_verify_failed",
-      metadata: { email, ip, reason: "expired_code" }
-    });
-    return json({ error: "verification code expired" }, 400);
-  }
 
-  await db
-    .prepare("UPDATE email_verification_codes SET status = 'used', used_at = ?1 WHERE id = ?2")
-    .bind(new Date().toISOString(), verification.id)
-    .run();
+    const account = await db
+      .prepare(
+        "SELECT id, tenant_id, name, email, status, email_verified_at FROM accounts WHERE id = ?1 LIMIT 1"
+      )
+      .bind(verification.account_id)
+      .first<AccountRow | null>();
 
-  const account = await db
-    .prepare(
-      "SELECT id, tenant_id, name, email, status, email_verified_at FROM accounts WHERE id = ?1 LIMIT 1"
-    )
-    .bind(verification.account_id)
-    .first<AccountRow | null>();
+    if (!account) {
+      return json({ error: "account not found" }, 404);
+    }
 
-  if (!account) {
-    return json({ error: "account not found" }, 404);
-  }
+    const now = new Date().toISOString();
+    if (!account.email_verified_at) {
+      await db
+        .prepare(
+          "UPDATE accounts SET status = 'active', email_verified_at = ?1, updated_at = ?2 WHERE id = ?3"
+        )
+        .bind(now, now, account.id)
+        .run();
+    }
 
-  const now = new Date().toISOString();
-  if (!account.email_verified_at) {
+    const token = generateSessionToken();
+    const tokenHash = await hashToken(token);
+    const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
     await db
       .prepare(
-        "UPDATE accounts SET status = 'active', email_verified_at = ?1, updated_at = ?2 WHERE id = ?3"
+        "INSERT INTO auth_sessions (id, account_id, token_hash, status, expires_at, created_at, revoked_at, last_seen_at) VALUES (?1, ?2, ?3, 'active', ?4, ?5, NULL, ?6)"
       )
-      .bind(now, now, account.id)
+      .bind(crypto.randomUUID(), account.id, tokenHash, expiresAt, now, now)
       .run();
-  }
 
-  const token = generateSessionToken();
-  const tokenHash = await hashToken(token);
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
-  await db
-    .prepare(
-      "INSERT INTO auth_sessions (id, account_id, token_hash, status, expires_at, created_at, revoked_at, last_seen_at) VALUES (?1, ?2, ?3, 'active', ?4, ?5, NULL, ?6)"
-    )
-    .bind(crypto.randomUUID(), account.id, tokenHash, expiresAt, now, now)
-    .run();
-  await logAuditEvent({
-    env,
-    tenantId: account.tenant_id,
-    actorType: "account",
-    actorId: account.id,
-    action: "auth.login_success",
-    metadata: { email, ip }
-  });
-
-  return json({
-    ok: true,
-    sessionToken: token,
-    user: {
-      accountId: account.id,
-      tenantId: account.tenant_id,
-      email: account.email,
-      name: account.name
+    try {
+      await ensureTenantOpenClawBootstrap(env, account.tenant_id);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "unknown error";
+      console.error("openclaw bootstrap failed", {
+        tenantId: account.tenant_id,
+        reason
+      });
     }
-  });
+
+    await logAuditEvent({
+      env,
+      tenantId: account.tenant_id,
+      actorType: "account",
+      actorId: account.id,
+      action: "auth.login_success",
+      metadata: { email, ip }
+    });
+
+    return json({
+      ok: true,
+      sessionToken: token,
+      user: {
+        accountId: account.id,
+        tenantId: account.tenant_id,
+        email: account.email,
+        name: account.name
+      }
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown error";
+    console.error("auth verify failed", {
+      reason
+    });
+    return json({ error: "unable to verify authentication code" }, 500);
+  }
 }
 
 export async function handleAuthMe(
