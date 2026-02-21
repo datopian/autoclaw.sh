@@ -37,13 +37,16 @@ function parseSleepAfter(value: string): { keepAlive?: boolean; sleepAfter?: str
   return { sleepAfter: value };
 }
 
-function toBase64Utf8(value: string): string {
-  const bytes = new TextEncoder().encode(value);
+function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
   for (const byte of bytes) {
     binary += String.fromCharCode(byte);
   }
   return btoa(binary);
+}
+
+function workspacePrefixForTenant(tenantId: string): string {
+  return `tenant/${tenantId}/openclaw/workspace`;
 }
 
 async function listAllKeys(bucket: R2Bucket, prefix: string): Promise<string[]> {
@@ -77,8 +80,7 @@ async function syncWorkspaceFromR2(input: {
       continue;
     }
     // eslint-disable-next-line no-await-in-loop
-    const content = await object.text();
-    const encoded = toBase64Utf8(content);
+    const encoded = bytesToBase64(new Uint8Array(await object.arrayBuffer()));
     const parentPath = sandboxPath.slice(0, sandboxPath.lastIndexOf("/"));
     const command = `mkdir -p ${shellQuote(parentPath)} && printf '%s' ${shellQuote(encoded)} | base64 -d > ${shellQuote(sandboxPath)}`;
     // eslint-disable-next-line no-await-in-loop
@@ -145,6 +147,16 @@ export async function ensureTenantOpenClawRuntime(
     };
   }
 
+  const expectedPrefix = workspacePrefixForTenant(tenantId);
+  if (runtime.workspacePrefix !== expectedPrefix) {
+    await runtimes.setStatus(tenantId, "failed");
+    return {
+      started: false,
+      reason: "workspace prefix does not match tenant"
+    };
+  }
+
+  const gatewayToken = await runtimes.ensureGatewayToken(tenantId);
   const sandbox = await getTenantSandbox({
     namespace: env.Sandbox,
     tenantId,
@@ -159,34 +171,59 @@ export async function ensureTenantOpenClawRuntime(
     };
   }
 
-  await runtimes.setStatus(tenantId, "starting");
-  await syncWorkspaceFromR2({
-    sandbox,
-    bucket: env.ARTIFACTS,
-    workspacePrefix: runtime.workspacePrefix
-  });
-
-  const processEnv: Record<string, string> = {
-    OPENCLAW_GATEWAY_PORT: String(GATEWAY_PORT),
-    OPENCLAW_GATEWAY_TOKEN: tenantId
-  };
-  if (tenant.modelProvider === "openai" && tenant.byokApiKey) {
-    processEnv.OPENAI_API_KEY = tenant.byokApiKey;
+  const markedStarting = await runtimes.tryMarkStarting(tenantId);
+  if (!markedStarting) {
+    const afterLockAttempt = await runtimes.findByTenantId(tenantId);
+    const processAfterLockAttempt = await findGatewayProcess(sandbox);
+    if (!processAfterLockAttempt && afterLockAttempt?.status === "starting") {
+      await runtimes.setStatus(tenantId, "failed");
+      const recovered = await runtimes.tryMarkStarting(tenantId);
+      if (!recovered) {
+        return {
+          started: false,
+          reason: "gateway is already starting"
+        };
+      }
+    } else {
+      return {
+        started: false,
+        reason: "gateway is already starting"
+      };
+    }
   }
-  if (tenant.modelProvider === "anthropic" && tenant.byokApiKey) {
-    processEnv.ANTHROPIC_API_KEY = tenant.byokApiKey;
-  }
 
-  const process = await sandbox.startProcess(GATEWAY_COMMAND, {
-    env: processEnv
-  });
-  await process.waitForPort(GATEWAY_PORT, {
-    mode: "tcp",
-    timeout: STARTUP_TIMEOUT_MS
-  });
-  await runtimes.setStatus(tenantId, "running");
-  return {
-    started: true,
-    reason: "gateway started"
-  };
+  try {
+    await syncWorkspaceFromR2({
+      sandbox,
+      bucket: env.ARTIFACTS,
+      workspacePrefix: runtime.workspacePrefix
+    });
+
+    const processEnv: Record<string, string> = {
+      OPENCLAW_GATEWAY_PORT: String(GATEWAY_PORT),
+      OPENCLAW_GATEWAY_TOKEN: gatewayToken
+    };
+    if (tenant.modelProvider === "openai" && tenant.byokApiKey) {
+      processEnv.OPENAI_API_KEY = tenant.byokApiKey;
+    }
+    if (tenant.modelProvider === "anthropic" && tenant.byokApiKey) {
+      processEnv.ANTHROPIC_API_KEY = tenant.byokApiKey;
+    }
+
+    const process = await sandbox.startProcess(GATEWAY_COMMAND, {
+      env: processEnv
+    });
+    await process.waitForPort(GATEWAY_PORT, {
+      mode: "tcp",
+      timeout: STARTUP_TIMEOUT_MS
+    });
+    await runtimes.setStatus(tenantId, "running");
+    return {
+      started: true,
+      reason: "gateway started"
+    };
+  } catch (error) {
+    await runtimes.setStatus(tenantId, "failed");
+    throw error;
+  }
 }
