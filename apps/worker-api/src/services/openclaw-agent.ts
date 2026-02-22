@@ -28,6 +28,22 @@ function extractAssistantText(payload: unknown): string | null {
   }
 
   const candidate = payload as Record<string, unknown>;
+  const payloads = candidate.payloads;
+  if (Array.isArray(payloads)) {
+    const lines = payloads
+      .map((item) => {
+        if (!item || typeof item !== "object") {
+          return null;
+        }
+        const text = (item as { text?: unknown }).text;
+        return typeof text === "string" && text.trim() ? text.trim() : null;
+      })
+      .filter((line): line is string => Boolean(line));
+    if (lines.length > 0) {
+      return lines.join("\n\n");
+    }
+  }
+
   const directKeys = ["reply", "output_text", "message", "text"];
   for (const key of directKeys) {
     const value = candidate[key];
@@ -83,6 +99,17 @@ function parseFirstJsonObject(value: string): unknown | null {
       return JSON.parse(candidate);
     } catch {
       continue;
+    }
+  }
+
+  const firstBrace = trimmed.indexOf("{");
+  const lastBrace = trimmed.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    const slice = trimmed.slice(firstBrace, lastBrace + 1);
+    try {
+      return JSON.parse(slice);
+    } catch {
+      // Ignore and return null below.
     }
   }
 
