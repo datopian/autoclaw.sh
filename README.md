@@ -110,6 +110,8 @@ The backend now exposes tenant-scoped runtime skills from the actual OpenClaw sa
 
 - `GET /api/runtime/skills?tenantId=<id>`
 - optional `includeHidden=true`
+- `GET /api/runtime/skills/packs` for curated pack definitions
+- `POST /api/runtime/skills/packs` to apply a pack for a tenant
 
 This endpoint:
 - ensures tenant runtime bootstrap/startup,
@@ -136,6 +138,12 @@ Policy semantics:
 - `allowed=false`: explicitly disallow skill for tenant policy.
 - `enabled=false`: keep skill installed/visible in policy but disabled for tenant usage.
 - `hidden=true`: hide skill from default skills list responses unless `includeHidden=true`.
+
+Pack semantics:
+- `basic`: starter setup focused on safe day-to-day capability.
+- `creator`: research/content oriented setup.
+- `ops`: technical operations oriented setup.
+- New tenants get `basic` automatically on first runtime bootstrap (only when no policy exists).
 
 ## Request Flow (Happy Path)
 

@@ -332,6 +332,42 @@ describe("worker routing", () => {
     expect(payload.tenantId).toBe("t_123");
   });
 
+  it("lists skill packs", async () => {
+    const req = new Request("https://example.com/api/runtime/skills/packs");
+    const res = await invokeFetch(req, { DB: mockDb() } as Env);
+
+    expect(res.status).toBe(200);
+    const payload = await json(res);
+    expect(Array.isArray(payload.packs)).toBe(true);
+  });
+
+  it("applies a skill pack", async () => {
+    const req = new Request("https://example.com/api/runtime/skills/packs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tenantId: "t_123",
+        pack: "basic"
+      })
+    });
+
+    const res = await invokeFetch(
+      req,
+      {
+        DB: mockDb({
+          firstResultBySql: (sql) =>
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: "2026-02-19T06:00:00.000Z" }
+              : null
+        })
+      } as Env
+    );
+
+    expect(res.status).toBe(200);
+    const payload = await json(res);
+    expect(payload.pack).toBe("basic");
+  });
+
   it("returns 404 for unknown routes", async () => {
     const req = new Request("https://example.com/api/nope");
     const res = await invokeFetch(req, { DB: mockDb() } as Env);

@@ -1,5 +1,7 @@
 import { requireDb } from "../db/client";
 import { createTenantOpenClawRuntimeRepository } from "../db/repositories/openclaw-runtime";
+import { createRuntimeSkillPolicyRepository } from "../db/repositories/runtime-skill-policy";
+import { applySkillPack, getSkillPack } from "./skill-packs";
 import type { Env } from "../types";
 
 const DEFAULT_SLEEP_AFTER = "10m";
@@ -73,6 +75,7 @@ export async function ensureTenantOpenClawBootstrap(
 
   const db = requireDb(env);
   const runtimes = createTenantOpenClawRuntimeRepository(db);
+  const runtimeSkillPolicies = createRuntimeSkillPolicyRepository(db);
   const workspacePrefix = buildWorkspacePrefix(tenantId);
   const sleepAfter = resolveDefaultSleepAfter(env);
 
@@ -95,4 +98,14 @@ export async function ensureTenantOpenClawBootstrap(
 
   await Promise.all(writes);
   await runtimes.markBootstrapped(tenantId);
+
+  // Apply default basic pack once so new tenants have an opinionated starter policy.
+  const basicPack = getSkillPack("basic");
+  if (basicPack) {
+    await applySkillPack({
+      repo: runtimeSkillPolicies,
+      tenantId,
+      pack: basicPack
+    });
+  }
 }
