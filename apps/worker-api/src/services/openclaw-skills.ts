@@ -1,5 +1,6 @@
 import { requireDb } from "../db/client";
 import { createTenantOpenClawRuntimeRepository } from "../db/repositories/openclaw-runtime";
+import { syncTenantCustomSkillsToRuntime } from "./runtime-custom-skills";
 import type { Env } from "../types";
 
 type SandboxLike = {
@@ -123,6 +124,12 @@ export async function listTenantRuntimeOpenClawSkills(input: {
     `tenant:${input.tenantId}`,
     parseSleepAfter(runtime.sleepAfter)
   ) as SandboxLike;
+
+  await syncTenantCustomSkillsToRuntime({
+    env: input.env,
+    tenantId: input.tenantId,
+    sandbox
+  });
 
   const result = await sandbox.exec("openclaw skills list --json", {
     cwd: "/root/clawd",
