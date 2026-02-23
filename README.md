@@ -148,6 +148,9 @@ Diagnostics/remediation:
 : `strategy=hide_unavailable` (default) -> disable/hide unavailable skills in policy.
 : `strategy=enable_ready` -> explicitly enable/unhide ready skills.
 
+Telegram command:
+- Send `/skills` to the shared Telegram bot to see tenant-enabled skills with readiness markers (`✅` ready, `⚠️` unavailable + short reason).
+
 Pack semantics:
 - `basic`: starter setup focused on safe day-to-day capability.
 - `creator`: research/content oriented setup.
