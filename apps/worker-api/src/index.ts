@@ -143,6 +143,12 @@ const worker: ExportedHandler<Env> = {
     if (url.pathname === "/api/runtime/skills/packs") {
       return handleRuntimeSkills(request, env);
     }
+    if (url.pathname === "/api/runtime/skills/diagnostics") {
+      return handleRuntimeSkills(request, env);
+    }
+    if (url.pathname === "/api/runtime/skills/remediate") {
+      return handleRuntimeSkills(request, env);
+    }
 
     if (url.pathname === "/api/webhooks/telegram") {
       return handleTelegramWebhook(request, env);

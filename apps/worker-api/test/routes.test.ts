@@ -368,6 +368,42 @@ describe("worker routing", () => {
     expect(payload.pack).toBe("basic");
   });
 
+  it("validates diagnostics tenantId", async () => {
+    const req = new Request("https://example.com/api/runtime/skills/diagnostics");
+    const res = await invokeFetch(req, { DB: mockDb() } as Env);
+
+    expect(res.status).toBe(400);
+    const payload = await json(res);
+    expect(payload.error).toBe("tenantId is required");
+  });
+
+  it("validates remediation strategy", async () => {
+    const req = new Request("https://example.com/api/runtime/skills/remediate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tenantId: "t_123",
+        strategy: "bad-strategy"
+      })
+    });
+
+    const res = await invokeFetch(
+      req,
+      {
+        DB: mockDb({
+          firstResultBySql: (sql) =>
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: "2026-02-19T06:00:00.000Z" }
+              : null
+        })
+      } as Env
+    );
+
+    expect(res.status).toBe(400);
+    const payload = await json(res);
+    expect(payload.error).toBe("strategy must be hide_unavailable or enable_ready");
+  });
+
   it("returns 404 for unknown routes", async () => {
     const req = new Request("https://example.com/api/nope");
     const res = await invokeFetch(req, { DB: mockDb() } as Env);
