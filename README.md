@@ -112,6 +112,8 @@ The backend now exposes tenant-scoped runtime skills from the actual OpenClaw sa
 - optional `includeHidden=true`
 - `GET /api/runtime/skills/packs` for curated pack definitions
 - `POST /api/runtime/skills/packs` to apply a pack for a tenant
+- `GET /api/runtime/skills/diagnostics?tenantId=<id>` for requirement diagnostics
+- `POST /api/runtime/skills/remediate` for one-click policy remediation
 
 This endpoint:
 - ensures tenant runtime bootstrap/startup,
@@ -139,6 +141,12 @@ Policy semantics:
 - `allowed=false`: explicitly disallow skill for tenant policy.
 - `enabled=false`: keep skill installed/visible in policy but disabled for tenant usage.
 - `hidden=true`: hide skill from default skills list responses unless `includeHidden=true`.
+
+Diagnostics/remediation:
+- `GET /api/runtime/skills/diagnostics` summarizes unavailable skills and missing requirements (`bins`, `env`, `config`, `os`).
+- `POST /api/runtime/skills/remediate` supports:
+: `strategy=hide_unavailable` (default) -> disable/hide unavailable skills in policy.
+: `strategy=enable_ready` -> explicitly enable/unhide ready skills.
 
 Pack semantics:
 - `basic`: starter setup focused on safe day-to-day capability.
