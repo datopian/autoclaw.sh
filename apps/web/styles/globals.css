@@ -448,6 +448,40 @@ textarea {
   gap: 16px;
 }
 
+.landingMenuButton {
+  display: none;
+  border: 1px solid #18181b;
+  background: #ffffff;
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  padding: 9px 8px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.landingMenuButton span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #111111;
+  border-radius: 99px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.landingMenuButton.isOpen span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.landingMenuButton.isOpen span:nth-child(2) {
+  opacity: 0;
+}
+
+.landingMenuButton.isOpen span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 .landingNavLink {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.78rem;
@@ -739,7 +773,58 @@ textarea {
     padding-top: 18px;
   }
 
+  .landingTopbar {
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 26px;
+  }
+
+  .landingMenuButton {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .landingNavLinks {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    display: none;
+    width: min(230px, 100%);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #18181b;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, 0.08);
+    z-index: 5;
+  }
+
+  .landingNavLinks.isOpen {
+    display: flex;
+  }
+
+  .landingNavLink {
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 6px 2px;
+  }
+
   .landingTitle {
     max-width: 12ch;
+  }
+
+  .landingActions {
+    width: 100%;
+    margin-top: 14px;
+  }
+
+  .landingButton {
+    width: 100%;
+    min-height: 52px;
+    justify-content: center;
+    font-size: 0.98rem;
   }
 }

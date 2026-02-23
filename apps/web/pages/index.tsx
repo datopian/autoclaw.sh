@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useAuthStatus } from "../lib/hooks/use-auth-status";
 
 const valueRows = [
@@ -28,6 +29,20 @@ const onboardingFlow = [
 
 export default function HomePage() {
   const { authenticated } = useAuthStatus();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return;
+    }
+    const onResize = () => {
+      if (window.innerWidth > 680) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [mobileMenuOpen]);
 
   return (
     <>
@@ -45,7 +60,18 @@ export default function HomePage() {
             <span className="brandMark" />
             OpenClaw Autopilot
           </Link>
-          <nav className="navLinks landingNavLinks">
+          <button
+            type="button"
+            className={`landingMenuButton${mobileMenuOpen ? " isOpen" : ""}`}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <nav className={`navLinks landingNavLinks${mobileMenuOpen ? " isOpen" : ""}`}>
             <Link href="/blog" className="landingNavLink">
               Blog
             </Link>
