@@ -43,6 +43,7 @@ Backend (`apps/worker-api`):
 - `/api/telegram/*`
 - `/api/webhooks/stripe`
 - `/api/subscriptions`
+- `/api/runtime/skills`
 - `queue` consumer processes run messages and updates D1 run status.
 - Durable Object `AgentSession` coordinates per-agent execution sessions.
 - Storage/bindings: D1 (`DB`), R2 (`ARTIFACTS`), Queue (`RUN_QUEUE`), Durable Object (`AGENT_SESSION`).
@@ -102,6 +103,39 @@ Runtime lifecycle per tenant:
 4. If needed, Worker bootstraps workspace files from R2 and starts tenant sandbox/container.
 5. Request is routed to tenant OpenClaw gateway process.
 6. Reply is sent back through Telegram.
+
+### Runtime Skills Inventory + Policy
+
+The backend now exposes tenant-scoped runtime skills from the actual OpenClaw sandbox:
+
+- `GET /api/runtime/skills?tenantId=<id>`
+- optional `includeHidden=true`
+
+This endpoint:
+- ensures tenant runtime bootstrap/startup,
+- runs `openclaw skills list --json` inside tenant runtime,
+- merges per-tenant policy from D1 (`tenant_runtime_skill_policy`),
+- returns `effectiveReady` for each skill.
+
+Policy updates are supported with:
+
+- `PATCH /api/runtime/skills`
+
+Body:
+
+```json
+{
+  "tenantId": "t_123",
+  "policies": [
+    { "name": "weather", "allowed": true, "enabled": true, "hidden": false }
+  ]
+}
+```
+
+Policy semantics:
+- `allowed=false`: explicitly disallow skill for tenant policy.
+- `enabled=false`: keep skill installed/visible in policy but disabled for tenant usage.
+- `hidden=true`: hide skill from default skills list responses unless `includeHidden=true`.
 
 ## Request Flow (Happy Path)
 

@@ -295,6 +295,43 @@ describe("worker routing", () => {
     expect(payload.ok).toBe(true);
   });
 
+  it("validates runtime skills GET tenantId", async () => {
+    const req = new Request("https://example.com/api/runtime/skills");
+    const res = await invokeFetch(req, { DB: mockDb() } as Env);
+
+    expect(res.status).toBe(400);
+    const payload = await json(res);
+    expect(payload.error).toBe("tenantId is required");
+  });
+
+  it("stores runtime skill policies", async () => {
+    const req = new Request("https://example.com/api/runtime/skills", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tenantId: "t_123",
+        policies: [{ name: "weather", enabled: false, hidden: true }]
+      })
+    });
+
+    const res = await invokeFetch(
+      req,
+      {
+        DB: mockDb({
+          firstResultBySql: (sql) =>
+            sql.includes("FROM tenants")
+              ? { id: "t_123", created_at: "2026-02-19T06:00:00.000Z" }
+              : null
+        })
+      } as Env
+    );
+
+    expect(res.status).toBe(200);
+    const payload = await json(res);
+    expect(payload.ok).toBe(true);
+    expect(payload.tenantId).toBe("t_123");
+  });
+
   it("returns 404 for unknown routes", async () => {
     const req = new Request("https://example.com/api/nope");
     const res = await invokeFetch(req, { DB: mockDb() } as Env);

@@ -26,6 +26,7 @@ import { handleTelegramPairing } from "./routes/telegram-pairing";
 import { handleTenantAgentConfig } from "./routes/tenant-agent-config";
 import { handleWorkspaceSkills } from "./routes/workspace-skills";
 import { handleAdminRuntimeBackfill } from "./routes/admin-runtime-backfill";
+import { handleRuntimeSkills } from "./routes/runtime-skills";
 import { AgentSession } from "./durable/agent-session";
 import { TenantSandbox } from "./durable/tenant-sandbox";
 import { createRunOrchestrator } from "./services/run-orchestrator";
@@ -134,6 +135,10 @@ const worker: ExportedHandler<Env> = {
 
     if (url.pathname === "/api/workspaces/skills") {
       return handleWorkspaceSkills(request, env);
+    }
+
+    if (url.pathname === "/api/runtime/skills") {
+      return handleRuntimeSkills(request, env);
     }
 
     if (url.pathname === "/api/webhooks/telegram") {
