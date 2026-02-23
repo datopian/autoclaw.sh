@@ -4,6 +4,7 @@ import { createRunRepository } from "../../src/db/repositories/runs";
 import { createSubscriptionRepository } from "../../src/db/repositories/subscriptions";
 import { createWorkspaceRepository } from "../../src/db/repositories/workspaces";
 import { createMemoryRepository } from "../../src/db/repositories/memory";
+import { createRuntimeSkillPolicyRepository } from "../../src/db/repositories/runtime-skill-policy";
 
 class MockStmt {
   public bound: unknown[] = [];
@@ -202,5 +203,46 @@ describe("memory repository", () => {
     const profiles = await memory.listProfiles("t_1", 10);
     expect(profiles.length).toBe(1);
     expect(profiles[0].factKey).toBe("timezone");
+  });
+});
+
+describe("runtime skill policy repository", () => {
+  it("lists policies for tenant", async () => {
+    const db = new MockD1([
+      {
+        tenant_id: "t_1",
+        skill_name: "weather",
+        allowed: 1,
+        enabled: 0,
+        hidden: 1,
+        created_at: "x",
+        updated_at: "y"
+      }
+    ]);
+    const policies = createRuntimeSkillPolicyRepository(db as unknown as D1Database);
+
+    const list = await policies.listByTenant("t_1");
+    expect(list.length).toBe(1);
+    expect(list[0].skillName).toBe("weather");
+    expect(list[0].allowed).toBe(true);
+    expect(list[0].enabled).toBe(false);
+    expect(list[0].hidden).toBe(true);
+  });
+
+  it("upserts policy row", async () => {
+    const db = new MockD1(null);
+    const policies = createRuntimeSkillPolicyRepository(db as unknown as D1Database);
+
+    await policies.upsert({
+      tenantId: "t_1",
+      skillName: "weather",
+      allowed: true,
+      enabled: false,
+      hidden: true
+    });
+
+    expect(
+      db.statements.some((sql: string) => sql.includes("tenant_runtime_skill_policy"))
+    ).toBe(true);
   });
 });
