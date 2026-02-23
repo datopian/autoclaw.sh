@@ -1,6 +1,7 @@
 import { requireDb } from "../db/client";
 import { createTenantOpenClawRuntimeRepository } from "../db/repositories/openclaw-runtime";
 import { createTenantRepository } from "../db/repositories/tenants";
+import { syncTenantCustomSkillsToRuntime } from "./runtime-custom-skills";
 import type { Env } from "../types";
 
 type SandboxLike = {
@@ -147,6 +148,12 @@ export async function runTenantOpenClawAgentTurn(input: {
     `tenant:${input.tenantId}`,
     parseSleepAfter(runtime.sleepAfter)
   ) as SandboxLike;
+
+  await syncTenantCustomSkillsToRuntime({
+    env: input.env,
+    tenantId: input.tenantId,
+    sandbox
+  });
 
   const sessionId = `telegram:${input.telegramUserId}`;
   const modelId = tenant.modelId?.trim();

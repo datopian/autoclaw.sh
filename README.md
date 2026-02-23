@@ -115,6 +115,7 @@ The backend now exposes tenant-scoped runtime skills from the actual OpenClaw sa
 
 This endpoint:
 - ensures tenant runtime bootstrap/startup,
+- syncs tenant-enabled custom skills from D1/R2 into runtime skill folders (`/root/.openclaw/skills/tenant-<id>-*`),
 - runs `openclaw skills list --json` inside tenant runtime,
 - merges per-tenant policy from D1 (`tenant_runtime_skill_policy`),
 - returns `effectiveReady` for each skill.
