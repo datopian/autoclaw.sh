@@ -822,9 +822,13 @@ textarea {
   }
 
   .landingButton {
+    display: inline-flex;
     width: 100%;
     min-height: 52px;
     justify-content: center;
+    align-items: center;
+    text-align: center;
+    line-height: 1.2;
     font-size: 0.98rem;
   }
 }
