@@ -1,5 +1,6 @@
 import { requireDb } from "../../db/client";
 import { createMemoryRepository } from "../../db/repositories/memory";
+import { createRuntimeSkillPolicyRepository } from "../../db/repositories/runtime-skill-policy";
 import { createTelegramPairingRepository } from "../../db/repositories/telegram-pairings";
 import { createTenantRepository } from "../../db/repositories/tenants";
 import { createWorkspaceRepository } from "../../db/repositories/workspaces";
@@ -11,7 +12,10 @@ import {
 } from "../../services/context-pack";
 import { ensureTenantOpenClawBootstrap } from "../../services/openclaw-bootstrap";
 import { runTenantOpenClawAgentTurn } from "../../services/openclaw-agent";
+import { listTenantRuntimeOpenClawSkills } from "../../services/openclaw-skills";
 import { ensureTenantOpenClawRuntime } from "../../services/openclaw-runtime";
+import { formatTelegramSkillsMessage } from "../../services/runtime-skill-chat";
+import type { MergedRuntimeSkill } from "../../services/runtime-skill-diagnostics";
 import type { Env } from "../../types";
 
 type TelegramMessage = {
@@ -174,6 +178,21 @@ function shouldUseRuntimeMode(input: { env: Env; tenantId: string }): boolean {
   return allowlist.has(input.tenantId);
 }
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timeout")), timeoutMs);
+    promise
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
 async function generateReplyViaAgentSession(input: {
   env: Env;
   tenantId: string;
@@ -279,6 +298,7 @@ export async function handleTelegramWebhook(
   const db = requireDb(env);
   const pairings = createTelegramPairingRepository(db);
   const tenants = createTenantRepository(db);
+  const runtimePolicies = createRuntimeSkillPolicyRepository(db);
   const workspaces = createWorkspaceRepository(db);
   const memory = createMemoryRepository(db);
   const lower = text.toLowerCase();
@@ -310,8 +330,72 @@ export async function handleTelegramWebhook(
     });
     return json({ ok: true });
   }
+  const tenantId = pairing.tenantId;
 
-  const tenant = await tenants.findById(pairing.tenantId);
+  const tenant = await tenants.findById(tenantId);
+  if (lower === "/skills") {
+    try {
+      const runtimeMode = shouldUseRuntimeMode({ env, tenantId });
+      if (!runtimeMode) {
+        await sendTelegramMessage({
+          botToken: env.TELEGRAM_BOT_TOKEN,
+          chatId: String(chatId),
+          text: "Skill inventory is available only in runtime mode right now."
+        });
+        return json({ ok: true });
+      }
+
+      const runtimeList = await withTimeout(
+        (async () => {
+          await ensureTenantOpenClawBootstrap(env, tenantId);
+          await ensureTenantOpenClawRuntime(env, tenantId);
+          return await listTenantRuntimeOpenClawSkills({
+            env,
+            tenantId
+          });
+        })(),
+        20_000
+      );
+      const policyList = await runtimePolicies.listByTenant(tenantId);
+      const policyMap = new Map(policyList.map((policy) => [policy.skillName, policy]));
+      const merged: MergedRuntimeSkill[] = runtimeList.map((skill) => {
+        const policy = policyMap.get(skill.name);
+        const allowed = policy?.allowed ?? true;
+        const enabled = policy?.enabled ?? true;
+        const hidden = policy?.hidden ?? false;
+        return {
+          ...skill,
+          policy: { allowed, enabled, hidden },
+          effectiveReady:
+            skill.eligible && !skill.disabled && !skill.blockedByAllowlist && allowed && enabled
+        };
+      });
+
+      const skillsMessage = formatTelegramSkillsMessage({
+        tenantId,
+        skills: merged
+      });
+      await sendTelegramMessage({
+        botToken: env.TELEGRAM_BOT_TOKEN,
+        chatId: String(chatId),
+        text: skillsMessage
+      });
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "unknown error";
+      if (reason === "timeout") {
+        await sendTelegramMessage({
+          botToken: env.TELEGRAM_BOT_TOKEN,
+          chatId: String(chatId),
+          text: "Runtime is warming up. Retry /skills in about 20-30 seconds."
+        });
+        return json({ ok: true });
+      }
+      throw error;
+    }
+
+    return json({ ok: true });
+  }
+
   if (!tenant?.byokApiKey || !tenant.modelProvider || !tenant.modelId) {
     await sendTelegramMessage({
       botToken: env.TELEGRAM_BOT_TOKEN,
@@ -323,21 +407,21 @@ export async function handleTelegramWebhook(
 
   try {
     let reply = "";
-    const runtimeMode = shouldUseRuntimeMode({ env, tenantId: pairing.tenantId });
+      const runtimeMode = shouldUseRuntimeMode({ env, tenantId });
 
     if (runtimeMode) {
       try {
-        await ensureTenantOpenClawBootstrap(env, pairing.tenantId);
-        const runtime = await ensureTenantOpenClawRuntime(env, pairing.tenantId);
+        await ensureTenantOpenClawBootstrap(env, tenantId);
+        const runtime = await ensureTenantOpenClawRuntime(env, tenantId);
         const turn = await runTenantOpenClawAgentTurn({
           env,
-          tenantId: pairing.tenantId,
+          tenantId,
           telegramUserId: String(userId),
           message: text
         });
         reply = turn.reply;
         console.log("telegram runtime reply", {
-          tenantId: pairing.tenantId,
+          tenantId,
           runtimeStarted: runtime.started,
           runtimeReason: runtime.reason
         });
@@ -348,12 +432,12 @@ export async function handleTelegramWebhook(
         }
         const reason = runtimeError instanceof Error ? runtimeError.message : "unknown runtime error";
         console.warn("telegram runtime fallback to direct mode", {
-          tenantId: pairing.tenantId,
+          tenantId,
           reason
         });
         reply = await generateReplyViaAgentSession({
           env,
-          tenantId: pairing.tenantId,
+          tenantId,
           telegramUserId: String(userId),
           userMessage: text,
           modelProvider: tenant.modelProvider,
@@ -374,7 +458,7 @@ export async function handleTelegramWebhook(
       }
       reply = await generateReplyViaAgentSession({
         env,
-        tenantId: pairing.tenantId,
+        tenantId,
         telegramUserId: String(userId),
         userMessage: text,
         modelProvider: tenant.modelProvider,
@@ -394,7 +478,7 @@ export async function handleTelegramWebhook(
     const now = new Date();
     const userEventId = crypto.randomUUID();
     const userObjectKey = buildMemoryObjectKey({
-      tenantId: pairing.tenantId,
+      tenantId,
       eventId: userEventId,
       at: now
     });
@@ -403,7 +487,7 @@ export async function handleTelegramWebhook(
       JSON.stringify(
         {
           eventId: userEventId,
-          tenantId: pairing.tenantId,
+          tenantId,
           telegramUserId: String(userId),
           telegramChatId: String(chatId),
           role: "user",
@@ -416,13 +500,13 @@ export async function handleTelegramWebhook(
       { httpMetadata: { contentType: "application/json" } }
     );
     const userEvent = await memory.appendEvent({
-      tenantId: pairing.tenantId,
+      tenantId,
       role: "user",
       contentR2Key: userObjectKey,
       redactionVersion: "v1"
     });
     await env.MEMORY_INGEST_QUEUE.send({
-      tenantId: pairing.tenantId,
+      tenantId,
       eventId: userEvent.id,
       seq: userEvent.seq,
       eventTime: userEvent.createdAt
@@ -430,7 +514,7 @@ export async function handleTelegramWebhook(
 
     const assistantEventId = crypto.randomUUID();
     const assistantObjectKey = buildMemoryObjectKey({
-      tenantId: pairing.tenantId,
+      tenantId,
       eventId: assistantEventId,
       at: now
     });
@@ -439,7 +523,7 @@ export async function handleTelegramWebhook(
       JSON.stringify(
         {
           eventId: assistantEventId,
-          tenantId: pairing.tenantId,
+          tenantId,
           telegramUserId: String(userId),
           telegramChatId: String(chatId),
           role: "assistant",
@@ -452,13 +536,13 @@ export async function handleTelegramWebhook(
       { httpMetadata: { contentType: "application/json" } }
     );
     const assistantEvent = await memory.appendEvent({
-      tenantId: pairing.tenantId,
+      tenantId,
       role: "assistant",
       contentR2Key: assistantObjectKey,
       redactionVersion: "v1"
     });
     await env.MEMORY_INGEST_QUEUE.send({
-      tenantId: pairing.tenantId,
+      tenantId,
       eventId: assistantEvent.id,
       seq: assistantEvent.seq,
       eventTime: assistantEvent.createdAt
