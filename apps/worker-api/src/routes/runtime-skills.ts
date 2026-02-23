@@ -5,6 +5,7 @@ import { json, methodNotAllowed, parseJson } from "../lib/http";
 import { ensureTenantOpenClawBootstrap } from "../services/openclaw-bootstrap";
 import { listTenantRuntimeOpenClawSkills } from "../services/openclaw-skills";
 import { ensureTenantOpenClawRuntime } from "../services/openclaw-runtime";
+import { applySkillPack, getSkillPack, listSkillPacks } from "../services/skill-packs";
 import type { Env } from "../types";
 
 type RuntimeSkillsPatchInput = {
@@ -15,6 +16,12 @@ type RuntimeSkillsPatchInput = {
     enabled?: boolean;
     hidden?: boolean;
   }>;
+};
+
+type ApplyPackInput = {
+  tenantId?: string;
+  pack?: string;
+  force?: boolean;
 };
 
 function badRequest(message: string): Response {
@@ -49,12 +56,59 @@ export async function handleRuntimeSkills(
   request: Request,
   env: Env
 ): Promise<Response> {
+  const url = new URL(request.url);
+  const isPacksRoute = url.pathname.endsWith("/packs");
   const db = requireDb(env);
   const tenants = createTenantRepository(db);
   const policies = createRuntimeSkillPolicyRepository(db);
 
+  if (isPacksRoute) {
+    if (request.method === "GET") {
+      return json({ packs: listSkillPacks() });
+    }
+
+    if (request.method === "POST") {
+      const body = await parseJson<ApplyPackInput>(request);
+      if (!body) {
+        return badRequest("invalid json body");
+      }
+
+      const tenantId = body.tenantId?.trim();
+      if (!tenantId) {
+        return badRequest("tenantId is required");
+      }
+      const pack = getSkillPack(body.pack);
+      if (!pack) {
+        return badRequest("pack must be one of: basic, creator, ops");
+      }
+
+      const tenant = await tenants.findById(tenantId);
+      if (!tenant) {
+        return json({ error: "tenant not found" }, 404);
+      }
+
+      const applied = await applySkillPack({
+        repo: policies,
+        tenantId,
+        pack,
+        force: body.force === true
+      });
+      const policyList = await policies.listByTenant(tenantId);
+
+      return json({
+        ok: applied.applied,
+        tenantId,
+        pack: pack.name,
+        reason: applied.reason,
+        policiesApplied: applied.policiesApplied,
+        policies: policyList
+      });
+    }
+
+    return methodNotAllowed("GET, POST");
+  }
+
   if (request.method === "GET") {
-    const url = new URL(request.url);
     const tenantId = url.searchParams.get("tenantId")?.trim();
     const includeHidden = parseBooleanQuery(url.searchParams.get("includeHidden"));
     if (!tenantId) {
