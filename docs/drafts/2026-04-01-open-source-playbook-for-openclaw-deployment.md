@@ -155,10 +155,3 @@ The immediate goal is not to pretend this category is solved.
 The goal is to make agent deployment more understandable, more repeatable, and more practical for real organizations.
 
 That feels like the right problem to work on.
-
-## Notes for next revision
-
-- Add one concrete asset near the top: a short product demo video, screenshot, or architecture diagram.
-- Decide whether to keep the public-facing name `OpenClaw Autopilot` in the headline or only in the body.
-- If this is adapted for Hacker News, prefer a title like `What We Learned Building an OpenClaw AaaS Prototype`.
-- Keep the public version anchored to specific dates: early February 2026 launch, April 2026 repositioning.
