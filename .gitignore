@@ -15,6 +15,7 @@ coverage/
 dist/
 build/
 *.tsbuildinfo
+.next/
 
 # Worktrees
 .worktrees/

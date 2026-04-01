@@ -65,7 +65,7 @@ This is how OpenClaw Autopilot components map to Cloudflare infrastructure:
 
 High-level flow:
 
-1. User uses `apps/web` UI at `autoclaw.sh`.
+1. User uses `apps/web` UI at `autoclaw.sh` (or your own deployment).
 2. Next.js API routes proxy requests to Worker API (`WORKER_API_BASE_URL`).
 3. Worker validates auth/session and writes state to D1.
 4. Long-running work is enqueued to `RUN_QUEUE`.
