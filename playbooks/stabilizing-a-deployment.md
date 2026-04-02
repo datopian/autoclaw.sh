@@ -1,11 +1,11 @@
 ---
-title: Stabilizing an AutoClaw Deployment
-description: Reduce failure rates, add observability, and build a reliable agent operation.
+title: Stabilizing an OpenClaw Deployment
+description: Reduce failure rates, add observability, and build a reliable OpenClaw agent operation.
 ---
 
-# Stabilizing an AutoClaw Deployment
+# Stabilizing an OpenClaw Deployment
 
-Agent systems fail in specific, recurring ways. This playbook covers the most common failure modes and the operational patterns that address them.
+Agent systems fail in specific, recurring ways. This playbook covers the most common failure modes for OpenClaw deployments and the operational patterns that address them.
 
 ## The failure taxonomy
 
@@ -21,16 +21,16 @@ Queue failures are the most common source of hard-to-diagnose issues.
 
 **Monitor queue depth.** A rising backlog with no throughput increase means the consumer is blocked or crashed. Set an alert when depth exceeds your expected per-minute volume.
 
-**Set explicit message retention.** Default retention is short. For long-running agent tasks, increase it:
+**Set explicit message retention.** Default retention is short. For long-running OpenClaw tasks, increase it:
 
 ```jsonc
 // wrangler.jsonc
 "queues": {
   "consumers": [
     {
-      "queue": "autoclaw-run-queue",
+      "queue": "openclaw-run-queue",
       "max_retries": 3,
-      "dead_letter_queue": "autoclaw-run-dlq"
+      "dead_letter_queue": "openclaw-run-dlq"
     }
   ]
 }

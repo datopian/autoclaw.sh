@@ -1,11 +1,11 @@
 ---
-title: Running AutoClaw Locally
-description: Set up a full AutoClaw development environment on your machine using Docker and Wrangler's local simulation.
+title: Running OpenClaw Locally
+description: Set up a full OpenClaw development environment on your machine using Docker and Wrangler's local simulation.
 ---
 
-# Running AutoClaw Locally
+# Running OpenClaw Locally
 
-For development and evaluation, AutoClaw runs fully locally using Wrangler's local mode (which simulates D1, R2, and Queues) and Docker Compose for supporting services.
+For development and evaluation, OpenClaw runs fully locally using Wrangler's local mode (which simulates D1, R2, and Queues) and Docker Compose for supporting services. No Cloudflare account needed to get started.
 
 ## Prerequisites
 
@@ -16,10 +16,12 @@ For development and evaluation, AutoClaw runs fully locally using Wrangler's loc
 ## 1. Clone and install
 
 ```bash
-git clone https://github.com/datopian/autoclaw.sh
-cd autoclaw.sh/examples/openclaw-aaas
+npm create openclaw@latest my-agent
+cd my-agent
 npm install
 ```
+
+> **Multi-tenant setup?** If you're using the openclaw-aaas example instead, clone that repo and `cd` into `examples/openclaw-aaas` before continuing.
 
 ## 2. Configure environment
 

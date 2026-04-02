@@ -1,48 +1,51 @@
-# OpenClaw
+# AutoClaw
 
-An open-source framework for deploying and operating AI agent systems.
+The open deployment reference for [OpenClaw](https://openclaw.ai) AI agents.
 
-OpenClaw is an early, opinionated prototype and reference implementation — not a finished platform. The goal is to develop reusable deployment patterns, operational tooling, and practical know-how for running agent systems in production.
+AutoClaw is Datopian's open-source project for deploying and operating OpenClaw in production. It is not a managed service or an abstraction layer — it is playbooks, reference implementations, and operational patterns, built in public and shared freely.
 
-## What this is
+## What this repo contains
 
-- A **framework and harness** for deploying AI agents on your own infrastructure
-- A set of **reference examples** showing real deployment paths (Cloudflare, Hetzner, etc.)
-- A growing collection of **playbooks** for setup, debugging, and stabilization
-- An **open learning experiment** — we build in public and share what we find
+- **Playbooks** — step-by-step operational guides: deploying on Cloudflare, running locally, stabilizing in production, and more
+- **Examples** — reference deployments showing real configurations (single-agent, multi-tenant AaaS, etc.)
+- **Site** — the autoclaw.sh static site, built with Astro and deployed on Cloudflare Pages
 
-## What this is not
+## What AutoClaw is not
 
-- A managed SaaS product
+- A managed SaaS platform
 - An abstraction that hides your infrastructure
-- A finished or stable framework
+- A finished or stable framework — it's an ongoing open experiment
 
 ## Repository structure
 
 ```
 /
   README.md
-  docs/              # Overview, architecture, framework docs
-  examples/          # Reference deployments
-    openclaw-aaas/   # Full AaaS reference: Next.js control plane + Cloudflare Worker API
-  templates/         # Deployment harnesses and config scaffolds
-  playbooks/         # Operational guides: setup, debugging, stabilization
+  playbooks/         # Operational guides for deploying and running OpenClaw
+  examples/
+    openclaw-aaas/   # Multi-tenant OpenClaw AaaS: Next.js control plane + Cloudflare Worker API
+  site/              # autoclaw.sh — Astro static site
+  docs/              # Architecture, plans, research drafts
 ```
+
+## Playbooks
+
+Operational guides for running OpenClaw in production:
+
+- [Deploying OpenClaw on Cloudflare](./playbooks/deploying-on-cloudflare.md)
+- [Running OpenClaw Locally](./playbooks/running-locally.md)
+- [Stabilizing an OpenClaw Deployment](./playbooks/stabilizing-a-deployment.md)
+
+Published at [autoclaw.sh/playbooks](https://autoclaw.sh/playbooks).
 
 ## Examples
 
 ### [`examples/openclaw-aaas`](./examples/openclaw-aaas)
 
-A full Agent-as-a-Service reference implementation running on Cloudflare:
+A multi-tenant OpenClaw Agent-as-a-Service reference implementation on Cloudflare:
 
-- **`apps/web`** — Next.js control plane (auth, dashboard, billing, blog)
+- **`apps/web`** — Next.js control plane (auth, dashboard, billing)
 - **`apps/worker-api`** — Cloudflare Worker API (agent sessions, memory, queues, sandboxed runtime)
-
-## Documentation
-
-- [`docs/scqh/`](./docs/scqh/) — Strategic context (situation, complication, question, hypothesis)
-- [`docs/plans/`](./docs/plans/) — Execution plans
-- [`docs/drafts/`](./docs/drafts/) — Work in progress
 
 ## License
 

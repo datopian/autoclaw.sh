@@ -1,26 +1,22 @@
 ---
-title: Deploying AutoClaw on Cloudflare
-description: End-to-end guide to deploying an AutoClaw agent system on Cloudflare Workers, D1, R2, and Queues.
+title: Deploying OpenClaw on Cloudflare
+description: End-to-end guide to deploying a single OpenClaw agent on Cloudflare Workers, D1, R2, and Queues.
 ---
 
-# Deploying AutoClaw on Cloudflare
+# Deploying OpenClaw on Cloudflare
 
-Cloudflare is the reference infrastructure for AutoClaw. Workers handle agent execution, D1 provides durable SQLite storage, Queues decouple run scheduling from execution, and R2 stores artifacts. This guide covers a full deployment from scratch.
+Cloudflare is a solid choice for running OpenClaw in production. Workers handle agent execution, D1 provides durable SQLite storage, Queues decouple run scheduling from execution, and R2 stores artifacts. This guide covers a straightforward single-agent deployment.
+
+> **Looking for multi-tenant?** If you need to run OpenClaw as a service for multiple users, see the [openclaw-aaas example](https://github.com/datopian/autoclaw.sh/tree/main/examples/openclaw-aaas) — it adds user management, isolated agent contexts, and a full web UI.
 
 ## Prerequisites
 
 - Cloudflare account with Workers Paid plan (required for D1 and Queues)
 - `wrangler` CLI installed: `npm install -g wrangler`
 - Authenticated: `wrangler login`
+- An OpenClaw worker project (scaffold one with `npm create openclaw@latest`)
 
-## 1. Clone the reference example
-
-```bash
-git clone https://github.com/datopian/autoclaw.sh
-cd autoclaw.sh/examples/openclaw-aaas
-```
-
-## 2. Configure wrangler
+## 1. Configure wrangler
 
 Copy the template and fill in your account details:
 
@@ -44,34 +40,34 @@ Find your account ID in the Cloudflare dashboard under Workers & Pages.
 ## 3. Create D1 database
 
 ```bash
-wrangler d1 create autoclaw-db
+wrangler d1 create openclaw-db
 ```
 
 Copy the `database_id` from the output into your `wrangler.jsonc`:
 
 ```jsonc
 "d1_databases": [
-  { "binding": "DB", "database_name": "autoclaw-db", "database_id": "YOUR_DATABASE_ID" }
+  { "binding": "DB", "database_name": "openclaw-db", "database_id": "YOUR_DATABASE_ID" }
 ]
 ```
 
 Run the migrations:
 
 ```bash
-wrangler d1 migrations apply autoclaw-db
+wrangler d1 migrations apply openclaw-db
 ```
 
 ## 4. Create R2 bucket
 
 ```bash
-wrangler r2 bucket create autoclaw-artifacts
+wrangler r2 bucket create openclaw-artifacts
 ```
 
 ## 5. Create Queues
 
 ```bash
-wrangler queues create autoclaw-run-queue
-wrangler queues create autoclaw-memory-queue
+wrangler queues create openclaw-run-queue
+wrangler queues create openclaw-memory-queue
 ```
 
 ## 6. Set secrets
@@ -89,14 +85,14 @@ npm install
 wrangler deploy
 ```
 
-Note the deployed URL — something like `https://autoclaw-worker-api.YOUR_SUBDOMAIN.workers.dev`.
+Note the deployed URL — something like `https://openclaw-worker-api.YOUR_SUBDOMAIN.workers.dev`.
 
 ## 8. Deploy the web frontend
 
-Set the worker URL as an environment variable and deploy (Cloudflare Pages or Vercel):
+Set the worker URL as an environment variable and deploy to Cloudflare Pages:
 
 ```bash
-WORKER_API_BASE_URL=https://autoclaw-worker-api.YOUR_SUBDOMAIN.workers.dev
+WORKER_API_BASE_URL=https://openclaw-worker-api.YOUR_SUBDOMAIN.workers.dev
 ```
 
 ## Verifying the deployment
@@ -104,7 +100,7 @@ WORKER_API_BASE_URL=https://autoclaw-worker-api.YOUR_SUBDOMAIN.workers.dev
 Hit the health endpoint:
 
 ```bash
-curl https://autoclaw-worker-api.YOUR_SUBDOMAIN.workers.dev/health
+curl https://openclaw-worker-api.YOUR_SUBDOMAIN.workers.dev/health
 ```
 
 Expected response:
