@@ -1,7 +1,0 @@
-# Cloudflare Pages deployment config for autoclaw.sh
-# Build command:  cd site && npm install && npm run build
-# Build output:   site/dist
-# Root directory: (repo root)
-
-name = "autoclaw-site"
-pages_build_output_dir = "dist"
