@@ -1,0 +1,34 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../components/Layout.astro';
+
+export async function getStaticPaths() {
+  const playbooks = await getCollection('playbooks', ({ data }) => !data.draft);
+  return playbooks.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const GITHUB_BASE = 'https://github.com/datopian/autoclaw.sh/blob/main/playbooks';
+const githubUrl = `${GITHUB_BASE}/${entry.id}.md`;
+---
+
+<Layout title={entry.data.title ?? entry.id} description={entry.data.description}>
+  <a href="/playbooks" class="backLink">← Playbooks</a>
+
+  <div class="proseHeader">
+    <h1>{entry.data.title ?? entry.id}</h1>
+    {entry.data.description && <p>{entry.data.description}</p>}
+    <div class="proseMeta">
+      <a href={githubUrl} target="_blank" rel="noopener">Edit on GitHub →</a>
+    </div>
+  </div>
+
+  <article class="prose">
+    <Content />
+  </article>
+</Layout>

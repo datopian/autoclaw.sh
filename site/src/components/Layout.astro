@@ -1,0 +1,72 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'An open framework for building and operating AI agent systems.' } = Astro.props;
+const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — AutoClaw</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/png" href="/brand/hero-visual.png" />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <main class="landingMain">
+      <header class="landingTopbar">
+        <a href="/" class="landingBrand">
+          <span class="brandMark"></span>
+          AutoClaw
+        </a>
+
+        <button
+          type="button"
+          class="landingMenuButton"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          id="menuBtn"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="landingNavLinks" id="navLinks">
+          <a href="/playbooks" class="landingNavLink">Playbooks</a>
+          <a href="/examples" class="landingNavLink">Examples</a>
+          <a href={GITHUB_URL} class="landingNavLink" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </header>
+
+      <slot />
+
+      <p class="footer landingFooter">
+        Learning AgentOps before the category gets named and crowded — autoclaw.sh
+      </p>
+    </main>
+
+    <script>
+      const btn = document.getElementById('menuBtn');
+      const nav = document.getElementById('navLinks');
+      btn?.addEventListener('click', () => {
+        const open = btn.classList.toggle('isOpen');
+        nav?.classList.toggle('isOpen', open);
+        btn.setAttribute('aria-expanded', String(open));
+      });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 680) {
+          btn?.classList.remove('isOpen');
+          nav?.classList.remove('isOpen');
+          btn?.setAttribute('aria-expanded', 'false');
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../components/Layout.astro';
+
+const playbooks = (await getCollection('playbooks', ({ data }) => !data.draft))
+  .sort((a, b) => a.id.localeCompare(b.id));
+---
+
+<Layout title="Playbooks" description="Operational playbooks for deploying and running AI agent systems.">
+  <div class="contentHeader">
+    <h1>Playbooks</h1>
+    <p>Operational guides for deploying and running AI agent systems in production.</p>
+  </div>
+
+  {playbooks.length === 0 ? (
+    <p class="emptyState">No playbooks yet — check back soon or <a href="https://github.com/datopian/autoclaw.sh" target="_blank" rel="noopener">contribute one on GitHub</a>.</p>
+  ) : (
+    <div class="contentList">
+      {playbooks.map((entry) => (
+        <a href={`/playbooks/${entry.id}`} class="contentCard">
+          <h2>{entry.data.title ?? entry.id}</h2>
+          {entry.data.description && <p>{entry.data.description}</p>}
+        </a>
+      ))}
+    </div>
+  )}
+</Layout>

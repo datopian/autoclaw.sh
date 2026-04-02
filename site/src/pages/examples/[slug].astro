@@ -1,0 +1,35 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../components/Layout.astro';
+
+export async function getStaticPaths() {
+  const examples = await getCollection('examples', ({ data }) => !data.draft);
+  return examples.map((entry) => ({
+    params: { slug: entry.id.split('/')[0] },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const slug = entry.id.split('/')[0];
+const GITHUB_BASE = 'https://github.com/datopian/autoclaw.sh/tree/main/examples';
+const githubUrl = `${GITHUB_BASE}/${slug}`;
+---
+
+<Layout title={entry.data.title ?? slug} description={entry.data.description}>
+  <a href="/examples" class="backLink">← Examples</a>
+
+  <div class="proseHeader">
+    <h1>{entry.data.title ?? slug}</h1>
+    {entry.data.description && <p>{entry.data.description}</p>}
+    <div class="proseMeta">
+      <a href={githubUrl} target="_blank" rel="noopener">View source on GitHub →</a>
+    </div>
+  </div>
+
+  <article class="prose">
+    <Content />
+  </article>
+</Layout>

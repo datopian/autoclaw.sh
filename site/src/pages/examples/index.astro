@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../components/Layout.astro';
+
+const examples = (await getCollection('examples', ({ data }) => !data.draft))
+  .sort((a, b) => a.id.localeCompare(b.id));
+
+// id is like "openclaw-aaas/README" — derive the slug (directory name)
+const items = examples.map((entry) => ({
+  entry,
+  slug: entry.id.split('/')[0],
+}));
+---
+
+<Layout title="Examples" description="Reference implementations for common AI agent deployment patterns.">
+  <div class="contentHeader">
+    <h1>Examples</h1>
+    <p>Reference implementations showing how to deploy AI agent systems with AutoClaw.</p>
+  </div>
+
+  {items.length === 0 ? (
+    <p class="emptyState">No examples yet — check back soon or <a href="https://github.com/datopian/autoclaw.sh" target="_blank" rel="noopener">contribute one on GitHub</a>.</p>
+  ) : (
+    <div class="contentList">
+      {items.map(({ entry, slug }) => (
+        <a href={`/examples/${slug}`} class="contentCard">
+          <h2>{entry.data.title ?? slug}</h2>
+          {entry.data.description && <p>{entry.data.description}</p>}
+        </a>
+      ))}
+    </div>
+  )}
+</Layout>
