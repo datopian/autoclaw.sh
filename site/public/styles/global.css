@@ -416,6 +416,18 @@ button:hover,
   }
 }
 
+/* ── Landing section links ────────────────────────────────── */
+
+.landingSectionLink {
+  color: inherit;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+}
+
+.landingSectionLink:hover {
+  color: #dc2626;
+}
+
 /* ── Content listing ──────────────────────────────────────── */
 
 .contentHeader {
