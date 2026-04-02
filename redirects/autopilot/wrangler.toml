@@ -1,0 +1,7 @@
+name = "autoclaw-redirect"
+main = "src/index.js"
+compatibility_date = "2026-04-02"
+
+routes = [
+  { pattern = "autopilot.datopian.com/*", zone_name = "datopian.com" }
+]
