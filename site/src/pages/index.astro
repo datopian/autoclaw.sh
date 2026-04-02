@@ -1,0 +1,151 @@
+---
+import '../styles/global.css';
+
+const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
+
+const signals = [
+  {
+    label: 'Open by Default',
+    detail:
+      'MIT licensed. Every playbook, template, and reference implementation is public. We build in the open so you can see exactly how production agent systems are structured.',
+  },
+  {
+    label: 'Batteries Included',
+    detail:
+      'Clone a template and have a working agent deployment in minutes. Reference implementations cover common patterns: memory, tool use, multi-channel routing, and more.',
+  },
+  {
+    label: 'Production Patterns',
+    detail:
+      'Not toy examples. These are the patterns we use running real agents: durable state, queue-backed execution, sandboxed containers, and observable operations.',
+  },
+];
+
+const steps = [
+  'Fork an example or clone a template that matches your use case.',
+  'Swap in your model, tools, and channels — the framework handles the rest.',
+  'Deploy on Cloudflare Workers. Contribute patterns back.',
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AutoClaw — Open Framework for AI Agent Deployment</title>
+    <meta
+      name="description"
+      content="An open framework for building and operating AI agent systems. Playbooks, templates, and reference implementations — all public, all production-grade."
+    />
+    <meta property="og:title" content="AutoClaw — Open Framework for AI Agent Deployment" />
+    <meta
+      property="og:description"
+      content="An open framework for building and operating AI agent systems. MIT licensed, built in public."
+    />
+    <meta property="og:image" content="https://autoclaw.sh/brand/hero-visual.png" />
+    <meta property="og:url" content="https://autoclaw.sh" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/png" href="/brand/hero-visual.png" />
+  </head>
+
+  <body>
+    <main class="landingMain">
+      <header class="landingTopbar">
+        <a href="/" class="landingBrand">
+          <span class="brandMark"></span>
+          AutoClaw
+        </a>
+
+        <button
+          type="button"
+          class="landingMenuButton"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          id="menuBtn"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="landingNavLinks" id="navLinks">
+          <a href={GITHUB_URL} class="landingNavLink" target="_blank" rel="noopener">GitHub</a>
+          <a href={`${GITHUB_URL}/tree/main/playbooks`} class="landingNavLink" target="_blank" rel="noopener">Playbooks</a>
+          <a href={`${GITHUB_URL}/tree/main/examples`} class="landingNavLink" target="_blank" rel="noopener">Examples</a>
+        </nav>
+      </header>
+
+      <section class="landingHero">
+        <div class="landingHeroCopy">
+          <p class="landingKicker">AutoClaw</p>
+          <h1 class="landingTitle">
+            Deploy AI agents.<br />
+            Built in the open.
+          </h1>
+          <p class="landingLead">
+            An open framework for building and operating AI agent systems.<br />
+            Playbooks, templates, and reference implementations — all public.
+          </p>
+          <div class="actions landingActions">
+            <a href={GITHUB_URL} class="button landingButton" target="_blank" rel="noopener">
+              ★ Star on GitHub
+            </a>
+            <a
+              href={`${GITHUB_URL}/tree/main/playbooks`}
+              class="button landingGhostButton"
+              target="_blank"
+              rel="noopener"
+            >
+              Read the Playbooks
+            </a>
+          </div>
+        </div>
+        <div class="landingHeroRail">
+          <figure class="landingHeroVisual">
+            <img src="/brand/hero-visual.png" alt="AutoClaw agent architecture" width="600" height="400" />
+          </figure>
+        </div>
+      </section>
+
+      <section class="landingSignals" aria-label="Why AutoClaw">
+        {signals.map((item) => (
+          <article class="landingSignalRow">
+            <h2>{item.label}</h2>
+            <p>{item.detail}</p>
+          </article>
+        ))}
+      </section>
+
+      <section class="landingFlow" aria-label="How to get started">
+        <h2>How it works</h2>
+        <ol>
+          {steps.map((step) => (
+            <li>{step}</li>
+          ))}
+        </ol>
+      </section>
+
+      <p class="footer landingFooter">
+        Learning AgentOps before the category gets named and crowded — autoclaw.sh
+      </p>
+    </main>
+
+    <script>
+      const btn = document.getElementById('menuBtn');
+      const nav = document.getElementById('navLinks');
+      btn?.addEventListener('click', () => {
+        const open = btn.classList.toggle('isOpen');
+        nav?.classList.toggle('isOpen', open);
+        btn.setAttribute('aria-expanded', String(open));
+      });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 680) {
+          btn?.classList.remove('isOpen');
+          nav?.classList.remove('isOpen');
+          btn?.setAttribute('aria-expanded', 'false');
+        }
+      });
+    </script>
+  </body>
+</html>

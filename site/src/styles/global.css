@@ -1,0 +1,417 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap");
+
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-muted: #f1f3f6;
+  --text: #12161f;
+  --text-muted: #556070;
+  --line: #dde3ec;
+  --line-strong: #c6d0dd;
+  --accent: #111827;
+  --accent-soft: #e8eef8;
+  --success: #0f766e;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 2px rgba(12, 16, 24, 0.05);
+  --shadow-md: 0 12px 30px rgba(15, 24, 36, 0.08);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Manrope", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1300px 420px at 20% -180px, #d8e4f7 0%, transparent 65%),
+    radial-gradient(900px 340px at 95% -140px, #e5f2ef 0%, transparent 70%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+.button {
+  font-family: inherit;
+  font-size: 0.97rem;
+  border-radius: var(--radius-sm);
+  appearance: none;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 11px 15px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+button:hover,
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.2);
+}
+
+.actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer {
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* ── Landing layout ───────────────────────────────────────── */
+
+.landingMain {
+  max-width: 1230px;
+  margin: 0 auto;
+  padding: 24px 20px 44px;
+}
+
+.landingTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 42px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #18181b;
+}
+
+.landingBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.92rem;
+}
+
+.brandMark {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #ffffff url("/brand/hero-visual.png") center / contain no-repeat;
+  border: 1px solid #111111;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.landingNavLinks {
+  display: inline-flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.landingMenuButton {
+  display: none;
+  border: 1px solid #18181b;
+  background: #ffffff;
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  padding: 9px 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.landingMenuButton span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #111111;
+  border-radius: 99px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.landingMenuButton.isOpen span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.landingMenuButton.isOpen span:nth-child(2) {
+  opacity: 0;
+}
+
+.landingMenuButton.isOpen span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.landingNavLink {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #27272a;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+
+.landingNavLink:hover {
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+
+.landingHero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.landingHeroCopy {
+  max-width: 60ch;
+}
+
+.landingHeroRail {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+}
+
+.landingHeroVisual {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.landingHeroVisual img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
+}
+
+.landingKicker {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b91c1c;
+  font-size: 0.79rem;
+}
+
+.landingTitle {
+  margin: 10px 0 12px;
+  font-size: clamp(2.1rem, 5vw, 4.6rem);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  max-width: 13ch;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.landingLead {
+  margin: 0;
+  color: #27272a;
+  font-size: 1.03rem;
+  line-height: 1.65;
+}
+
+.landingActions {
+  justify-content: flex-start;
+  align-self: flex-start;
+  margin-top: 24px;
+}
+
+.landingButton {
+  background: #111111;
+  border-color: #111111;
+}
+
+.landingButton:hover {
+  box-shadow: 0 10px 18px rgba(17, 17, 17, 0.22);
+}
+
+.landingGhostButton {
+  border-color: #dc2626;
+  color: #dc2626;
+  background: #fff;
+}
+
+.landingGhostButton:hover {
+  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.15);
+}
+
+/* ── Signals ──────────────────────────────────────────────── */
+
+.landingSignals {
+  margin-top: 54px;
+  border-top: 1px solid #18181b;
+}
+
+.landingSignalRow {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
+  padding: 20px 0;
+  border-bottom: 1px solid #d4d4d8;
+}
+
+.landingSignalRow h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-family: "IBM Plex Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.landingSignalRow p {
+  margin: 0;
+  color: #3f3f46;
+  line-height: 1.6;
+}
+
+/* ── How it works ─────────────────────────────────────────── */
+
+.landingFlow {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.landingFlow h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-family: "IBM Plex Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.landingFlow ol {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 10px;
+  color: #27272a;
+  line-height: 1.6;
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+
+.landingFooter {
+  margin-top: 34px;
+  padding-top: 14px;
+  border-top: 1px solid #e4e4e7;
+  color: #a11d1d;
+  font-family: "IBM Plex Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.74rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 940px) {
+  .landingHero,
+  .landingFlow,
+  .landingSignalRow {
+    grid-template-columns: 1fr;
+  }
+
+  .landingActions {
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+
+  .landingHeroRail {
+    justify-items: start;
+  }
+}
+
+@media (max-width: 680px) {
+  .landingMain {
+    padding: 18px 14px 34px;
+  }
+
+  .landingTopbar {
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 26px;
+  }
+
+  .landingMenuButton {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .landingNavLinks {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    display: none;
+    width: min(230px, 100%);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #18181b;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, 0.08);
+    z-index: 5;
+  }
+
+  .landingNavLinks.isOpen {
+    display: flex;
+  }
+
+  .landingNavLink {
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 6px 2px;
+  }
+
+  .landingTitle {
+    max-width: 12ch;
+  }
+
+  .landingActions {
+    width: 100%;
+    margin-top: 14px;
+  }
+
+  .landingButton {
+    display: inline-flex;
+    width: 100%;
+    min-height: 52px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    line-height: 1.2;
+    font-size: 0.98rem;
+  }
+}

@@ -17,6 +17,11 @@ build/
 *.tsbuildinfo
 .next/
 
+# Site (Astro)
+site/dist/
+site/.astro/
+site/node_modules/
+
 # Worktrees
 .worktrees/
 
