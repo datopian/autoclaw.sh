@@ -1,6 +1,7 @@
 ---
 title: Google Workspace Integration for Clawbot
 description: Connect Clawbot to Gmail, Calendar, Drive, and other Google Workspace services using gogcli.
+slug: google-workspace-integration
 ---
 
 # Google Workspace Integration for Clawbot
@@ -36,11 +37,11 @@ Open the Google Cloud Console credentials area and create a project:
 
 Start by opening the project picker and creating a new project.
 
-![Create a Google Cloud project](./select-project-new-project.png)
+![Create a Google Cloud project](./images/select-project-new-project.png)
 
 Then fill in the project form and create the project.
 
-![Project creation form](./create-project-form.png)
+![Project creation form](./images/create-project-form.png)
 
 Use a dedicated project for Clawbot rather than reusing a random personal project. That makes it easier to audit scopes, rotate credentials, and separate dev from prod.
 
@@ -68,19 +69,19 @@ You can enable them from the API Library or directly from the URLs documented in
 
 One easy way to get there is to search for `api and services` from the Google Cloud console.
 
-![Search for APIs and Services](./search-apis-and-services.png)
+![Search for APIs and Services](./images/search-apis-and-services.png)
 
 From the APIs dashboard, click `Enable APIs and services`.
 
-![APIs dashboard](./apis-dashboard-enable-apis-and-services.png)
+![APIs dashboard](./images/apis-dashboard-enable-apis-and-services.png)
 
 The Workspace API library is where you enable products like Gmail, Calendar, Drive, Sheets, and Admin SDK.
 
-![Google Workspace API library](./google-workspace-api-library.png)
+![Google Workspace API library](./images/google-workspace-api-library.png)
 
 Each API has its own product page. Enable each one Clawbot needs.
 
-![Enable Google Calendar API](./enable-google-calendar-api.png)
+![Enable Google Calendar API](./images/enable-google-calendar-api.png)
 
 ## 3. Configure the OAuth consent screen
 
@@ -93,27 +94,25 @@ Set up the consent screen for the project. If the app is left in `Testing`, Goog
 
 From the main Google Cloud navigation, open the OAuth consent screen.
 
-![Open OAuth consent screen](./open-oauth-consent-screen.png)
+![Open OAuth consent screen](./images/open-oauth-consent-screen.png)
 
 Fill in the branding information for the app.
 
-![Configure OAuth branding](./configure-oauth-branding-app-info.png)
+![Configure OAuth branding](./images/configure-oauth-branding-app-info.png)
 
 For most Clawbot setups, choose `External` unless this is strictly limited to users inside your Workspace org and you know you want an internal-only app.
 
-![Choose External audience](./configure-oauth-audience-external.png)
+![Choose External audience](./images/configure-oauth-audience-external.png)
 
-Google may also show the newer Google Auth Platform navigation. From there, go to the audience page.
-
-![Open Google Auth Platform](./open-google-auth-platform.png)
+From here go to the audience page, using the left-hand menu.
 
 Then add your test users.
 
-![Add test users button](./add-test-users-button.png)
+![Add test users button](./images/add-test-users-button.png)
 
-![Add test users dialog](./add-test-users-dialog.png)
+![Add test users dialog](./images/add-test-users-dialog.png)
 
-![Save test user](./save-test-user.png)
+![Save test user](./images/save-test-user.png)
 
 If you skip this, OAuth will usually fail with an access or app-verification error for anyone not explicitly allowlisted.
 
@@ -127,19 +126,19 @@ Go to <https://console.cloud.google.com/auth/clients> and create a client:
 
 Open the credentials page first.
 
-![Open credentials page](./open-credentials-page.png)
+![Open credentials page](./images/open-credentials-page.png)
 
 Then create an OAuth client and choose `Desktop app`.
 
-![Create OAuth desktop client](./create-oauth-client-desktop-app.png)
+![Create OAuth desktop client](./images/create-oauth-client-desktop-app.png)
 
 After the client is created, download the JSON immediately and store it safely.
 
-![Download OAuth client JSON](./oauth-client-created-download-json.png)
+![Download OAuth client JSON](./images/oauth-client-created-download-json.png)
 
 Google usually names it something like `client_secret_....apps.googleusercontent.com.json`.
 
-![Download OAuth client JSON](./download-secret.png)
+![Download OAuth client JSON](./images/download-secret.png)
 
 Do not commit this file into the repo.
 
