@@ -10,7 +10,7 @@ OpenClaw deployments usually mix very different workloads: cheap cron jobs, repe
 
 The more useful question is: which model should handle which part of the system?
 
-This comparison is based on community feedback from practitioners discussing what they actually use for agent workloads. It is not a benchmark shootout. It is a practical guide for choosing a stack that fits OpenClaw.
+The model list in this article started with Reddit. We processed the most popular posts and threads in communities discussing OpenClaw to surface which models practitioners actually reach for — not which ones score best on benchmarks. That community signal was then used as the basis for deeper research, pricing analysis, and the comparison tables below. It is a practical guide for choosing a stack that fits OpenClaw, grounded in what real users report working for them.
 
 ## The short version
 
