@@ -4,17 +4,20 @@ import Layout from '../../components/Layout.astro';
 
 export async function getStaticPaths() {
   const playbooks = await getCollection('playbooks', ({ data }) => !data.draft);
-  return playbooks.map((entry) => ({
-    params: { slug: entry.id },
-    props: { entry },
-  }));
+  return playbooks.map((entry) => {
+    // Normalize: "multi-agent-workflows/README" → "multi-agent-workflows"
+    const slug = entry.id.replace(/\/README$/i, '');
+    return { params: { slug }, props: { entry } };
+  });
 }
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
 const GITHUB_BASE = 'https://github.com/datopian/autoclaw.sh/blob/main/playbooks';
-const githubUrl = `${GITHUB_BASE}/${entry.id}.md`;
+// entry.id may be "multi-agent-workflows/README" — link to the actual file path
+const githubPath = entry.id.includes('/') ? entry.id + '.md' : entry.id + '.md';
+const githubUrl = `${GITHUB_BASE}/${githubPath}`;
 ---
 
 <Layout title={entry.data.title ?? entry.id} description={entry.data.description}>

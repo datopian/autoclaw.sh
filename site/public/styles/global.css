@@ -330,6 +330,25 @@ button:hover,
   text-transform: uppercase;
   letter-spacing: 0.03em;
   font-size: 0.74rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 20px;
+}
+
+.footerLinks a {
+  color: #a11d1d;
+  text-decoration: none;
+}
+
+.footerLinks a:hover {
+  text-decoration: underline;
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
@@ -479,6 +498,14 @@ button:hover,
   color: #3f3f46;
   line-height: 1.6;
   font-size: 0.97rem;
+}
+
+.contentCardDate {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: "IBM Plex Mono", monospace;
+  margin-top: 6px;
+  display: block;
 }
 
 @media (max-width: 680px) {

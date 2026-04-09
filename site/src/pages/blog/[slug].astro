@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../components/Layout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const GITHUB_BASE = 'https://github.com/datopian/autoclaw.sh/blob/main/blog';
+const githubUrl = `${GITHUB_BASE}/${entry.id}.md`;
+const dateStr = entry.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Layout title={entry.data.title ?? entry.id} description={entry.data.description}>
+  <a href="/blog" class="backLink">← Blog</a>
+
+  <div class="proseHeader">
+    <h1>{entry.data.title ?? entry.id}</h1>
+    {entry.data.description && <p>{entry.data.description}</p>}
+    <div class="proseMeta">
+      <span>{dateStr}</span>
+      <a href={githubUrl} target="_blank" rel="noopener">Edit on GitHub →</a>
+    </div>
+  </div>
+
+  <article class="prose">
+    <Content />
+  </article>
+</Layout>

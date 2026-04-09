@@ -17,4 +17,11 @@ const examples = defineCollection({
   schema,
 });
 
-export const collections = { playbooks, examples };
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: '../blog' }),
+  schema: schema.extend({
+    date: z.coerce.date(),
+  }),
+});
+
+export const collections = { playbooks, examples, blog };

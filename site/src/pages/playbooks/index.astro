@@ -17,7 +17,7 @@ const playbooks = (await getCollection('playbooks', ({ data }) => !data.draft))
   ) : (
     <div class="contentList">
       {playbooks.map((entry) => (
-        <a href={`/playbooks/${entry.id}`} class="contentCard">
+        <a href={`/playbooks/${entry.id.replace(/\/README$/i, '')}`} class="contentCard">
           <h2>{entry.data.title ?? entry.id}</h2>
           {entry.data.description && <p>{entry.data.description}</p>}
         </a>

@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../components/Layout.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Layout title="Blog" description="Articles on AI agents, automation, and the OpenClaw ecosystem.">
+  <div class="contentHeader">
+    <h1>Blog</h1>
+    <p>Articles on AI agents, automation, and the OpenClaw ecosystem.</p>
+  </div>
+
+  {posts.length === 0 ? (
+    <p class="emptyState">No posts yet — check back soon.</p>
+  ) : (
+    <div class="contentList">
+      {posts.map((post) => (
+        <a href={`/blog/${post.id}`} class="contentCard">
+          <h2>{post.data.title ?? post.id}</h2>
+          {post.data.description && <p>{post.data.description}</p>}
+          <span class="contentCardDate">{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        </a>
+      ))}
+    </div>
+  )}
+</Layout>
