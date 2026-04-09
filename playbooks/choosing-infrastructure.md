@@ -5,7 +5,7 @@ description: Compare deployment options for running OpenClaw — from local mach
 
 # Hosting Options for OpenClaw
 
-OpenClaw can run almost anywhere: your laptop, a cheap VPS, a serverless platform, or a home server. This playbook compares the most common options so you can pick the right fit for your use case.
+OpenClaw can run almost anywhere: your laptop, a cheap VPS, a managed cloud platform, or a home server. This playbook compares the most common options so you can pick the right fit for your use case.
 
 ## Quick comparison
 
@@ -13,7 +13,7 @@ OpenClaw can run almost anywhere: your laptop, a cheap VPS, a serverless platfor
 |---|---|---|---|
 | Local machine | Beginner | $0 | Evaluation, personal use |
 | VPS (Hetzner, DigitalOcean) | Intermediate | $4–10 | Most self-hosters |
-| Cloudflare Workers | Intermediate–Advanced | $5+ | Production, multi-user |
+| Cloudflare Workers + Sandbox containers | Advanced | $10+ typical, ~$35 always-on | Experimental Cloudflare-native deployment |
 | PaaS (Railway, Render, Fly.io) | Beginner–Intermediate | $5–20 | Fast setup, low ops overhead |
 | Home server / Raspberry Pi | Advanced | $0–5 (electricity) | Privacy-first, always-on local |
 
@@ -30,7 +30,7 @@ Run OpenClaw directly on your computer. No server needed.
 
 **Cons**
 - Only available when your machine is on
-- Not accessible from other devices without extra setup (e.g. ngrok tunnel)
+- Not accessible from other devices without extra setup (e.g. tailscale network or ngrok tunnel)
 - Limited by your machine's memory and CPU
 
 **Technical requirements**
@@ -67,30 +67,27 @@ Hetzner is the best value — a CAX11 (2 vCPU ARM, 4 GB RAM) runs ~€4/month an
 
 ---
 
-## Cloudflare Workers
+## Cloudflare Workers + Sandbox containers
 
-Run OpenClaw on Cloudflare's serverless edge network using the AutoClaw reference stack. Workers handle agent execution, D1 provides durable storage, Queues manage async tasks, and R2 stores artifacts.
-
-See [Deploying OpenClaw on Cloudflare](./deploying-on-cloudflare.md) for a step-by-step guide.
+Run OpenClaw behind a Cloudflare Worker that boots a Cloudflare Sandbox container. This is the architecture used by the [`cloudflare/moltworker`](https://github.com/cloudflare/moltworker) reference repo, OpenClaw runs inside the container, optional R2 storage persists data across restarts, and a cron trigger can wake the container before scheduled jobs.
 
 **Pros**
-- Globally distributed — low latency anywhere
-- Scales to zero (no idle cost)
-- No server to manage
-- Tight integration with Cloudflare D1, R2, Queues, and AI Gateway
+- Managed Cloudflare deployment with built-in integration points like Access, workers.dev, and optional AI Gateway
+- Optional R2 backup/restore for persistence across container restarts
+- Can sleep when idle to reduce costs
 
 **Cons**
-- Workers Paid plan required for D1 and Queues ($5/month)
-- Workers have CPU time limits (50ms unbound per request on free, more on paid) — not suited for long-running synchronous tasks
-- Requires understanding of Wrangler and Cloudflare's deployment model
-- Cold starts on infrequently-used workers
+- Experimental proof of concept, not officially supported and may break without notice
+- Workers Paid plan is required for Sandbox containers, and compute costs can be much higher than a simple worker
+- Cold starts can take 1-2 minutes when the container is asleep
+- Requires comfort with Wrangler, Cloudflare Access, and Cloudflare's container model
 
 **Technical requirements**
-- Comfortable with CLI tooling (Wrangler)
-- Understanding of serverless concepts (stateless execution, bindings)
-- Familiarity with async/queue patterns for longer agent tasks
+- Comfortable with CLI tooling like Wrangler
+- Understanding of Cloudflare Sandbox/Containers, secrets, and worker bindings
+- Optional R2 setup if you want persistence across container restarts
 
-**Cost:** $5/month (Workers Paid) + R2/D1 usage (typically <$1/month at small scale)
+**Cost:** $5/month Workers Paid plan plus container costs. The `moltworker` README estimates roughly ~$34.50/month for a `standard-1` container running 24/7, or about ~$10-11/month if the container sleeps aggressively when idle.
 
 ---
 
@@ -148,7 +145,7 @@ Run OpenClaw on hardware you own — a Raspberry Pi, an old laptop, or a mini PC
 
 **Want always-on at low cost with minimal ops** → VPS on Hetzner. Best value for solo operators.
 
-**Building for multiple users or need production reliability** → Cloudflare Workers with the AutoClaw stack.
+**Already deep in Cloudflare and want a managed deployment despite the experimental container model** → Cloudflare Workers + Sandbox containers.
 
 **Want fast setup without thinking about servers** → Railway or Render.
 
