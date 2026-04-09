@@ -42,6 +42,69 @@ That last point matters the most. For serious OpenClaw deployments, the stronges
 | **GLM (local)** | Reliable local option | Local cron jobs, self-hosted agents, simple dependable workflows | **Hardware-based** | Less associated with top-end capability |
 | **OpenRouter** | Cost and provider optimization | Fallback routing, provider abstraction, task-specific switching | **Depends on routed models** | Adds operational complexity because it is routing, not a model |
 
+## Scoring matrix
+
+Ratings on a 1–5 scale. **Cost** is rated inversely — 5 means cheapest (best value). **Local** indicates whether self-hosting is the primary deployment mode.
+
+| Model | Cost (5=cheapest) | Output Quality | Tool Reliability | Context Window | Setup Ease | Local? |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Minimax** | ★★★★★ | ★★★☆☆ | ★★★☆☆ | ★★★★★ | ★★★★☆ | No |
+| **Kimi K2.5** | ★★★★☆ | ★★★★☆ | ★★★★☆ | ★★★☆☆ | ★★★★☆ | No |
+| **DeepSeek V3** | ★★★★★ | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | ★★★★☆ | No |
+| **Claude Sonnet** | ★★☆☆☆ | ★★★★★ | ★★★★★ | ★★★★☆ | ★★★★★ | No |
+| **Claude Opus** | ★☆☆☆☆ | ★★★★★ | ★★★★★ | ★★★★☆ | ★★★★★ | No |
+| **ChatGPT Plus (OAuth)** | ★★★☆☆ | ★★★★☆ | ★★★★☆ | ★★★☆☆ | ★★★★★ | No |
+| **GPT-5.4 Mini** | ★★★★★ | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | ★★★★★ | No |
+| **Gemini 3 Flash** | ★★★★★ | ★★★☆☆ | ★★★☆☆ | ★★★★★ | ★★★★☆ | No |
+| **Qwen3.5 (local)** | ★★★★★ | ★★★★☆ | ★★★☆☆ | ★★★★☆ | ★★☆☆☆ | Yes |
+| **GLM (local)** | ★★★★★ | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | Yes |
+
+## API pricing reference
+
+Approximate costs per million tokens as reported by the community and public pricing pages. Local models are excluded since cost is hardware-dependent.
+
+| Model | Input (per 1M tokens) | Output (per 1M tokens) | Free tier? |
+| --- | --- | --- | --- |
+| **Minimax** | ~$0.20 | ~$1.10 | No |
+| **Kimi K2.5** (via OpenRouter) | ~$0.07–0.15 | ~$0.30–0.60 | Limited |
+| **DeepSeek V3** | ~$0.27 | ~$1.10 | No |
+| **Claude Sonnet** | ~$3.00 | ~$15.00 | No |
+| **Claude Opus** | ~$15.00 | ~$75.00 | No |
+| **GPT-5.4 Mini** | ~$0.15 | ~$0.60 | No |
+| **Gemini 3 Flash** | ~$0.00–0.10 | ~$0.00–0.40 | Yes |
+| **ChatGPT Plus (OAuth)** | $20/mo flat | — | No |
+
+> Prices are indicative and change frequently. Check provider pricing pages before committing to a stack.
+
+## Context window comparison
+
+Context window size matters when an OpenClaw agent needs to read long threads, large documents, or extended conversation history in a single pass.
+
+| Model | Context Window | Notes |
+| --- | --- | --- |
+| **Minimax** | 1M tokens | One of the largest available |
+| **Gemini 3 Flash** | 1M tokens | Large context, suitable for document-heavy workflows |
+| **Claude Sonnet / Opus** | 200K tokens | Strong long-context reliability |
+| **Kimi K2.5** | ~128–200K tokens | Varies by access method |
+| **DeepSeek V3** | 128K tokens | Sufficient for most agent tasks |
+| **GPT-5.4 Mini** | 128K tokens | Standard modern context size |
+| **Qwen3.5-27B (local)** | ~115K reliable | Community-reported with 32GB VRAM at Q4-K-M quantization |
+| **GLM (local)** | Varies | Depends on quantization and hardware |
+
+## Task-type model matching
+
+| Task Type | Recommended Model(s) | Avoid |
+| --- | --- | --- |
+| High-volume cron jobs | DeepSeek V3, Kimi K2.5, GLM (local) | Opus, Sonnet |
+| Inbox triage / classification | GPT-5.4 Mini, DeepSeek V3, Gemini Flash | Opus |
+| Complex multi-step reasoning | Claude Opus | Minimax, GPT-5.4 Mini |
+| Tool-heavy agent workflows | Claude Sonnet, Claude Opus | Local models (less tested) |
+| Experimentation / prototyping | Gemini 3 Flash, Kimi K2.5 | Opus |
+| Privacy-sensitive / self-hosted | Qwen3.5 (local), GLM (local) | Any cloud API |
+| Long-document context tasks | Minimax, Gemini Flash | DeepSeek V3 |
+| Budget-first general use | Minimax, Kimi K2.5 | Claude Opus |
+| Simple onboarding | ChatGPT Plus (OAuth) | Local models |
+
 ## What matters for OpenClaw
 
 ### 1. Repetitive agent work should usually be cheap
