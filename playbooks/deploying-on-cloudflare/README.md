@@ -260,8 +260,3 @@ Run `npx wrangler secret list` and `npx wrangler tail` and verify your AI-provid
 
 **WebSockets work poorly in local development**
 The repo documents limitations in `wrangler dev` with sandbox WebSocket proxying. Test against a real deployment if you need full browser or chat behavior.
-
-## Next steps
-
-- [Choosing infrastructure](./choosing-infrastructure.md) — compare Cloudflare to VPS, PaaS, and local hosting
-- [Secure / private deployments](./secure-private-deployment.md) — lock down your instance further
