@@ -2,6 +2,7 @@
 title: "Connecting OpenClaw to Your CRM"
 description: "How to wire OpenClaw agents into HubSpot, Salesforce, or any CRM via MCP — and what that unlocks for sales and ops workflows."
 date: 2026-04-06
+draft: true
 ---
 
 Modern sales teams spend hours every week updating CRM records, logging calls, and chasing down contact details. OpenClaw agents can handle most of that automatically — here's how to set it up.
