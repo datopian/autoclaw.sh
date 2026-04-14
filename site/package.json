@@ -10,5 +10,8 @@
   "dependencies": {
     "astro": "^5.7.0",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260414.1"
   }
 }

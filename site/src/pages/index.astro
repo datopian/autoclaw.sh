@@ -25,11 +25,65 @@ const exampleItems = examples
         The open deployment reference for OpenClaw AI agents.<br />
         Playbooks, templates, and reference implementations.
       </p>
-      <div class="actions landingActions">
-        <a href={GITHUB_URL} class="button landingButton" target="_blank" rel="noopener">
-          ★ Star on GitHub
-        </a>
-      </div>
+      <form class="heroCta" id="ctaForm" novalidate>
+        <p class="heroCtaHeadline">Exclusive insights, playbooks, and early product updates.</p>
+        <div class="heroCtaInputRow">
+          <input
+            class="heroCtaInput"
+            id="ctaEmail"
+            type="email"
+            name="email"
+            placeholder="you@company.com"
+            autocomplete="email"
+          />
+          <button type="submit" class="heroCtaButton" id="ctaBtn">Stay in the loop</button>
+        </div>
+        <p class="heroCtaNote" id="ctaNote">High-signal only. No spam.</p>
+      </form>
+
+      <script>
+        const form = document.getElementById('ctaForm') as HTMLFormElement;
+        const input = document.getElementById('ctaEmail') as HTMLInputElement;
+        const btn = document.getElementById('ctaBtn') as HTMLButtonElement;
+        const note = document.getElementById('ctaNote') as HTMLParagraphElement;
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = input.value.trim();
+          if (!email) return;
+
+          btn.disabled = true;
+          btn.textContent = 'Sending…';
+
+          try {
+            const res = await fetch('/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email }),
+            });
+
+            if (res.ok) {
+              input.value = '';
+              btn.textContent = 'You\'re in ✓';
+              note.textContent = 'Check your inbox soon.';
+              note.style.color = 'var(--success)';
+            } else {
+              btn.textContent = 'Try again';
+              btn.disabled = false;
+              note.textContent = 'Something went wrong. Try again.';
+              note.style.color = '#b91c1c';
+            }
+          } catch {
+            btn.textContent = 'Try again';
+            btn.disabled = false;
+            note.textContent = 'Network error. Try again.';
+            note.style.color = '#b91c1c';
+          }
+        });
+      </script>
+      <a href={GITHUB_URL} class="githubLink" target="_blank" rel="noopener">
+        ★ Star on GitHub
+      </a>
     </div>
     <div class="landingHeroRail">
       <figure class="landingHeroVisual">

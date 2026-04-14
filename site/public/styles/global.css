@@ -34,8 +34,9 @@ body {
   font-family: "Manrope", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(1300px 420px at 20% -180px, #d8e4f7 0%, transparent 65%),
-    radial-gradient(900px 340px at 95% -140px, #e5f2ef 0%, transparent 70%),
+    radial-gradient(1500px 560px at 10% -220px, #cddaf5 0%, transparent 58%),
+    radial-gradient(800px 420px at 96% -120px, #d6eee8 0%, transparent 62%),
+    radial-gradient(700px 400px at 55% 110%, #e8eef8 0%, transparent 65%),
     var(--bg);
   min-height: 100vh;
 }
@@ -95,9 +96,9 @@ button:hover,
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 42px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #18181b;
+  margin-bottom: 52px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
 
 .landingBrand {
@@ -178,13 +179,28 @@ button:hover,
   border-color: #dc2626;
 }
 
+/* ── Entrance animation ───────────────────────────────────── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.landingKicker  { animation: fadeUp 0.45s ease both; animation-delay: 0.05s; }
+.landingTitle   { animation: fadeUp 0.45s ease both; animation-delay: 0.12s; }
+.landingLead    { animation: fadeUp 0.45s ease both; animation-delay: 0.20s; }
+.heroCta        { animation: fadeUp 0.45s ease both; animation-delay: 0.28s; }
+.githubLink     { animation: fadeUp 0.45s ease both; animation-delay: 0.34s; }
+.landingHeroRail { animation: fadeUp 0.55s ease both; animation-delay: 0.18s; }
+
 /* ── Hero ─────────────────────────────────────────────────── */
 
 .landingHero {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 40px;
   align-items: center;
+  min-height: 420px;
 }
 
 .landingHeroCopy {
@@ -233,9 +249,10 @@ button:hover,
 
 .landingLead {
   margin: 0;
-  color: #27272a;
+  color: var(--text-muted);
   font-size: 1.03rem;
-  line-height: 1.65;
+  line-height: 1.7;
+  max-width: 44ch;
 }
 
 .landingActions {
@@ -263,19 +280,125 @@ button:hover,
   box-shadow: 0 8px 16px rgba(220, 38, 38, 0.15);
 }
 
+/* ── Hero CTA ─────────────────────────────────────────────── */
+
+.heroCta {
+  margin-top: 32px;
+  padding: 20px 22px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid #b91c1c;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  max-width: 440px;
+}
+
+.heroCtaHeadline {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.heroCtaInputRow {
+  display: flex;
+  align-items: stretch;
+  height: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.heroCtaInputRow:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+.heroCtaInput {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0 13px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+  height: 100%;
+}
+
+.heroCtaInput::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.heroCtaButton {
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0 16px;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  border-left: 1px solid var(--line-strong);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  transform: none;
+}
+
+.heroCtaButton:hover {
+  opacity: 0.82;
+  transform: none;
+  box-shadow: none;
+}
+
+.heroCtaNote {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.01em;
+}
+
+.githubLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.githubLink:hover {
+  color: var(--text);
+}
+
 /* ── Signals ──────────────────────────────────────────────── */
 
 .landingSignals {
-  margin-top: 54px;
-  border-top: 1px solid #18181b;
+  margin-top: 72px;
+  border-top: 1px solid var(--line-strong);
 }
 
 .landingSignalRow {
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
-  padding: 20px 0;
-  border-bottom: 1px solid #d4d4d8;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .landingSignalRow h2 {
@@ -469,7 +592,7 @@ button:hover,
 
 .contentList {
   margin-top: 8px;
-  border-top: 1px solid #18181b;
+  border-top: 1px solid var(--line-strong);
 }
 
 .contentCard {
@@ -477,12 +600,16 @@ button:hover,
   grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
   gap: 16px;
   padding: 20px 0;
-  border-bottom: 1px solid #d4d4d8;
-  transition: opacity 0.1s ease;
+  border-bottom: 1px solid var(--line);
+  transition: transform 0.18s ease, color 0.18s ease;
 }
 
 .contentCard:hover {
-  opacity: 0.75;
+  transform: translateX(4px);
+}
+
+.contentCard:hover h2 {
+  color: #b91c1c;
 }
 
 .contentCard h2 {
