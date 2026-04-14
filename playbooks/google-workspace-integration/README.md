@@ -1,32 +1,32 @@
 ---
-title: Google Workspace Integration for Clawbot
-description: Connect Clawbot to Gmail, Calendar, Drive, and other Google Workspace services using gogcli.
+title: Google Workspace Integration for Openclaw
+description: Connect Openclaw to Gmail, Calendar, Drive, and other Google Workspace services using gogcli.
 slug: google-workspace-integration
 ---
 
-# Google Workspace Integration for Clawbot
+# Google Workspace Integration for Openclaw
 
-This playbook shows how to give Clawbot access to Google Workspace using [`gogcli`](https://github.com/steipete/gogcli), a terminal-first Google client that works well from an agent runtime. The core pattern is simple:
+This playbook shows how to give Openclaw access to Google Workspace using [`gogcli`](https://github.com/steipete/gogcli), a terminal-first Google client that works well from an agent runtime. The core pattern is simple:
 
 1. Create a Google Cloud project
-2. Enable the Google APIs Clawbot needs
+2. Enable the Google APIs Openclaw needs
 3. Create an OAuth desktop client and download its JSON file
-4. Put that JSON file on the Clawbot host
+4. Put that JSON file on the Openclaw host
 5. Use `gog` to authorize the target Google account
-6. Let Clawbot call `gog` commands as needed
+6. Let Openclaw call `gog` commands as needed
 
-This is the best default setup when Clawbot is acting on behalf of a specific human user.
+This is the best default setup when Openclaw is acting on behalf of a specific human user.
 
 ## What this gives you
 
-Once configured, Clawbot can use Google Workspace from the shell, including:
+Once configured, Openclaw can use Google Workspace from the shell, including:
 
 - Gmail search, read, send, labels, drafts, and filters
 - Calendar listing, search, create, update, and RSVP
 - Drive upload, download, search, and sharing
 - Docs, Sheets, Slides, Forms, Contacts, Tasks, and more
 
-For most Clawbot deployments, start with OAuth user auth first. Only move to a service account with domain-wide delegation if you need org-wide admin access or Workspace-only APIs that require impersonation.
+For most Openclaw deployments, start with OAuth user auth first. Only move to a service account with domain-wide delegation if you need org-wide admin access or Workspace-only APIs that require impersonation.
 
 ## 1. Create the Google Cloud project
 
@@ -43,11 +43,11 @@ Then fill in the project form and create the project.
 
 ![Project creation form](./images/create-project-form.png)
 
-Use a dedicated project for Clawbot rather than reusing a random personal project. That makes it easier to audit scopes, rotate credentials, and separate dev from prod.
+Use a dedicated project for Openclaw rather than reusing a random personal project. That makes it easier to audit scopes, rotate credentials, and separate dev from prod.
 
 ## 2. Enable the APIs you need
 
-Enable only the APIs Clawbot actually needs. Common ones are:
+Enable only the APIs Openclaw actually needs. Common ones are:
 
 - Gmail API
 - Google Calendar API
@@ -57,7 +57,7 @@ Enable only the APIs Clawbot actually needs. Common ones are:
 - People API
 - Google Tasks API
 
-If you expect Clawbot to work across more of Workspace, you can also enable:
+If you expect Openclaw to work across more of Workspace, you can also enable:
 
 - Google Slides API
 - Google Forms API
@@ -79,7 +79,7 @@ The Workspace API library is where you enable products like Gmail, Calendar, Dri
 
 ![Google Workspace API library](./images/google-workspace-api-library.png)
 
-Each API has its own product page. Enable each one Clawbot needs.
+Each API has its own product page. Enable each one Openclaw needs.
 
 ![Enable Google Calendar API](./images/enable-google-calendar-api.png)
 
@@ -100,7 +100,7 @@ Fill in the branding information for the app.
 
 ![Configure OAuth branding](./images/configure-oauth-branding-app-info.png)
 
-For most Clawbot setups, choose `External` unless this is strictly limited to users inside your Workspace org and you know you want an internal-only app.
+For most Openclaw setups, choose `External` unless this is strictly limited to users inside your Workspace org and you know you want an internal-only app.
 
 ![Choose External audience](./images/configure-oauth-audience-external.png)
 
@@ -142,35 +142,35 @@ Google usually names it something like `client_secret_....apps.googleusercontent
 
 Do not commit this file into the repo.
 
-## 5. Put the secret JSON on the Clawbot host
+## 5. Put the secret JSON on the Openclaw host
 
 Pick a dedicated folder outside the git checkout. A good default is:
 
 ```bash
-mkdir -p /opt/clawbot/secrets/google
-chmod 700 /opt/clawbot/secrets/google
+mkdir -p /opt/openclaw/secrets/google
+chmod 700 /opt/openclaw/secrets/google
 ```
 
 Save the OAuth client JSON there, for example:
 
 ```text
-/opt/clawbot/secrets/google/workspace-oauth.json
+/opt/openclaw/secrets/google/workspace-oauth.json
 ```
 
 Two practical ways to get the file onto the machine:
 
 ### Option A: send it through Telegram
 
-Upload the JSON file to Clawbot in Telegram and ask it to save the attachment to:
+Upload the JSON file to Openclaw in Telegram and ask it to save the attachment to:
 
 ```text
-/opt/clawbot/secrets/google/workspace-oauth.json
+/opt/openclaw/secrets/google/workspace-oauth.json
 ```
 
 Example prompt:
 
 ```text
-Save this file to /opt/clawbot/secrets/google/workspace-oauth.json and do not move it into the repo.
+Save this file to /opt/openclaw/secrets/google/workspace-oauth.json and do not move it into the repo.
 ```
 
 ### Option B: copy it with `scp`
@@ -178,13 +178,13 @@ Save this file to /opt/clawbot/secrets/google/workspace-oauth.json and do not mo
 From your local machine:
 
 ```bash
-scp ~/Downloads/client_secret_123.json your-user@your-server:/opt/clawbot/secrets/google/workspace-oauth.json
+scp ~/Downloads/client_secret_123.json your-user@your-server:/opt/openclaw/secrets/google/workspace-oauth.json
 ```
 
 Then fix permissions on the server if needed:
 
 ```bash
-chmod 600 /opt/clawbot/secrets/google/workspace-oauth.json
+chmod 600 /opt/openclaw/secrets/google/workspace-oauth.json
 ```
 
 ## 6. Install `gogcli`
@@ -224,19 +224,19 @@ gog --help
 Point `gog` at the JSON file you saved on the server:
 
 ```bash
-gog auth credentials /opt/clawbot/secrets/google/workspace-oauth.json
+gog auth credentials /opt/openclaw/secrets/google/workspace-oauth.json
 ```
 
 If you want separate Google projects for different environments, use named clients:
 
 ```bash
-gog --client work auth credentials /opt/clawbot/secrets/google/workspace-oauth.json
+gog --client work auth credentials /opt/openclaw/secrets/google/workspace-oauth.json
 gog auth credentials list
 ```
 
 For most setups, the default client is enough.
 
-## 8. Authorize the Google account Clawbot should use
+## 8. Authorize the Google account Openclaw should use
 
 For a server or remote shell, the easiest flow is usually the manual one:
 
@@ -282,11 +282,11 @@ gog calendar calendars
 gog drive ls --max 5
 ```
 
-If these work, Clawbot can use Google Workspace from the shell.
+If these work, Openclaw can use Google Workspace from the shell.
 
-## 10. How Clawbot should use it
+## 10. How Openclaw should use it
 
-Once `gog` is installed and authenticated on the host, Clawbot does not need direct API integration code for many workflows. It can call `gog` commands and work with the results.
+Once `gog` is installed and authenticated on the host, Openclaw does not need direct API integration code for many workflows. It can call `gog` commands and work with the results.
 
 Typical examples:
 
@@ -297,11 +297,11 @@ gog drive search 'quarterly report' --json
 gog docs export <docId> --format markdown --out ./report.md
 ```
 
-For agent reliability, prefer `--json` output anywhere Clawbot will parse the result.
+For agent reliability, prefer `--json` output anywhere Openclaw will parse the result.
 
 ## Recommended scope strategy
 
-Start narrow. Only request the services Clawbot really needs.
+Start narrow. Only request the services Openclaw really needs.
 
 - Email assistant: `gmail`
 - Scheduling assistant: `calendar`
@@ -325,7 +325,7 @@ High-level flow:
 6. Configure `gog`:
 
 ```bash
-gog auth service-account set you@yourdomain.com --key /opt/clawbot/secrets/google/service-account.json
+gog auth service-account set you@yourdomain.com --key /opt/openclaw/secrets/google/service-account.json
 gog --account you@yourdomain.com auth status
 ```
 
@@ -334,7 +334,7 @@ This is the right model for org-wide automation, but it is more sensitive operat
 ## Security notes
 
 - Never commit OAuth client JSON or service account JSON into git
-- Keep secret files outside the repo, ideally under `/opt/clawbot/secrets/`
+- Keep secret files outside the repo, ideally under `/opt/openclaw/secrets/`
 - Lock permissions down with `chmod 600`
 - Prefer least-privilege scopes
 - Use separate Google Cloud projects for dev and prod
@@ -354,7 +354,7 @@ The token was authorized without the needed service scope. Re-run `gog auth add 
 
 Use `--manual` during `gog auth add`.
 
-**Clawbot can run commands manually but not inside automation**
+**Openclaw can run commands manually but not inside automation**
 
 Set `GOG_ACCOUNT` in the runtime environment so the account selection is explicit.
 
@@ -362,12 +362,12 @@ Set `GOG_ACCOUNT` in the runtime environment so the account selection is explici
 
 Before you call this done, make sure all of these are true:
 
-1. The Google Cloud project is dedicated to Clawbot
+1. The Google Cloud project is dedicated to Openclaw
 2. Only required APIs are enabled
 3. Test users are added if the app is still in testing
-4. The OAuth JSON is stored at `/opt/clawbot/secrets/google/workspace-oauth.json`
+4. The OAuth JSON is stored at `/opt/openclaw/secrets/google/workspace-oauth.json`
 5. `gog auth credentials` has been run on the host
 6. `gog auth add ... --manual` completed successfully
-7. `gog gmail labels list` or another real command works from the Clawbot host
+7. `gog gmail labels list` or another real command works from the Openclaw host
 
-At that point, Clawbot can use Google Workspace through `gogcli` with no extra middleware beyond shell access.
+At that point, Openclaw can use Google Workspace through `gogcli` with no extra middleware beyond shell access.
