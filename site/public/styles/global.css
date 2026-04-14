@@ -444,8 +444,18 @@ button:hover,
 
 /* ── Contact ──────────────────────────────────────────────── */
 
+.contactRow {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid #b91c1c;
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  margin-top: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
 .contactBlurb {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.6;
@@ -453,17 +463,16 @@ button:hover,
 
 .contactLink {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.88rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 700;
   color: var(--text);
-  border-bottom: 1px solid var(--line-strong);
-  padding-bottom: 1px;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
 }
 
 .contactLink:hover {
   color: #b91c1c;
-  border-color: #b91c1c;
 }
 
 /* ── Footer ───────────────────────────────────────────────── */
