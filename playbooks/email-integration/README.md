@@ -73,9 +73,11 @@ openclaw@ubuntu-4gb-hel1-2:~$ clawhub install imap-smtp-email
 
 As you can see it installed the skill to `/home/openclaw/.openclaw/workspace/skills/imap-smtp-email`. This skill provides a mail connector that can read and send email using IMAP and SMTP.
 
-Go into that directroy and run `bash setup.sh` to configure the connector, it should guide you through entering the IMAP and SMTP settings described in the next section.
+Go into that directory and run `npm i` this should install any email libraries required by the CLI
 
-## 4. Use these IMAP settings
+After that you can run `bash setup.sh` to configure the connector, it should guide you through entering the IMAP and SMTP settings described in the next section.
+
+## 5. Use these IMAP settings
 
 When OpenClaw asks for email connection settings, use the following values:
 
@@ -96,7 +98,7 @@ If your OpenClaw setup also wants to send email or save drafts through SMTP, use
 - Username: the same full Gmail address
 - Password: the same Gmail App Password
 
-## 5. Test with small prompts first
+## 6. Test with small prompts first
 
 Do not start with a large workflow. First confirm that OpenClaw can read mail reliably.
 
@@ -116,7 +118,7 @@ If you see a receipt, tell me the vendor and amount.
 
 If these work, the integration is usually in good shape.
 
-## 6. Start with one safe automation
+## 7. Start with one safe automation
 
 The best first automation is small and easy to verify.
 
