@@ -33,6 +33,7 @@ AutoClaw is Datopian's open-source project for deploying and operating OpenClaw 
 Operational guides for running OpenClaw in production:
 
 - [Deploying OpenClaw on Cloudflare](./playbooks/deploying-on-cloudflare.md)
+- [How to Compare LLM Quality for Your OpenClaw Use Case](./playbooks/how-to-compare-llm-quality-for-your-openclaw-use-case/README.md)
 - [Running OpenClaw Locally](./playbooks/running-locally.md)
 - [Stabilizing an OpenClaw Deployment](./playbooks/stabilizing-a-deployment.md)
 
