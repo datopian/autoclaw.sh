@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Layout from '../components/Layout.astro';
+import heroVisual from '../assets/hero-visual.png';
 
 const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
 
@@ -88,7 +90,7 @@ const exampleItems = examples
     </div>
     <div class="landingHeroRail">
       <figure class="landingHeroVisual">
-        <img src="/brand/hero-visual.png" alt="AutoClaw agent architecture" width="600" height="400" />
+        <Image src={heroVisual} alt="AutoClaw agent architecture" width={844} format="webp" quality={82} />
       </figure>
     </div>
   </section>
