@@ -228,27 +228,99 @@ You must guide the user through these steps in order:
 
 1. Ask how to connect to the OpenClaw instance.
 Figure out how the active model can be switched. For example: is access via SSH, a local shell, Docker, a control plane, or some other interface?
+Before moving on, identify:
+- what environment you can access
+- whether you can inspect the active model configuration
+- whether you can reload or restart the relevant service if needed
+- any immediate blockers such as missing access or unclear ownership
+
+Do not continue until the access path is clear enough to support model switching.
 
 2. Ask how model switching works in that deployment.
 Determine where the active provider/model is configured, how to switch it safely, and how to verify the active model before testing.
+Write down the switching procedure as a short repeatable checklist before running any model tests.
+That checklist should include:
+- where the model is configured
+- what exact value needs to change
+- whether a restart or reload is required
+- how to confirm that the new model is actually active
+
+If the deployment uses a stable agent entry point, preserve that entry point and change only the configured model behind it.
 
 3. Ask what workflow should be tested.
 The workflow must be a real OpenClaw use case and should be written as a fixed sequence of steps.
+Help the user turn the workflow into a clean ordered list of prompts or actions.
+Before moving on, make sure the workflow is:
+- real, not synthetic
+- representative of something users actually care about
+- short enough to run several times
+- rich enough to expose meaningful failure modes
+
+If the workflow is vague or too broad, force clarification before continuing.
 
 4. Ask which providers and models should be tested.
 Help the user build a shortlist that includes one baseline model and several credible alternatives.
+For each candidate, record:
+- provider
+- exact model name or model ID
+- why it is in scope, for example lower cost, easier hosting, or likely quality
+
+Do not build a giant list. Prefer one known-good baseline plus a small shortlist of plausible alternatives.
 
 5. Help define the evaluation criteria.
 Figure out what counts as a successful run, what counts as a failure, how many runs should be done per model, and whether retries are allowed.
+Keep the criteria lightweight and operational.
+At minimum, define:
+- what counts as workflow completion
+- what counts as a behavioral failure
+- what counts as an infrastructure failure
+- whether a slight quality drop is acceptable for lower cost
+- how many repeated runs are required after smoke tests
+
+If retries are allowed, define them before running anything and keep the retry rules consistent across models.
 
 6. Run one smoke test per model.
 Use the exact same workflow and reject obvious failures early.
+The purpose of the smoke test is not ranking. It is to filter obvious non-starters.
+For each smoke run, capture:
+- provider and model
+- workflow outputs
+- obvious breakdowns
+- whether the model should move to repeated runs
+
+If a model clearly fails, stop and record why.
 
 7. For viable models, run multiple evaluations per model.
 Capture the model name, run identifier, outputs for each workflow step, retries, failures, and notes about what broke.
+Use the exact same workflow for every repeated run.
+For each run, record:
+- provider and model
+- run ID
+- the workflow steps in order
+- the final output for each step
+- retries or failures
+- notes on recurring issues
+
+Do not treat one good run as decisive. The purpose of repeated runs is to expose variance.
 
 8. Build a comparison report.
 The report should make it easy to compare multiple runs across multiple models side by side. It should include one section per model, one entry per run, the workflow steps in order, the captured outputs, retries or failures, and short notes about what broke.
+Also include:
+- a short summary of the workflow being tested
+- the list of providers and models tested
+- the switching procedure used
+- the evaluation criteria
+- a conclusion section that distinguishes viable models, weak candidates, and rejects
+
+The report should be reviewable by someone who did not watch the runs happen.
+
+9. Summarize the outcome.
+End with a short decision-oriented summary that states:
+- which model served as the baseline
+- which alternatives were viable
+- which alternatives were rejected
+- what still needs more testing
+- whether the current evidence supports switching away from the baseline
 
 Important rules:
 
