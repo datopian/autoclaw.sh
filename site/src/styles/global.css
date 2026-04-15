@@ -238,6 +238,11 @@ button:hover,
   line-height: 1.65;
 }
 
+.landingLeadSpice {
+  color: var(--text-muted, #71717a);
+  font-style: italic;
+}
+
 .landingActions {
   justify-content: flex-start;
   align-self: flex-start;
@@ -261,6 +266,96 @@ button:hover,
 
 .landingGhostButton:hover {
   box-shadow: 0 8px 16px rgba(220, 38, 38, 0.15);
+}
+
+/* ── Hero CTA ─────────────────────────────────────────────── */
+
+.heroCta {
+  margin-top: 32px;
+  padding: 20px 22px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid #b91c1c;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  max-width: 440px;
+}
+
+.heroCtaHeadline {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.heroCtaInputRow {
+  display: flex;
+  align-items: stretch;
+  height: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.heroCtaInputRow:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+.heroCtaInput {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0 13px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+  height: 100%;
+}
+
+.heroCtaInput::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.heroCtaButton {
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0 16px;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  border-left: 1px solid var(--line-strong);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  transform: none;
+}
+
+.heroCtaButton:hover {
+  opacity: 0.82;
+  transform: none;
+  box-shadow: none;
+}
+
+.heroCtaNote {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.01em;
 }
 
 /* ── Signals ──────────────────────────────────────────────── */

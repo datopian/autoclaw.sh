@@ -13,20 +13,21 @@ const exampleItems = examples
   .map((entry) => ({ entry, slug: entry.id.split('/')[0] }));
 ---
 
-<Layout title="Deploy OpenClaw. Do it right." description="The open deployment reference for OpenClaw AI agents. Playbooks, templates, and reference implementations.">
+<Layout title="Open Source Deploy for OpenClaw" description="Skills, playbooks, templates, and tutorials to help you deploy OpenClaw and other agents.">
   <section class="landingHero">
     <div class="landingHeroCopy">
-      <p class="landingKicker">For OpenClaw</p>
       <h1 class="landingTitle">
-        Deploy OpenClaw.<br />
-        Do it right.
+        Open Source Deploy<br />
+        for OpenClaw.
       </h1>
       <p class="landingLead">
-        The open deployment reference for OpenClaw AI agents.<br />
-        Playbooks, templates, and reference implementations.
+        Skills, playbooks, templates, and tutorials to help you deploy OpenClaw and other agents.
+      </p>
+      <p class="landingLead landingLeadSpice">
+        We prototyped a SaaS for OpenClaw and decided to open source everything we learned.
       </p>
       <form class="heroCta" id="ctaForm" novalidate>
-        <p class="heroCtaHeadline">Exclusive insights, playbooks, and early product updates.</p>
+        <p class="heroCtaHeadline">What we're building, breaking, and shipping.</p>
         <div class="heroCtaInputRow">
           <input
             class="heroCtaInput"
@@ -38,7 +39,7 @@ const exampleItems = examples
           />
           <button type="submit" class="heroCtaButton" id="ctaBtn">Stay in the loop</button>
         </div>
-        <p class="heroCtaNote" id="ctaNote">High-signal only. No spam.</p>
+        <p class="heroCtaNote" id="ctaNote">We email when we ship something. Roughly once a month.</p>
       </form>
 
       <script>
