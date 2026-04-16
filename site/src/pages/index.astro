@@ -104,7 +104,7 @@ const exampleItems = examples
         ) : (
           <div class="contentList">
             {playbooks.map((entry) => (
-              <a href={`/playbooks/${entry.id}`} class="contentCard">
+              <a href={`/playbooks/${entry.id.split('/')[0]}`} class="contentCard">
                 <h2>{entry.data.title ?? entry.id}</h2>
                 {entry.data.description && <p>{entry.data.description}</p>}
               </a>
