@@ -116,7 +116,7 @@ button:hover,
   width: 26px;
   height: 26px;
   border-radius: 6px;
-  background: #ffffff url("/brand/hero-visual.png") center / contain no-repeat;
+  background: #ffffff url("/brand/logo.webp") center / contain no-repeat;
   border: 1px solid #111111;
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
