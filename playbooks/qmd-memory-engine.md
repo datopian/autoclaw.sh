@@ -79,10 +79,6 @@ Install it with either npm or Bun:
 npm install -g @tobilu/qmd
 ```
 
-```bash
-bun install -g @tobilu/qmd
-```
-
 You also need:
 
 - QMD available on the gateway process `PATH`
