@@ -1,10 +1,10 @@
 ---
 title: "Agent minimalism: what shipping OpenClaw in production taught us"
-description: "We deploy OpenClaw for a living. After a year, the biggest lesson is that most of the time you don't need it — you need a right-sized setup. On the token tax, two cases where we walked away, and why deterministic beats probabilistic more often than you'd think."
+description: "We help businesses deploy OpenClaw. After a few months, the biggest lesson is that most of the time you don't need it — you need a right-sized setup. On the token tax, two cases where we walked away, and why deterministic beats probabilistic more often than you'd think."
 date: 2026-06-22
 ---
 
-We deploy OpenClaw for a living. We wrote the tutorials, built the open-source deployment playbook, and ran it inside our own systems. So it's worth being honest about the biggest thing a year of that taught us:
+We help businesses deploy OpenClaw. We wrote the tutorials, built the open-source deployment playbook, and ran it inside our own systems. So it's worth being honest about the biggest thing the past few months of that taught us:
 
 **Most of the time, you don't need OpenClaw. You need a right-sized setup — and more often than people admit, a deterministic one.**
 
@@ -64,4 +64,4 @@ If you answer "bounded / just the input / must be right / high-volume," you don'
 
 When the problem really is agent-shaped, deploying OpenClaw well is its own skill — hosting, memory, integrations, multi-agent workflows. That's what we put into our open-source playbook ([autoclaw.sh](https://autoclaw.sh)) and a [hands-on video series](https://www.youtube.com/watch?v=QRfnHmO80jw&list=PLMGxXkdb_1Kx9MyyZxLW-vke5iGXw-EGZ). Use it when the job earns it.
 
-But the most useful thing we can tell you after a year of this is the part nobody selling agent frameworks will: **start minimal, and make the framework prove it's needed.**
+But the most useful thing we can tell you after a few months of this is the part nobody selling agent frameworks will: **start minimal, and make the framework prove it's needed.**
