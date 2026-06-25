@@ -179,6 +179,26 @@ button:hover,
   border-color: #dc2626;
 }
 
+.landingNavCta {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  background: #111111;
+  color: #ffffff;
+  border: 1px solid #111111;
+  border-radius: 8px;
+  padding: 8px 14px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.landingNavCta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(17, 17, 17, 0.22);
+  color: #ffffff;
+}
+
 /* ── Entrance animation ───────────────────────────────────── */
 
 @keyframes fadeUp {

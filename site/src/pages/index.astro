@@ -28,62 +28,12 @@ const exampleItems = examples
       <p class="landingLead landingLeadSpice">
         We prototyped a SaaS for OpenClaw and decided to open source everything we learned.
       </p>
-      <form class="heroCta" id="ctaForm" novalidate>
-        <p class="heroCtaHeadline">What we're building, breaking, and shipping.</p>
-        <div class="heroCtaInputRow">
-          <input
-            class="heroCtaInput"
-            id="ctaEmail"
-            type="email"
-            name="email"
-            placeholder="you@company.com"
-            autocomplete="email"
-          />
-          <button type="submit" class="heroCtaButton" id="ctaBtn">Stay in the loop</button>
-        </div>
-        <p class="heroCtaNote" id="ctaNote">We email when we ship something. Roughly once a month.</p>
-      </form>
+      <div class="actions landingActions">
+        <a href="/forward-deployed" class="button landingButton">Scope a deployment →</a>
+        <a href="/playbooks" class="button landingGhostButton">Read the playbooks</a>
+      </div>
+      <p class="heroCtaNote">Forward Deployed Engineers: we deploy and operate your data &amp; AI agents — in your stack, in production.</p>
 
-      <script>
-        const form = document.getElementById('ctaForm') as HTMLFormElement;
-        const input = document.getElementById('ctaEmail') as HTMLInputElement;
-        const btn = document.getElementById('ctaBtn') as HTMLButtonElement;
-        const note = document.getElementById('ctaNote') as HTMLParagraphElement;
-
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = input.value.trim();
-          if (!email) return;
-
-          btn.disabled = true;
-          btn.textContent = 'Sending…';
-
-          try {
-            const res = await fetch('/subscribe', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email }),
-            });
-
-            if (res.ok) {
-              input.value = '';
-              btn.textContent = 'You\'re in ✓';
-              note.textContent = 'Check your inbox soon.';
-              note.style.color = 'var(--success)';
-            } else {
-              btn.textContent = 'Try again';
-              btn.disabled = false;
-              note.textContent = 'Something went wrong. Try again.';
-              note.style.color = '#b91c1c';
-            }
-          } catch {
-            btn.textContent = 'Try again';
-            btn.disabled = false;
-            note.textContent = 'Network error. Try again.';
-            note.style.color = '#b91c1c';
-          }
-        });
-      </script>
       <a href={GITHUB_URL} class="githubLink" target="_blank" rel="noopener">
         ★ Star on GitHub
       </a>
@@ -133,8 +83,8 @@ const exampleItems = examples
     <div class="landingSignalRow contactRow">
       <h2>Work with us</h2>
       <div>
-        <p class="contactBlurb">Need help deploying OpenClaw in production? We offer consulting and professional services.</p>
-        <a href="mailto:contact@datopian.com?subject=Interested%20in%20Autoclaw%20services" class="contactLink">contact@datopian.com</a>
+        <p class="contactBlurb">Need it deployed and running, not just documented? Our Forward Deployed Engineers embed with your team to ship your data and AI agents into production.</p>
+        <a href="/forward-deployed" class="contactLink">Scope a deployment →</a>
       </div>
     </div>
   </section>
