@@ -1,91 +1,102 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
 import Layout from '../components/Layout.astro';
-import heroVisual from '../assets/hero-visual.png';
 
 const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
+const SCOPE_URL = '/forward-deployed';
 
 const playbooks = (await getCollection('playbooks', ({ data }) => !data.draft))
-  .sort((a, b) => a.id.localeCompare(b.id));
-
-const examples = await getCollection('examples', ({ data }) => !data.draft);
-const exampleItems = examples
   .sort((a, b) => a.id.localeCompare(b.id))
-  .map((entry) => ({ entry, slug: entry.id.split('/')[0] }));
+  .map((entry, i) => ({
+    num: String(i + 1).padStart(2, '0'),
+    title: entry.data.title ?? entry.id,
+    desc: entry.data.description ?? '',
+    tag: (entry.data as Record<string, unknown>).tag as string | undefined,
+    href: `/playbooks/${entry.id.split('/')[0]}`,
+  }));
 ---
 
-<Layout title="Open Source Deploy for OpenClaw" description="Skills, playbooks, templates, and tutorials to help you deploy OpenClaw and other agents.">
-  <section class="landingHero">
-    <div class="landingHeroCopy">
-      <h1 class="landingTitle">
-        Open Source Deploy<br />
-        for OpenClaw.
-      </h1>
-      <p class="landingLead">
-        Skills, playbooks, templates, and tutorials to help you deploy OpenClaw and other agents.
-      </p>
-      <p class="landingLead landingLeadSpice">
-        We prototyped a SaaS for OpenClaw and decided to open source everything we learned.
-      </p>
-      <div class="actions landingActions">
-        <a href="/forward-deployed" class="button landingButton">Scope a deployment →</a>
-        <a href="/playbooks" class="button landingGhostButton">Read the playbooks</a>
-      </div>
-      <p class="heroCtaNote">Forward Deployed Engineers: we deploy and operate your data &amp; AI agents — in your stack, in production.</p>
+<Layout title="Open Source Deploy for OpenClaw" description="Forward Deployed Engineers: we deploy and operate your data and AI agents — in your stack, in production. Plus open playbooks, templates, and tutorials for OpenClaw.">
 
-      <a href={GITHUB_URL} class="githubLink" target="_blank" rel="noopener">
-        ★ Star on GitHub
-      </a>
+  <!-- HERO -->
+  <section style="padding:78px 0 64px">
+    <div style="font-family:var(--mono);font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--claw);margin-bottom:30px">// open source deploy for openclaw</div>
+    <h1 class="idx-h1" style="font-size:92px;line-height:0.9;letter-spacing:-0.045em;font-weight:700;margin:0 0 34px;max-width:15ch">Get agents to the <span style="color:var(--claw);white-space:nowrap">last mile.</span></h1>
+    <div class="idx-heroGrid" style="display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:end">
+      <div>
+        <p style="font-size:21px;line-height:1.5;color:var(--ink);margin:0 0 14px;max-width:50ch">Forward Deployed Engineers: we deploy and operate your data &amp; AI agents — in your stack, in production.</p>
+        <p style="font-size:16px;line-height:1.5;color:var(--ink-70);margin:0;max-width:50ch">Skills, playbooks, templates, and tutorials to deploy OpenClaw and other agents — everything we learned building a SaaS for it, open-sourced.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">
+        <div style="display:flex;gap:13px;flex-wrap:wrap">
+          <a href={SCOPE_URL} style="background:var(--claw);color:var(--paper);font-weight:600;font-size:16px;padding:14px 24px;border-radius:3px">Scope a deployment →</a>
+          <a href="#playbooks" style="border:1px solid var(--ink);color:var(--ink);font-weight:600;font-size:16px;padding:13px 24px;border-radius:3px">Read the playbooks</a>
+        </div>
+        <a href={GITHUB_URL} target="_blank" rel="noopener" style="font-family:var(--mono);font-size:13px;color:var(--ink-70)">★ Star on GitHub →</a>
+      </div>
     </div>
-    <div class="landingHeroRail">
-      <figure class="landingHeroVisual">
-        <Image src={heroVisual} alt="AutoClaw agent architecture" width={844} format="webp" quality={82} />
-      </figure>
+    <div style="margin-top:54px;border-top:1px solid var(--line);padding-top:22px">
+      <div class="idx-states" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;font-family:var(--mono);font-size:13px;color:var(--ink-70)">
+        <div style="display:flex;align-items:center;gap:9px"><span style="color:var(--success)">●</span> model ready</div>
+        <div style="color:var(--ink-faint);margin:0 18px">→</div>
+        <div style="display:flex;align-items:center;gap:9px"><span style="color:var(--claw)">●</span> your data + tools not wired</div>
+        <div style="color:var(--ink-faint);margin:0 18px">→</div>
+        <div style="display:flex;align-items:center;gap:9px"><span style="color:var(--cobalt)">●</span> in production, owned</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:13px;color:var(--ink-faint);margin-top:14px">the last mile is where most projects stall — it's where we work</div>
     </div>
   </section>
 
-  <section class="landingSignals" aria-label="Playbooks">
-    <div class="landingSignalRow">
-      <h2><a href="/playbooks" class="landingSectionLink">Playbooks</a></h2>
+  <!-- PLAYBOOKS -->
+  <section id="playbooks" style="border-top:1px solid var(--line);padding:72px 0">
+    <div class="idx-pbHead" style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin-bottom:40px">
       <div>
-        {playbooks.length === 0 ? (
-          <p style="color: var(--text-muted);">Coming soon.</p>
-        ) : (
-          <div class="contentList">
-            {playbooks.map((entry) => (
-              <a href={`/playbooks/${entry.id.split('/')[0]}`} class="contentCard">
-                <h2>{entry.data.title ?? entry.id}</h2>
-                {entry.data.description && <p>{entry.data.description}</p>}
-              </a>
-            ))}
-          </div>
-        )}
+        <div style="font-family:var(--mono);font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--claw);margin-bottom:14px">// {playbooks.length} guides</div>
+        <h2 style="font-size:44px;line-height:1;letter-spacing:-0.035em;font-weight:700;margin:0">Playbooks.</h2>
       </div>
+      <p style="font-size:16px;line-height:1.5;color:var(--ink-70);max-width:38ch;margin:0">Battle-tested, open guides for getting OpenClaw and other agents into production — infrastructure, integrations, patterns, and ops.</p>
     </div>
-    <div class="landingSignalRow">
-      <h2><a href="/examples" class="landingSectionLink">Examples</a></h2>
-      <div>
-        {exampleItems.length === 0 ? (
-          <p style="color: var(--text-muted);">Coming soon.</p>
-        ) : (
-          <div class="contentList">
-            {exampleItems.map(({ entry, slug }) => (
-              <a href={`/examples/${slug}`} class="contentCard">
-                <h2>{entry.data.title ?? slug}</h2>
-                {entry.data.description && <p>{entry.data.description}</p>}
-              </a>
-            ))}
+    <div class="idx-pbGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line)">
+      {playbooks.map((pb) => (
+        <a href={pb.href} class="idx-pbCard" style="display:block;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:26px 28px;background:var(--paper)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint)">{pb.num}</span>
+            {pb.tag && <span style="font-family:var(--mono);font-size:11px;color:var(--claw);text-transform:uppercase;letter-spacing:0.1em">{pb.tag}</span>}
           </div>
-        )}
-      </div>
+          <div style="font-size:20px;font-weight:600;letter-spacing:-0.02em;line-height:1.15;margin-bottom:10px">{pb.title}</div>
+          <div style="font-size:14px;line-height:1.5;color:var(--ink-70)">{pb.desc}</div>
+        </a>
+      ))}
     </div>
-    <div class="landingSignalRow contactRow">
-      <h2>Work with us</h2>
+  </section>
+
+  <!-- WORK WITH US (full-bleed dark band) -->
+  <section style="margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);width:100vw;background:var(--ink);color:var(--paper);border-top:1px solid var(--line)">
+    <div class="idx-bandGrid" style="max-width:1180px;margin:0 auto;padding:88px 40px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:center">
       <div>
-        <p class="contactBlurb">Need it deployed and running, not just documented? Our Forward Deployed Engineers embed with your team to ship your data and AI agents into production.</p>
-        <a href="/forward-deployed" class="contactLink">Scope a deployment →</a>
+        <div style="font-family:var(--mono);font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--claw-light);margin-bottom:24px">// work with us</div>
+        <h2 style="font-size:52px;line-height:0.96;letter-spacing:-0.04em;font-weight:700;margin:0 0 22px;max-width:18ch">Need it deployed and running — not just documented?</h2>
+        <p style="font-size:18px;line-height:1.5;color:#C9C0B1;max-width:48ch;margin:0 0 32px">Our Forward Deployed Engineers embed with your team to ship your data and AI agents into production — your stack, your repo, your cloud.</p>
+        <a href={SCOPE_URL} style="display:inline-block;background:var(--claw);color:var(--paper);font-weight:600;font-size:16px;padding:15px 26px;border-radius:3px">Scope a deployment →</a>
+      </div>
+      <div style="border:1px solid var(--ink-line);border-radius:4px;background:var(--ink-card);padding:30px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.1em;margin-bottom:22px">ENGAGEMENT · ONE TRACK</div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-family:var(--mono);font-size:12px;color:var(--claw);width:22px">01</span><div><div style="font-weight:600;font-size:15px">Diagnostic</div><div style="font-size:13px;color:var(--ink-faint)">a working proof on your data</div></div></div>
+          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-family:var(--mono);font-size:12px;color:var(--claw);width:22px">02</span><div><div style="font-weight:600;font-size:15px">Embed &amp; deploy</div><div style="font-size:13px;color:var(--ink-faint)">production code in your stack</div></div></div>
+          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-family:var(--mono);font-size:12px;color:var(--cobalt);width:22px">03</span><div><div style="font-weight:600;font-size:15px">Operate · AgentOps</div><div style="font-size:13px;color:var(--ink-faint)">we run it, then you own it</div></div></div>
+        </div>
       </div>
     </div>
   </section>
+
+  <style>
+    @media (max-width:900px){
+      .idx-heroGrid,.idx-pbGrid,.idx-bandGrid{grid-template-columns:1fr !important}
+      .idx-pbHead{flex-direction:column;align-items:flex-start !important}
+      .idx-h1{font-size:clamp(48px,12vw,92px) !important}
+      .idx-states{font-size:12px}
+    }
+  </style>
+
 </Layout>
