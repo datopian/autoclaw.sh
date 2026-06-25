@@ -1,0 +1,282 @@
+---
+import Layout from '../components/Layout.astro';
+
+const GCAL = 'https://calendar.app.google/KEoJ46XPPRscJFdSA';
+const PLAYBOOKS = '/playbooks';
+---
+
+<Layout
+  title="Forward Deployed Engineers"
+  description="Datopian engineers embed in your team to deploy and operate your data and AI agents — from first diagnostic to a running system you own."
+>
+  <section class="fd-hero">
+    <div class="fd-heroGrid">
+      <div>
+        <p class="fd-eyebrow">Datopian · Forward Deployed Engineers</p>
+        <h1 class="fd-h1">We deploy and <span class="fd-hl">operate</span> your data and AI agents.</h1>
+        <p class="fd-lead">Datopian engineers embed in your team and ship inside your stack — from first diagnostic to a running system you own. Production code, not slideware.</p>
+        <p class="fd-lead fd-spice">You read our open playbooks. This is for when you'd rather we did it with you.</p>
+        <div class="fd-heroCta">
+          <a class="fd-btn" href={GCAL} target="_blank" rel="noopener">Scope a deployment →</a>
+          <a class="fd-btn fd-ghost" href={PLAYBOOKS}>Read the playbooks</a>
+        </div>
+      </div>
+      <div class="fd-readout" aria-label="The deployment gap">
+        <div class="fd-rtop"><span>// the last mile</span><span class="fd-dot" aria-hidden="true"></span></div>
+        <div class="fd-big"><span>95%</span></div>
+        <div class="fd-rcap">of enterprise GenAI pilots reach production with no measurable impact. The model isn't the problem — the deployment is.</div>
+        <hr />
+        <div class="fd-rrow"><span>model</span><b>ready</b></div>
+        <div class="fd-rrow"><span>your data + tools</span><b>not wired</b></div>
+        <div class="fd-rrow"><span>in production</span><b>stalled</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fd-section fd-problem">
+    <div class="fd-split">
+      <h2 class="fd-h2">Pilots demo. <span class="fd-hl">Deployments ship.</span></h2>
+      <div>
+        <p>The hard part of AI and data work isn't the prototype — it's the last mile: your data, your tools, your access controls, your infrastructure, your team's workflows. That's where most projects stall.</p>
+        <p>A Forward Deployed Engineer closes that gap from the inside. We join your team, work in your repo and your cloud, and own the path from idea to a system running in production — then hand it back.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="fd-section">
+    <div class="fd-trackHead">
+      <div>
+        <p class="fd-eyebrow">What we provide</p>
+        <h2 class="fd-h2">One track. Decreasing dependency.</h2>
+      </div>
+      <p class="fd-muted">Every engagement runs the same four phases. We start hands-on and step back as your team takes ownership — by the end, you run it and we advise.</p>
+    </div>
+
+    <div class="fd-depbar" id="fdDepbar" role="img" aria-label="Datopian's hands-on involvement tapers across the engagement as your team takes ownership">
+      <div class="fd-us"></div>
+      <span class="fd-deplabel fd-lUs">Datopian builds</span>
+      <span class="fd-deplabel fd-lYou">You own it</span>
+    </div>
+    <div class="fd-deplegend"><span>↑ we do the work</span><span>we advise ↓</span></div>
+
+    <div class="fd-phases">
+      <div class="fd-phase"><span class="fd-pn">01</span><h3 class="fd-h3">Diagnostic</h3><div class="fd-wk">2–4 weeks · fixed scope</div><p>We find your highest-value use case and ship a working proof on your real data — enough to fund the next phase.</p><span class="fd-tag">→ a real result, not a report</span></div>
+      <div class="fd-phase"><span class="fd-pn">02</span><h3 class="fd-h3">Embed</h3><div class="fd-wk">in your repo &amp; cloud</div><p>Our engineers join your team and build alongside it — your stack, your conventions, your controls.</p><span class="fd-tag">→ production code</span></div>
+      <div class="fd-phase"><span class="fd-pn">03</span><h3 class="fd-h3">Deploy</h3><div class="fd-wk">to production</div><p>Systems wired to your data, tools, and processes — agents and data infrastructure running where your users are.</p><span class="fd-tag">→ live, observable, owned</span></div>
+      <div class="fd-phase"><span class="fd-pn">04</span><h3 class="fd-h3">Operate</h3><div class="fd-wk">AgentOps · ongoing</div><p>We run and harden it until your team is ready, then step back into an advisory role. You keep the system and the knowledge.</p><span class="fd-tag">→ then we hand over</span></div>
+    </div>
+  </section>
+
+  <section class="fd-section">
+    <div class="fd-split">
+      <div>
+        <p class="fd-eyebrow">Why Datopian</p>
+        <h2 class="fd-h2">We bring our <span class="fd-hl">own stack.</span></h2>
+        <p class="fd-sub">Consultancies build from scratch on whatever's there. SaaS vendors hand you a tool and leave. We deploy our own engineers on our own proven, open-source stack — so we start at the last mile, not the starting line.</p>
+        <div class="fd-contrast">
+          <span class="fd-chip"><b>vs consultancies</b> — not from scratch</span>
+          <span class="fd-chip"><b>vs SaaS</b> — we implement</span>
+        </div>
+      </div>
+      <div class="fd-stack">
+        <div class="fd-srow"><span class="fd-k">AutoClaw</span><span class="fd-v"><b>Agent deployment &amp; AgentOps.</b> The open-source playbook for getting AI agents into production safely — the methods we run for you.</span></div>
+        <div class="fd-srow"><span class="fd-k">PortalJS</span><span class="fd-v"><b>Data portals &amp; catalogs.</b> The framework behind data platforms used in production — your data, made discoverable and queryable.</span></div>
+        <div class="fd-srow"><span class="fd-k">Managed Cloudflare</span><span class="fd-v"><b>Edge data infrastructure.</b> Hosting, storage, and serving on R2 + Workers — fast, owned, no servers to run.</span></div>
+        <div class="fd-srow"><span class="fd-k">Model-agnostic</span><span class="fd-v"><b>Your keys, your models.</b> We integrate against your infrastructure and policies — not lock you into ours.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fd-section">
+    <p class="fd-eyebrow">Proof</p>
+    <h2 class="fd-h2 fd-mb">Shipped, not <span class="fd-hl">slideware.</span></h2>
+    <div class="fd-metrics">
+      <div class="fd-metric"><div class="fd-n">18</div><div class="fd-l">municipalities on one live regional data platform</div></div>
+      <div class="fd-metric"><div class="fd-n">100<span>%</span></div><div class="fd-l">open-source stack — no vendor lock-in, you keep the code</div></div>
+      <div class="fd-metric"><div class="fd-n">weeks</div><div class="fd-l">to first production result, not quarters</div></div>
+    </div>
+    <div class="fd-deploys">
+      <div class="fd-dep"><span class="fd-tag">Public sector</span><h4 class="fd-h4">Winnipeg Metro Region</h4><p>An open-data portal for an 18-municipality region, live on PortalJS Cloud — the reference deployment for regional data sharing.</p></div>
+      <div class="fd-dep"><span class="fd-tag">Municipal</span><h4 class="fd-h4">Lisbon Municipality</h4><p>A data portal demo delivered on managed hosting — brief to live site without the city standing up infrastructure.</p></div>
+      <div class="fd-dep"><span class="fd-tag">Open source</span><h4 class="fd-h4">PortalJS &amp; AutoClaw</h4><p>The frameworks we deploy are public and battle-tested — the same code we run for you is the code you can read.</p></div>
+    </div>
+  </section>
+
+  <section class="fd-section">
+    <div class="fd-split">
+      <div>
+        <p class="fd-eyebrow">Who you work with</p>
+        <h2 class="fd-h2">The people who <span class="fd-hl">ship it.</span></h2>
+        <p class="fd-sub">No account managers between you and the work. You work directly with senior engineers who maintain the open-source stack and have put it into production.</p>
+        <p class="fd-note">// bios + photos to be added before launch</p>
+      </div>
+      <div class="fd-crew">
+        <div class="fd-member"><div class="fd-avatar">DE</div><div><div class="fd-nm">Data Engineer</div><div class="fd-rl">pipelines · catalogs · PortalJS</div></div></div>
+        <div class="fd-member"><div class="fd-avatar fd-alt">AE</div><div><div class="fd-nm">Agent Engineer</div><div class="fd-rl">agents · AgentOps · AutoClaw</div></div></div>
+        <div class="fd-member"><div class="fd-avatar fd-alt">PE</div><div><div class="fd-nm">Platform Engineer</div><div class="fd-rl">Cloudflare · edge · reliability</div></div></div>
+        <div class="fd-member"><div class="fd-avatar">FD</div><div><div class="fd-nm">Lead FDE</div><div class="fd-rl">scopes &amp; owns your deployment</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fd-section">
+    <p class="fd-eyebrow">How engagements work</p>
+    <h2 class="fd-h2">Start with a <span class="fd-hl">diagnostic.</span></h2>
+    <div class="fd-priceIntro">
+      <p>Engagements are fixed-scope and productized — you always know what you're buying. Most start with a paid diagnostic that ships a real result and scopes the rest.</p>
+      <div class="fd-hire">A senior in-house AI hire runs <b>$150k+/yr</b> and takes <b>~6 months</b> to recruit and ramp. A Datopian engagement costs less than that first-year package — and ships in weeks.</div>
+    </div>
+    <div class="fd-tiers">
+      <div class="fd-tier fd-lead"><span class="fd-step">01 · Start here</span><h3 class="fd-h3">Diagnostic</h3><div class="fd-price">from $9k</div><div class="fd-meta">2–4 weeks · fixed</div><p>A working proof on your data plus a scoped plan for what's next. Real value you keep even if you stop here.</p></div>
+      <div class="fd-tier"><span class="fd-step">02 · Build</span><h3 class="fd-h3">Build &amp; Deploy</h3><div class="fd-price">from $40k</div><div class="fd-meta">milestone-based</div><p>Embedded engineers take it from proof to a production system wired into your data, tools, and controls.</p></div>
+      <div class="fd-tier"><span class="fd-step">03 · Run</span><h3 class="fd-h3">Operate · AgentOps</h3><div class="fd-price">from $5k<small>/mo</small></div><div class="fd-meta">retainer · scales by access</div><p>We run, monitor, and harden the system — on call until your team fully owns it.</p></div>
+    </div>
+    <p class="fd-indicative">// indicative anchors — final scope and pricing set in your diagnostic</p>
+  </section>
+
+  <section class="fd-final" id="scope">
+    <p class="fd-eyebrow fd-eyebrowLight">Easy to start</p>
+    <h2 class="fd-h2 fd-final-h">Scope a deployment.</h2>
+    <p class="fd-final-sub">A 30-minute call. Tell us where AI or data is stuck; we'll tell you whether a Forward Deployed Engineer is the right fit and what a first diagnostic would look like.</p>
+    <a class="fd-btn fd-light" href={GCAL} target="_blank" rel="noopener">Book a scoping call →</a>
+    <a class="fd-ghostlink" href={PLAYBOOKS}>or read the open-source playbooks first →</a>
+  </section>
+
+  <style>
+    .fd-eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--success);margin:0 0 16px;display:flex;align-items:center;gap:10px;}
+    .fd-eyebrow::before{content:"";width:22px;height:1px;background:var(--success);}
+    .fd-h1,.fd-h2,.fd-h3,.fd-h4{font-family:"Space Grotesk",sans-serif;font-weight:700;letter-spacing:-0.02em;line-height:1.05;margin:0;}
+    .fd-h2{font-size:clamp(28px,4vw,42px);}
+    .fd-hl{color:var(--success);}
+    .fd-section{padding:84px 0;border-top:1px solid var(--line);}
+
+    .fd-btn{font-family:"Manrope",sans-serif;font-weight:600;font-size:0.97rem;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:12px 17px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:var(--accent);color:#fff;transition:transform .12s ease,box-shadow .12s ease;}
+    .fd-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(17,24,39,0.2);}
+    .fd-ghost{background:transparent;color:var(--text);border-color:var(--line-strong);}
+    .fd-ghost:hover{border-color:var(--accent);box-shadow:none;}
+    .fd-light{background:#fff;color:var(--accent);border-color:#fff;}
+    .fd-light:hover{box-shadow:0 8px 22px rgba(0,0,0,0.3);}
+
+    /* hero */
+    .fd-hero{padding:40px 0 76px;}
+    .fd-heroGrid{display:grid;grid-template-columns:1.3fr 0.9fr;gap:52px;align-items:center;}
+    .fd-h1{font-size:clamp(38px,5.6vw,64px);letter-spacing:-0.03em;}
+    .fd-lead{font-size:clamp(17px,1.6vw,20px);color:var(--text-muted);max-width:36ch;margin:24px 0;}
+    .fd-spice{font-size:15px;border-left:2px solid var(--success);padding-left:14px;max-width:42ch;}
+    .fd-heroCta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px;}
+
+    .fd-readout{background:var(--accent);color:#e7edf6;border-radius:var(--radius-lg);padding:28px 28px 24px;box-shadow:var(--shadow-md);}
+    .fd-rtop{display:flex;justify-content:space-between;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#8a96ab;}
+    .fd-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(15,118,110,0.3);}
+    .fd-big{font-family:"Space Grotesk",sans-serif;font-size:66px;font-weight:700;letter-spacing:-0.04em;margin:16px 0 4px;color:#fff;}
+    .fd-big span{color:#5eead4;}
+    .fd-rcap{font-size:14px;color:#aab6c8;line-height:1.5;}
+    .fd-readout hr{border:none;border-top:1px solid #2a3344;margin:20px 0 14px;}
+    .fd-rrow{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#c3cdda;padding:5px 0;}
+    .fd-rrow b{color:#fff;font-weight:500;}
+
+    /* problem + splits */
+    .fd-split{display:grid;grid-template-columns:0.85fr 1.15fr;gap:48px;align-items:start;}
+    .fd-problem p{color:var(--text-muted);font-size:18px;max-width:54ch;}
+    .fd-problem p+p{margin-top:16px;}
+    .fd-sub{color:var(--text-muted);margin-top:18px;max-width:42ch;}
+    .fd-muted{color:var(--text-muted);max-width:40ch;}
+
+    /* track */
+    .fd-trackHead{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:40px;}
+    .fd-depbar{position:relative;height:44px;border-radius:var(--radius-sm);overflow:hidden;background:#d6eee8;border:1px solid var(--line);}
+    .fd-us{position:absolute;inset:0;background:linear-gradient(90deg,var(--accent),#2b3a55);clip-path:polygon(0 0,100% 0,100% 100%,0 100%);transform-origin:left center;}
+    .fd-deplabel{position:absolute;top:50%;transform:translateY(-50%);font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;}
+    .fd-lUs{left:15px;color:#fff;}
+    .fd-lYou{right:15px;color:var(--success);}
+    .fd-deplegend{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin:8px 0 30px;}
+    .fd-phases{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    .fd-phase{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);padding:24px 22px 26px;display:flex;flex-direction:column;min-height:236px;box-shadow:var(--shadow-sm);}
+    .fd-pn{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:0.08em;color:var(--success);font-weight:500;}
+    .fd-phase .fd-h3{font-size:21px;margin:12px 0 6px;}
+    .fd-wk{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-muted);margin-bottom:13px;}
+    .fd-phase p{font-size:14.5px;color:var(--text-muted);line-height:1.5;}
+    .fd-tag{margin-top:auto;padding-top:16px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--success);font-weight:500;}
+
+    /* why */
+    .fd-contrast{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
+    .fd-chip{font-family:"IBM Plex Mono",monospace;font-size:12px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:9px 13px;color:var(--text-muted);background:var(--surface);}
+    .fd-chip b{color:var(--success);}
+    .fd-stack{display:flex;flex-direction:column;gap:12px;}
+    .fd-srow{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);padding:20px 24px;display:grid;grid-template-columns:170px 1fr;gap:22px;align-items:baseline;box-shadow:var(--shadow-sm);}
+    .fd-k{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text);}
+    .fd-v{color:var(--text-muted);font-size:15px;}
+    .fd-v b{color:var(--text);font-weight:600;}
+
+    /* proof */
+    .fd-mb{margin-bottom:34px;}
+    .fd-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:30px;}
+    .fd-metric{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);padding:28px 26px;box-shadow:var(--shadow-sm);}
+    .fd-n{font-family:"Space Grotesk",sans-serif;font-size:42px;font-weight:700;letter-spacing:-0.03em;color:var(--text);}
+    .fd-n span{color:var(--success);}
+    .fd-l{color:var(--text-muted);font-size:14px;margin-top:8px;line-height:1.45;}
+    .fd-deploys{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .fd-dep{border:1px solid var(--line);border-radius:var(--radius-md);padding:22px;background:var(--surface);box-shadow:var(--shadow-sm);}
+    .fd-dep .fd-tag{padding-top:0;}
+    .fd-h4{font-size:17px;margin:11px 0 6px;}
+    .fd-dep p{font-size:14px;color:var(--text-muted);line-height:1.5;}
+
+    /* team */
+    .fd-note{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--text-muted);margin-top:16px;}
+    .fd-crew{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+    .fd-member{display:flex;gap:15px;align-items:center;border:1px solid var(--line);border-radius:var(--radius-md);padding:17px 20px;background:var(--surface);box-shadow:var(--shadow-sm);}
+    .fd-avatar{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:14px;color:#fff;background:var(--success);}
+    .fd-avatar.fd-alt{background:var(--accent);}
+    .fd-nm{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:15px;}
+    .fd-rl{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--text-muted);margin-top:3px;}
+
+    /* pricing */
+    .fd-priceIntro{display:grid;grid-template-columns:1fr 1fr;gap:46px;align-items:end;margin:26px 0 36px;}
+    .fd-priceIntro p{color:var(--text-muted);font-size:17px;max-width:48ch;}
+    .fd-hire{border-left:2px solid var(--success);padding:4px 0 4px 18px;font-size:15px;color:var(--text);}
+    .fd-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .fd-tier{border:1px solid var(--line);border-radius:var(--radius-md);padding:26px 24px;background:var(--surface);display:flex;flex-direction:column;box-shadow:var(--shadow-sm);}
+    .fd-lead{border-color:var(--success);box-shadow:0 0 0 1px var(--success),var(--shadow-md);}
+    .fd-step{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--success);}
+    .fd-tier .fd-h3{font-size:20px;margin:9px 0 4px;}
+    .fd-price{font-family:"Space Grotesk",sans-serif;font-size:30px;font-weight:700;letter-spacing:-0.02em;margin:10px 0 2px;}
+    .fd-price small{font-family:"Manrope",sans-serif;font-size:14px;color:var(--text-muted);font-weight:400;}
+    .fd-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--text-muted);margin-bottom:13px;}
+    .fd-tier p{font-size:14.5px;color:var(--text-muted);line-height:1.5;}
+    .fd-indicative{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--text-muted);margin-top:18px;}
+
+    /* final */
+    .fd-final{border-radius:var(--radius-lg);background:var(--accent);color:#e7edf6;margin:84px 0 0;padding:72px 40px;text-align:center;}
+    .fd-eyebrowLight{color:#5eead4;justify-content:center;}
+    .fd-eyebrowLight::before{background:#5eead4;}
+    .fd-final-h{color:#fff;max-width:16ch;margin:0 auto;}
+    .fd-final-sub{color:#aab6c8;max-width:48ch;margin:22px auto 30px;font-size:18px;}
+    .fd-ghostlink{display:block;margin-top:20px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8a96ab;}
+    .fd-ghostlink:hover{color:#fff;}
+
+    .fd-us{transform:scaleX(0);}
+    @media (prefers-reduced-motion: no-preference){
+      .fd-us{transition:transform 1.1s cubic-bezier(.22,.61,.36,1);}
+      .fd-depbar.fd-in .fd-us{transform:scaleX(1);}
+    }
+    @media (prefers-reduced-motion: reduce){ .fd-us{transform:scaleX(1);} }
+
+    @media (max-width:860px){
+      .fd-heroGrid,.fd-split,.fd-priceIntro{grid-template-columns:1fr;gap:32px;}
+      .fd-phases,.fd-metrics,.fd-deploys,.fd-tiers,.fd-crew{grid-template-columns:1fr;}
+      .fd-section{padding:60px 0;}
+      .fd-readout{max-width:430px;}
+      .fd-final{padding:56px 24px;}
+    }
+  </style>
+
+  <script>
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('fd-in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.35 });
+    const bar = document.getElementById('fdDepbar');
+    if (bar) io.observe(bar);
+  </script>
+</Layout>
