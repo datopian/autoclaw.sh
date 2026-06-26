@@ -38,10 +38,10 @@ const cases = [
   { tag: 'Open source', title: 'PortalJS & AutoClaw', desc: 'The frameworks we deploy are public and battle-tested — the same code we run for you is the code you can read.' },
 ];
 const team = [
-  { img: '/team/anuar.jpg', name: 'Anuar Ustayev', role: 'Lead FDE', bio: 'Scopes engagements and sets the technical and data-infrastructure approach — from diagnostic and high-level assessment to architecture.' },
-  { img: '/team/joao.jpg', name: 'João Demenech', role: 'Forward Deployed Engineer', bio: 'Builds and ships agentic AI — deploying OpenClaw and custom agents into production.' },
-  { img: '/team/ola.jpg', name: 'Ola Rubaj', role: 'Forward Deployed Engineer', bio: 'Agentic AI engineer — designs and deploys AI agents that run reliably in your stack.' },
-  { img: '/team/stephen.jpg', name: 'Stephen Oni', role: 'Forward Deployed Engineer', bio: 'ML and agentic AI engineer — models, pipelines, and agents from prototype to production.' },
+  { img: '/team/anuar.jpg', name: 'Anuar Ustayev', role: 'Lead FDE', pos: '22%', bio: 'Scopes engagements and sets the technical and data-infrastructure approach — from diagnostic and high-level assessment to architecture.' },
+  { img: '/team/joao.jpg', name: 'João Demenech', role: 'Forward Deployed Engineer', pos: '6%', bio: 'Builds and ships agentic AI — deploying OpenClaw and custom agents into production.' },
+  { img: '/team/ola.jpg', name: 'Ola Rubaj', role: 'Forward Deployed Engineer', pos: '22%', bio: 'Agentic AI engineer — designs and deploys AI agents that run reliably in your stack.' },
+  { img: '/team/stephen.jpg', name: 'Stephen Oni', role: 'Forward Deployed Engineer', pos: '22%', bio: 'ML and agentic AI engineer — models, pipelines, and agents from prototype to production.' },
 ];
 const pricing = [
   { step: '01 · Start here', name: 'Diagnostic', price: 'from $9k', meta: '2 weeks · fixed', desc: "A working proof on your data plus a scoped plan for what's next. Real value you keep even if you stop here." },
@@ -247,7 +247,7 @@ const pricing = [
         {team.map((m) => (
           <div style="border:1px solid #2A2420;border-radius:4px;background:#1A1612;padding:24px">
             <div style="width:100%;aspect-ratio:1/1;border-radius:3px;overflow:hidden;background:#2A2420;margin-bottom:18px">
-              <img src={m.img} alt={m.name} loading="lazy" width="512" height="512" style="width:100%;height:100%;object-fit:cover;object-position:center 22%;display:block" />
+              <img src={m.img} alt={m.name} loading="lazy" width="512" height="512" style={`width:100%;height:100%;object-fit:cover;object-position:center ${m.pos};display:block`} />
             </div>
             <div style="font-size:17px;font-weight:600;margin-bottom:5px">{m.name}</div>
             <div style="font-family:'Space Mono',monospace;font-size:12px;color:#D9572E;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">{m.role}</div>
