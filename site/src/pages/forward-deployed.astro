@@ -4,6 +4,21 @@
 // design language, its own nav/footer. Data baked in; CTA → Google Calendar.
 const GCAL = 'https://calendar.app.google/KEoJ46XPPRscJFdSA';
 const GITHUB = 'https://github.com/datopian/autoclaw.sh';
+const canonicalURL = new URL('/forward-deployed', Astro.site);
+const ogImage = new URL('/brand/logo.webp', Astro.site);
+const SEO_TITLE = 'Forward Deployed Engineers for AI Agents, LLMs & Data | Datopian';
+const SEO_DESC = 'Forward Deployed Engineers who embed with your team to ship AI agents, LLM apps, and data infrastructure into production — OpenClaw and beyond. You own the result.';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Forward Deployed Engineers',
+  serviceType: 'Forward Deployed Engineering for AI agents, LLM applications, and data infrastructure',
+  description: SEO_DESC,
+  url: canonicalURL.href,
+  areaServed: 'Worldwide',
+  provider: { '@type': 'Organization', name: 'Datopian', url: 'https://www.datopian.com' },
+  audience: { '@type': 'BusinessAudience', audienceType: 'AI-native startups, data teams, and businesses deploying AI agents and LLM applications' },
+};
 
 const phases = [
   { num: '01', title: 'Diagnostic', meta: '2 weeks · fixed scope', desc: 'We find your highest-value use case and ship a working proof on your real data — enough to fund the next phase.', out: '→ a real result, not a report' },
@@ -39,12 +54,25 @@ const pricing = [
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Forward Deployed Engineers — AutoClaw</title>
-<meta name="description" content="Datopian engineers embed in your team to deploy and operate your data and AI agents — from first diagnostic to a running system you own." />
+<title>{SEO_TITLE}</title>
+<meta name="description" content={SEO_DESC} />
+<link rel="canonical" href={canonicalURL} />
+<meta name="robots" content="index, follow" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="AutoClaw" />
+<meta property="og:title" content={SEO_TITLE} />
+<meta property="og:description" content={SEO_DESC} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:image" content={ogImage} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={SEO_TITLE} />
+<meta name="twitter:description" content={SEO_DESC} />
+<meta name="twitter:image" content={ogImage} />
 <link rel="icon" type="image/png" href="/brand/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 <style>
   *{box-sizing:border-box}
   body{margin:0}
@@ -88,7 +116,7 @@ const pricing = [
   <!-- HERO -->
   <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:72px 40px 60px">
     <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#D9572E;margin-bottom:30px">// datopian · forward deployed engineers</div>
-    <h1 class="fd-bigH1" style="font-size:84px;line-height:0.92;letter-spacing:-0.045em;font-weight:700;margin:0 0 32px;max-width:17ch">We deploy and operate your data and AI agents.</h1>
+    <h1 class="fd-bigH1" style="font-size:84px;line-height:0.96;letter-spacing:-0.04em;font-weight:700;margin:0 0 32px;max-width:17ch">We deploy and operate your data and AI agents.</h1>
     <div class="fd-heroGrid" style="display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:end">
       <div>
         <p style="font-size:21px;line-height:1.5;color:#15120F;margin:0 0 14px;max-width:52ch">Datopian engineers embed in your team and ship inside your stack — from first diagnostic to a running system you own. Production code, not slideware.</p>
@@ -271,7 +299,7 @@ const pricing = [
           <div style="width:18px;height:18px;background:#D9572E;clip-path:polygon(0 0,100% 0,100% 60%,60% 60%,60% 100%,0 100%)"></div>
           <span style="font-weight:700;letter-spacing:-0.02em;font-size:16px">AutoClaw</span>
         </a>
-        <p style="font-size:14px;line-height:1.55;color:#A59C8C;margin:0">The open deployment reference for OpenClaw agents. Made by Datopian.</p>
+        <p style="font-size:14px;line-height:1.55;color:#A59C8C;margin:0">The open deployment reference for OpenClaw agents. Made by <a href="https://www.datopian.com" target="_blank" rel="noopener" style="color:#C9C0B1;text-decoration:underline;text-underline-offset:2px">Datopian</a>.</p>
       </div>
       <div style="display:flex;gap:48px;font-size:14px;color:#C9C0B1">
         <div style="display:flex;flex-direction:column;gap:11px">

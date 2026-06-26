@@ -167,7 +167,7 @@ button:hover, .button:hover { transform: translateY(-1px); opacity: 0.92; }
 .footerCol a:hover, .footerLinks a:hover { color: var(--paper); }
 
 /* ── Content listing (playbooks / examples / tools) ───────── */
-.contentHeader { margin-bottom: 32px; }
+.contentHeader { margin-top: 48px; margin-bottom: 32px; }
 .contentHeader h1 { margin: 0 0 8px; font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.035em; line-height: 1; }
 .contentHeader p { margin: 0; color: var(--ink-70); font-size: 1.05rem; line-height: 1.55; max-width: 60ch; }
 .contentList { margin-top: 8px; border-top: 1px solid var(--line); }
@@ -208,7 +208,7 @@ button:hover, .button:hover { transform: translateY(-1px); opacity: 0.92; }
 .prose th, .prose td { text-align: left; padding: 8px 12px; border: 1px solid var(--line); }
 .prose th { background: var(--panel); font-weight: 600; }
 
-.backLink { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-70); margin-bottom: 24px; }
+.backLink { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-70); margin-top: 48px; margin-bottom: 24px; }
 .backLink:hover { color: var(--claw); }
 
 /* ── Responsive ───────────────────────────────────────────── */

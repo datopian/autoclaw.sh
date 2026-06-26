@@ -1,0 +1,19 @@
+# AutoClaw
+
+> Open deployment reference for OpenClaw agents, and Datopian's Forward Deployed Engineer (FDE) service for deploying and operating AI agents, LLM applications, and data infrastructure in production. For individuals, teams, and businesses.
+
+## Forward Deployed Engineers (service)
+
+- [Forward Deployed Engineers](https://autoclaw.sh/forward-deployed): Hire Datopian's Forward Deployed Engineers to embed with your team and ship AI agents, LLM apps, and data infrastructure into production — in your stack, in your cloud. Engagement runs diagnostic → embed → deploy → operate (AgentOps); you own the result. OpenClaw and beyond. Model-agnostic. For AI-native startups, data teams, and businesses.
+
+## Open-source playbooks and site
+
+- [Home](https://autoclaw.sh/): Deploy OpenClaw and AI agents — playbooks, examples, and tools, plus the FDE service.
+- [Playbooks](https://autoclaw.sh/playbooks): Battle-tested, open guides for getting OpenClaw and other AI agents into production — infrastructure, integrations, patterns, memory, and ops.
+- [Examples](https://autoclaw.sh/examples): Reference implementations for common AI agent deployment patterns.
+- [Blog](https://autoclaw.sh/blog): Articles on AI agents, LLMs, AgentOps, and the OpenClaw ecosystem.
+- [Tools](https://autoclaw.sh/tools): Interactive tools, including an LLM prompt-cost calculator.
+
+## About
+
+Made by [Datopian](https://www.datopian.com) — a data and AI infrastructure team behind PortalJS and managed data portals on Cloudflare. AutoClaw is the open deployment reference for OpenClaw, and the home of Datopian's Forward Deployed Engineering for AI and data work.
