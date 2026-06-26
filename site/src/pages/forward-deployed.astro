@@ -87,7 +87,7 @@ const pricing = [
     .fd-finalH{font-size:clamp(40px,10vw,72px) !important}
     .fd-statNum{font-size:clamp(72px,18vw,128px) !important}
     .fd-h2{font-size:clamp(32px,7vw,52px) !important}
-    .fd-navlinks{display:none !important}
+    .fd-navtext{display:none !important}
     .fd-pad{padding-left:22px !important;padding-right:22px !important}
   }
   @media (max-width:560px){
@@ -106,8 +106,10 @@ const pricing = [
         <span style="font-weight:700;letter-spacing:-0.02em;font-size:17px">AutoClaw</span>
       </a>
       <div class="fd-navlinks" style="display:flex;align-items:center;gap:30px;font-size:14px;color:#4D453B">
-        <a href="/playbooks">Playbooks</a><a href="/examples">Examples</a><a href="/blog">Blog</a><a href="/tools">Tools</a>
-        <a href={GITHUB} style="color:#A59C8C">GitHub ↗</a>
+        <span class="fd-navtext" style="display:flex;align-items:center;gap:30px">
+          <a href="/playbooks">Playbooks</a><a href="/examples">Examples</a><a href="/blog">Blog</a><a href="/tools">Tools</a>
+          <a href={GITHUB} style="color:#A59C8C">GitHub ↗</a>
+        </span>
         <a href={GCAL} target="_blank" rel="noopener" style="background:#15120F;color:#F4F1EA;font-weight:600;padding:10px 17px;border-radius:3px">Scope a deployment</a>
       </div>
     </div>
