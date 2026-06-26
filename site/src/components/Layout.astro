@@ -2,10 +2,15 @@
 interface Props {
   title: string;
   description?: string;
+  image?: string;
 }
 
-const { title, description = 'An open framework for building and operating AI agent systems.' } = Astro.props;
+const { title, description = 'Forward Deployed Engineers plus open playbooks for deploying and operating OpenClaw, AI agents, and LLM apps in production.', image } = Astro.props;
 const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
+const SCOPE_URL = '/forward-deployed';
+const fullTitle = `${title} — AutoClaw`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image ?? '/brand/logo.webp', Astro.site);
 ---
 
 <!doctype html>
@@ -13,9 +18,24 @@ const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — AutoClaw</title>
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AutoClaw" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="icon" type="image/png" href="/brand/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles/global.css" />
     <script>
       !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="Ii init Di qi Sr Bi Zi Pi capture calculateEventProperties Yi register register_once register_for_session unregister unregister_for_session Xi getFeatureFlag getFeatureFlagPayload getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync Ji identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty Wi Vi createPersonProfile setInternalOrTestUser Gi Fi Ki opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing $i debug Tr Ui getPageViewId captureTraceFeedback captureTraceMetric Ri".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
@@ -35,16 +55,8 @@ const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
           AutoClaw
         </a>
 
-        <button
-          type="button"
-          class="landingMenuButton"
-          aria-label="Toggle navigation menu"
-          aria-expanded="false"
-          id="menuBtn"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
+        <button type="button" class="landingMenuButton" aria-label="Toggle navigation menu" aria-expanded="false" id="menuBtn">
+          <span></span><span></span><span></span>
         </button>
 
         <nav class="landingNavLinks" id="navLinks">
@@ -52,20 +64,31 @@ const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
           <a href="/examples" class="landingNavLink">Examples</a>
           <a href="/blog" class="landingNavLink">Blog</a>
           <a href="/tools" class="landingNavLink">Tools</a>
-          <a href={GITHUB_URL} class="landingNavLink" target="_blank" rel="noopener">GitHub</a>
+          <a href={GITHUB_URL} class="landingNavLink" target="_blank" rel="noopener" style="color:var(--ink-faint)">GitHub ↗</a>
+          <a href={SCOPE_URL} class="landingNavCta">Scope a deployment</a>
         </nav>
       </header>
 
       <slot />
 
-      <footer class="footer landingFooter">
-        <span>The open deployment reference for OpenClaw agents. Made by Datopian.</span>
-        <nav class="footerLinks">
-          <a href="/playbooks">Playbooks</a>
-          <a href="/examples">Examples</a>
-          <a href="/blog">Blog</a>
-          <a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
-        </nav>
+      <footer class="landingFooter">
+        <div>
+          <a href="/" class="footerBrand"><span class="brandMark"></span> AutoClaw</a>
+          <p class="footerTag">The open deployment reference for OpenClaw agents. Made by <a href="https://www.datopian.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Datopian</a>.</p>
+        </div>
+        <div class="footerCols">
+          <div class="footerCol">
+            <span class="footerColHead">RESOURCES</span>
+            <a href="/playbooks">Playbooks</a>
+            <a href="/examples">Examples</a>
+            <a href="/blog">Blog</a>
+          </div>
+          <div class="footerCol">
+            <span class="footerColHead">COMPANY</span>
+            <a href="/forward-deployed">Forward Deployed</a>
+            <a href={GITHUB_URL} target="_blank" rel="noopener">GitHub ↗</a>
+          </div>
+        </div>
       </footer>
     </main>
 
@@ -77,14 +100,6 @@ const GITHUB_URL = 'https://github.com/datopian/autoclaw.sh';
         nav?.classList.toggle('isOpen', open);
         btn.setAttribute('aria-expanded', String(open));
       });
-      window.addEventListener('resize', () => {
-        if (window.innerWidth > 680) {
-          btn?.classList.remove('isOpen');
-          nav?.classList.remove('isOpen');
-          btn?.setAttribute('aria-expanded', 'false');
-        }
-      });
-
     </script>
   </body>
 </html>

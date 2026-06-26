@@ -1,0 +1,321 @@
+---
+// Forward Deployed Engineers — implemented from Claude Design "ForwardDeployed.dc.html"
+// (project: Autoclaw.sh design system update). Self-contained page: new cream/terracotta
+// design language, its own nav/footer. Data baked in; CTA → Google Calendar.
+const GCAL = 'https://calendar.app.google/KEoJ46XPPRscJFdSA';
+const GITHUB = 'https://github.com/datopian/autoclaw.sh';
+const canonicalURL = new URL('/forward-deployed', Astro.site);
+const ogImage = new URL('/brand/logo.webp', Astro.site);
+const SEO_TITLE = 'Forward Deployed Engineers for AI Agents, LLMs & Data | Datopian';
+const SEO_DESC = 'Forward Deployed Engineers who embed with your team to ship AI agents, LLM apps, and data infrastructure into production — OpenClaw and beyond. You own the result.';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Forward Deployed Engineers',
+  serviceType: 'Forward Deployed Engineering for AI agents, LLM applications, and data infrastructure',
+  description: SEO_DESC,
+  url: canonicalURL.href,
+  areaServed: 'Worldwide',
+  provider: { '@type': 'Organization', name: 'Datopian', url: 'https://www.datopian.com' },
+  audience: { '@type': 'BusinessAudience', audienceType: 'AI-native startups, data teams, and businesses deploying AI agents and LLM applications' },
+};
+
+const phases = [
+  { num: '01', title: 'Diagnostic', meta: '2 weeks · fixed scope', desc: 'We find your highest-value use case and ship a working proof on your real data — enough to fund the next phase.', out: '→ a real result, not a report' },
+  { num: '02', title: 'Embed', meta: 'in your repo & cloud', desc: 'Our engineers join your team and build alongside it — your stack, your conventions, your controls.', out: '→ production code' },
+  { num: '03', title: 'Deploy', meta: 'to production', desc: 'Systems wired to your data, tools, and processes — agents and data infrastructure running where your users are.', out: '→ live, observable, owned' },
+  { num: '04', title: 'Operate', meta: 'AgentOps · ongoing', desc: 'We run and harden it until your team is ready, then step back into an advisory role. You keep the system and the knowledge.', out: '→ then we hand over' },
+];
+const stack = [
+  { name: 'AutoClaw', desc: 'Agent deployment & AgentOps. The open-source playbook for getting AI agents into production safely — the methods we run for you.' },
+  { name: 'PortalJS', desc: 'Data portals & catalogs. The framework behind data platforms used in production — your data, made discoverable and queryable.' },
+  { name: 'Managed Cloudflare', desc: 'Edge data infrastructure. Hosting, storage, and serving on R2 + Workers — fast, owned, no servers to run.' },
+  { name: 'Model-agnostic', desc: 'Your keys, your models. We integrate against your infrastructure and policies — not lock you into ours.' },
+];
+const cases = [
+  { tag: 'AI-native', title: 'datahub.io', desc: "An AI-native data hub we're building in the open — datasets made discoverable, queryable, and ready for agents to use." },
+  { tag: 'On request', title: 'Enterprise deployments', desc: "Most of our production work ships under NDA — we'll walk you through the case studies relevant to your stack on a scoping call." },
+  { tag: 'Open source', title: 'PortalJS & AutoClaw', desc: 'The frameworks we deploy are public and battle-tested — the same code we run for you is the code you can read.' },
+];
+const team = [
+  { img: '/team/anuar.jpg', name: 'Anuar Ustayev', role: 'Lead FDE', pos: '22%', bio: 'Scopes engagements and sets the technical and data-infrastructure approach — from diagnostic and high-level assessment to architecture.' },
+  { img: '/team/joao.jpg', name: 'João Demenech', role: 'Forward Deployed Engineer', pos: '42%', bio: 'Builds and ships agentic AI — deploying OpenClaw and custom agents into production.' },
+  { img: '/team/ola.jpg', name: 'Ola Rubaj', role: 'Forward Deployed Engineer', pos: '22%', bio: 'Agentic AI engineer — designs and deploys AI agents that run reliably in your stack.' },
+  { img: '/team/stephen.jpg', name: 'Stephen Oni', role: 'Forward Deployed Engineer', pos: '22%', bio: 'ML and agentic AI engineer — models, pipelines, and agents from prototype to production.' },
+];
+const pricing = [
+  { step: '01 · Start here', name: 'Diagnostic', price: 'from $9k', meta: '2 weeks · fixed', desc: "A working proof on your data plus a scoped plan for what's next. Real value you keep even if you stop here." },
+  { step: '02 · Build', name: 'Build & Deploy', price: 'from $40k', meta: 'milestone-based', desc: 'Embedded engineers take it from proof to a production system wired into your data, tools, and controls.' },
+  { step: '03 · Run', name: 'Operate · AgentOps', price: 'from $5k/mo', meta: 'retainer · scales by access', desc: 'We run, monitor, and harden the system — on call until your team fully owns it.' },
+];
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{SEO_TITLE}</title>
+<meta name="description" content={SEO_DESC} />
+<link rel="canonical" href={canonicalURL} />
+<meta name="robots" content="index, follow" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="AutoClaw" />
+<meta property="og:title" content={SEO_TITLE} />
+<meta property="og:description" content={SEO_DESC} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:image" content={ogImage} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={SEO_TITLE} />
+<meta name="twitter:description" content={SEO_DESC} />
+<meta name="twitter:image" content={ogImage} />
+<link rel="icon" type="image/png" href="/brand/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+<style>
+  *{box-sizing:border-box}
+  body{margin:0}
+  ::selection{background:#D9572E;color:#F4F1EA}
+  a{color:inherit;text-decoration:none}
+  /* responsive overrides of the desktop design */
+  @media (max-width:900px){
+    .fd-heroGrid,.fd-statGrid,.fd-pilotsGrid,.fd-whyTop,.fd-stackGrid,.fd-teamTop,.fd-pricingGrid,.fd-casesGrid{grid-template-columns:1fr !important}
+    .fd-phaseGrid{grid-template-columns:repeat(2,1fr) !important}
+    .fd-teamGrid{grid-template-columns:repeat(2,1fr) !important}
+    .fd-bigH1{font-size:clamp(44px,11vw,84px) !important}
+    .fd-finalH{font-size:clamp(40px,10vw,72px) !important}
+    .fd-statNum{font-size:clamp(72px,18vw,128px) !important}
+    .fd-h2{font-size:clamp(32px,7vw,52px) !important}
+    .fd-navtext{display:none !important}
+    .fd-pad{padding-left:22px !important;padding-right:22px !important}
+  }
+  @media (max-width:560px){
+    .fd-phaseGrid,.fd-teamGrid{grid-template-columns:1fr !important}
+  }
+</style>
+</head>
+<body>
+<div data-screen-label="Forward Deployed" style="background:#F4F1EA;color:#15120F;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased">
+
+  <!-- NAV -->
+  <div style="position:sticky;top:0;z-index:20;background:rgba(244,241,234,0.88);backdrop-filter:blur(8px);border-bottom:1px solid #DCD5C7">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:18px 40px;display:flex;align-items:center;justify-content:space-between">
+      <a href="/" style="display:flex;align-items:center;gap:11px">
+        <div style="width:20px;height:20px;background:#D9572E;clip-path:polygon(0 0,100% 0,100% 60%,60% 60%,60% 100%,0 100%)"></div>
+        <span style="font-weight:700;letter-spacing:-0.02em;font-size:17px">AutoClaw</span>
+      </a>
+      <div class="fd-navlinks" style="display:flex;align-items:center;gap:30px;font-size:14px;color:#4D453B">
+        <span class="fd-navtext" style="display:flex;align-items:center;gap:30px">
+          <a href="/playbooks">Playbooks</a><a href="/examples">Examples</a><a href="/blog">Blog</a><a href="/tools">Tools</a>
+          <a href={GITHUB} style="color:#A59C8C">GitHub ↗</a>
+        </span>
+        <a href={GCAL} target="_blank" rel="noopener" style="background:#15120F;color:#F4F1EA;font-weight:600;padding:10px 17px;border-radius:3px">Scope a deployment</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:72px 40px 60px">
+    <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#D9572E;margin-bottom:30px">// datopian · forward deployed engineers</div>
+    <h1 class="fd-bigH1" style="font-size:84px;line-height:0.96;letter-spacing:-0.04em;font-weight:700;margin:0 0 32px;max-width:17ch">We deploy and operate your data and AI agents.</h1>
+    <div class="fd-heroGrid" style="display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:end">
+      <div>
+        <p style="font-size:21px;line-height:1.5;color:#15120F;margin:0 0 14px;max-width:52ch">Datopian engineers embed in your team and ship inside your stack — from first diagnostic to a running system you own. Production code, not slideware.</p>
+        <p style="font-size:16px;line-height:1.5;color:#4D453B;margin:0;max-width:52ch">You read our open playbooks. This is for when you'd rather we did it with you.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+        <div style="display:flex;gap:13px;flex-wrap:wrap">
+          <a href={GCAL} target="_blank" rel="noopener" style="background:#D9572E;color:#F4F1EA;font-weight:600;font-size:16px;padding:14px 24px;border-radius:3px">Scope a deployment →</a>
+          <a href="/playbooks" style="border:1px solid #15120F;color:#15120F;font-weight:600;font-size:16px;padding:13px 24px;border-radius:3px">Read the playbooks</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAT BAND -->
+  <div style="background:#15120F;color:#F4F1EA;border-top:1px solid #DCD5C7">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:64px 40px">
+      <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#E8825E;margin-bottom:36px">// the last mile</div>
+      <div class="fd-statGrid" style="display:grid;grid-template-columns:0.85fr 1.15fr;gap:56px;align-items:center">
+        <div>
+          <div class="fd-statNum" style="font-size:128px;font-weight:700;letter-spacing:-0.05em;line-height:0.85">95%</div>
+          <p style="font-size:17px;line-height:1.5;color:#C9C0B1;margin:18px 0 0;max-width:38ch">of enterprise GenAI pilots reach production with no measurable impact. The model isn't the problem — the deployment is.</p>
+        </div>
+        <div style="border:1px solid #2A2420;border-radius:4px;background:#1A1612;padding:32px;display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 4px"><span style="font-size:17px;font-weight:600">model</span><span style="font-family:'Space Mono',monospace;font-size:13px;color:#6FA77E">ready ✓</span></div>
+          <div style="height:1px;background:#2A2420"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 4px"><span style="font-size:17px;font-weight:600">your data + tools</span><span style="font-family:'Space Mono',monospace;font-size:13px;color:#E8825E">not wired</span></div>
+          <div style="height:1px;background:#2A2420"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 4px"><span style="font-size:17px;font-weight:600;color:#A59C8C">in production</span><span style="font-family:'Space Mono',monospace;font-size:13px;color:#A59C8C">stalled</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PILOTS DEMO -->
+  <div style="border-top:1px solid #2A2420;background:#15120F;color:#F4F1EA">
+    <div class="fd-pad fd-pilotsGrid" style="max-width:1180px;margin:0 auto;padding:80px 40px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start">
+      <h2 class="fd-h2" style="font-size:52px;line-height:0.96;letter-spacing:-0.04em;font-weight:700;margin:0">Pilots demo.<br>Deployments ship.</h2>
+      <p style="font-size:19px;line-height:1.55;color:#C9C0B1;margin:6px 0 0">The hard part of AI and data work isn't the prototype — it's the last mile: your data, your tools, your access controls, your infrastructure, your team's workflows. That's where most projects stall.<br><br><span style="color:#F4F1EA">A Forward Deployed Engineer closes that gap from the inside.</span> We join your team, work in your repo and your cloud, and own the path from idea to a system running in production — then hand it back.</p>
+    </div>
+  </div>
+
+  <!-- ONE TRACK / PHASES -->
+  <div style="border-top:1px solid #DCD5C7">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:72px 40px">
+      <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#D9572E;margin-bottom:14px">// what we provide</div>
+      <h2 class="fd-h2" style="font-size:48px;line-height:0.98;letter-spacing:-0.04em;font-weight:700;margin:0 0 12px">One track. Decreasing dependency.</h2>
+      <p style="font-size:18px;line-height:1.5;color:#4D453B;max-width:62ch;margin:0 0 44px">Every engagement runs the same four phases. We start hands-on and step back as your team takes ownership — by the end, you run it and we advise.</p>
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:12px;color:#4D453B"><span>Datopian builds</span><span>You own it</span></div>
+      <div style="height:8px;border-radius:999px;background:linear-gradient(90deg,#D9572E 0%,#D9572E 30%,#9a6b5a 55%,#2B53C9 100%);margin-bottom:8px"></div>
+      <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:12px;color:#A59C8C;margin-bottom:36px"><span>↑ we do the work</span><span>we advise ↓</span></div>
+      <div class="fd-phaseGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid #15120F">
+        {phases.map((ph) => (
+          <div style="border-right:1px solid #DCD5C7;padding:26px 24px 30px;background:#F4F1EA">
+            <div style="font-family:'Space Mono',monospace;font-size:13px;color:#D9572E;margin-bottom:22px">{ph.num}</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:-0.02em;margin-bottom:6px">{ph.title}</div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:#A59C8C;letter-spacing:0.06em;margin-bottom:16px">{ph.meta}</div>
+            <div style="font-size:14px;line-height:1.5;color:#4D453B;margin-bottom:18px">{ph.desc}</div>
+            <div style="font-family:'Space Mono',monospace;font-size:12px;color:#15120F;border-top:1px solid #DCD5C7;padding-top:14px">{ph.out}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- OWN STACK -->
+  <div style="border-top:1px solid #DCD5C7;background:#ECE7DC">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:72px 40px">
+      <div class="fd-whyTop" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-bottom:44px">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#D9572E;margin-bottom:14px">// why datopian</div>
+          <h2 class="fd-h2" style="font-size:48px;line-height:0.98;letter-spacing:-0.04em;font-weight:700;margin:0">We bring our own stack.</h2>
+        </div>
+        <div>
+          <p style="font-size:18px;line-height:1.55;color:#4D453B;margin:0 0 18px">Consultancies build from scratch on whatever's there. SaaS vendors hand you a tool and leave. We deploy our own engineers on our own proven, open-source stack — so we start at the last mile, not the starting line.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:12px">
+            <span style="border:1px solid #15120F;padding:6px 12px;border-radius:999px">vs consultancies — not from scratch</span>
+            <span style="border:1px solid #15120F;padding:6px 12px;border-radius:999px">vs SaaS — we implement</span>
+          </div>
+        </div>
+      </div>
+      <div class="fd-stackGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid #15120F;border-left:1px solid #DAD3C6">
+        {stack.map((s) => (
+          <div style="border-right:1px solid #DAD3C6;border-bottom:1px solid #DAD3C6;padding:26px 28px;background:#ECE7DC">
+            <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px">{s.name}</div>
+            <div style="font-size:14px;line-height:1.5;color:#4D453B">{s.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- PROOF -->
+  <div style="border-top:1px solid #DCD5C7">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:72px 40px">
+      <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#D9572E;margin-bottom:14px">// proof</div>
+      <h2 class="fd-h2" style="font-size:48px;line-height:0.98;letter-spacing:-0.04em;font-weight:700;margin:0 0 44px">Shipped, not slideware.</h2>
+      <div style="display:flex;gap:64px;border-bottom:1px solid #DCD5C7;padding-bottom:40px;margin-bottom:44px;flex-wrap:wrap">
+        <div><div style="font-size:72px;font-weight:700;letter-spacing:-0.04em;line-height:0.9">18</div><div style="font-size:14px;color:#4D453B;max-width:24ch;margin-top:10px">AI and data projects shipped into production</div></div>
+        <div><div style="font-size:72px;font-weight:700;letter-spacing:-0.04em;line-height:0.9">100%</div><div style="font-size:14px;color:#4D453B;max-width:24ch;margin-top:10px">open-source stack — no vendor lock-in, you keep the code</div></div>
+        <div><div style="font-size:72px;font-weight:700;letter-spacing:-0.04em;line-height:0.9;color:#2B53C9">weeks</div><div style="font-size:14px;color:#4D453B;max-width:24ch;margin-top:10px">to first production result, not quarters</div></div>
+      </div>
+      <div class="fd-casesGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+        {cases.map((c) => (
+          <div style="border:1px solid #DCD5C7;border-radius:4px;padding:28px;background:#F4F1EA">
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:#D9572E;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:18px">{c.tag}</div>
+            <div style="font-size:21px;font-weight:700;letter-spacing:-0.02em;margin-bottom:10px">{c.title}</div>
+            <div style="font-size:14px;line-height:1.5;color:#4D453B">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div style="border-top:1px solid #DCD5C7;background:#15120F;color:#F4F1EA">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:72px 40px">
+      <div class="fd-teamTop" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-bottom:44px">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#E8825E;margin-bottom:14px">// who you work with</div>
+          <h2 class="fd-h2" style="font-size:48px;line-height:0.98;letter-spacing:-0.04em;font-weight:700;margin:0">The people who ship it.</h2>
+        </div>
+        <p style="font-size:18px;line-height:1.55;color:#C9C0B1;margin:6px 0 0">You work directly with senior engineers who maintain the open-source stack and have put it into production.</p>
+      </div>
+      <div class="fd-teamGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+        {team.map((m) => (
+          <div style="border:1px solid #2A2420;border-radius:4px;background:#1A1612;padding:24px">
+            <div style="width:100%;aspect-ratio:1/1;border-radius:3px;overflow:hidden;background:#2A2420;margin-bottom:18px">
+              <img src={m.img} alt={m.name} loading="lazy" width="512" height="512" style={`width:100%;height:100%;object-fit:cover;object-position:center ${m.pos};display:block`} />
+            </div>
+            <div style="font-size:17px;font-weight:600;margin-bottom:5px">{m.name}</div>
+            <div style="font-family:'Space Mono',monospace;font-size:12px;color:#D9572E;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">{m.role}</div>
+            <div style="font-size:13px;color:#A59C8C;line-height:1.5">{m.bio}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div style="border-top:1px solid #2A2420;background:#15120F;color:#F4F1EA">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:72px 40px 80px">
+      <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#E8825E;margin-bottom:14px">// how engagements work</div>
+      <h2 class="fd-h2" style="font-size:48px;line-height:0.98;letter-spacing:-0.04em;font-weight:700;margin:0 0 12px">Start with a diagnostic.</h2>
+      <p style="font-size:18px;line-height:1.55;color:#C9C0B1;max-width:64ch;margin:0 0 18px">Engagements are fixed-scope and productized — you always know what you're buying. Most start with a paid diagnostic that ships a real result and scopes the rest.</p>
+      <p style="font-size:16px;line-height:1.55;color:#A59C8C;max-width:64ch;margin:0 0 40px">A senior in-house AI hire runs <span style="color:#E8825E">$150k+/yr</span> and takes <span style="color:#F4F1EA">~6 months</span> to recruit and ramp. A Datopian engagement costs less than that first-year package — and ships in weeks.</p>
+      <div class="fd-pricingGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+        {pricing.map((p) => (
+          <div style="border:1px solid #2A2420;border-radius:4px;background:#1A1612;padding:30px;display:flex;flex-direction:column">
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:#D9572E;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:18px">{p.step}</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px">{p.name}</div>
+            <div style="font-size:32px;font-weight:700;letter-spacing:-0.03em;color:#E8825E;margin-bottom:4px">{p.price}</div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:#A59C8C;margin-bottom:18px">{p.meta}</div>
+            <div style="font-size:14px;line-height:1.5;color:#C9C0B1">{p.desc}</div>
+          </div>
+        ))}
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:12px;color:#5C564E;margin-top:20px">// indicative anchors — final scope and pricing set in your diagnostic</div>
+    </div>
+  </div>
+
+  <!-- FINAL CTA -->
+  <div style="border-top:1px solid #DCD5C7">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:80px 40px">
+      <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#D9572E;margin-bottom:24px">// easy to start</div>
+      <h2 class="fd-finalH" style="font-size:72px;line-height:0.92;letter-spacing:-0.045em;font-weight:700;margin:0 0 24px;max-width:16ch">Scope a deployment.</h2>
+      <p style="font-size:20px;line-height:1.5;color:#4D453B;max-width:60ch;margin:0 0 32px">A 30-minute call. Tell us where AI or data is stuck; we'll tell you whether a Forward Deployed Engineer is the right fit and what a first diagnostic would look like.</p>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <a href={GCAL} target="_blank" rel="noopener" style="background:#D9572E;color:#F4F1EA;font-weight:600;font-size:17px;padding:16px 28px;border-radius:3px">Book a scoping call →</a>
+        <a href="/playbooks" style="font-family:'Space Mono',monospace;font-size:14px;color:#4D453B;border-bottom:1px solid #A59C8C;padding-bottom:2px">or read the open-source playbooks first →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#15120F;color:#F4F1EA;border-top:1px solid #DCD5C7">
+    <div class="fd-pad" style="max-width:1180px;margin:0 auto;padding:48px 40px;display:flex;align-items:flex-start;justify-content:space-between;gap:40px;flex-wrap:wrap">
+      <div style="max-width:34ch">
+        <a href="/" style="display:flex;align-items:center;gap:11px;margin-bottom:16px">
+          <div style="width:18px;height:18px;background:#D9572E;clip-path:polygon(0 0,100% 0,100% 60%,60% 60%,60% 100%,0 100%)"></div>
+          <span style="font-weight:700;letter-spacing:-0.02em;font-size:16px">AutoClaw</span>
+        </a>
+        <p style="font-size:14px;line-height:1.55;color:#A59C8C;margin:0">The open deployment reference for OpenClaw agents. Made by <a href="https://www.datopian.com" target="_blank" rel="noopener" style="color:#C9C0B1;text-decoration:underline;text-underline-offset:2px">Datopian</a>.</p>
+      </div>
+      <div style="display:flex;gap:48px;font-size:14px;color:#C9C0B1">
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#5C564E;letter-spacing:0.1em;margin-bottom:2px">RESOURCES</span>
+          <a href="/playbooks">Playbooks</a><a href="/examples">Examples</a><a href="/blog">Blog</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#5C564E;letter-spacing:0.1em;margin-bottom:2px">COMPANY</span>
+          <a href="/forward-deployed">Forward Deployed</a><a href={GITHUB}>GitHub ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
