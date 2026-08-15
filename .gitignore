@@ -27,3 +27,9 @@ site/node_modules/
 
 # Beads runtime state
 .beads/
+
+# Agent session runtime state (Gas Town / Claude Code).
+# Root-anchored so example projects can still ship their own .claude/ or CLAUDE.md.
+/.claude/
+/.runtime/
+/CLAUDE.md
