@@ -69,3 +69,6 @@ sync-mode: "realtime"
 # - linear.api-key
 # - github.org
 # - github.repo
+storage.backend: dolt
+dolt.server: ""
+dolt.port: 3307
